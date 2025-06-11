@@ -47,6 +47,19 @@ fastify.get('/', (request: any, reply: any) => {
   reply.sendFile('index.html'); // Serveix el fitxer index.html
 });
 
+// Serveix index.html per a totes les rutes GET que no siguin API ni fitxers estàtics (SPA fallback)
+fastify.setNotFoundHandler((request, reply) => {
+  if (
+    request.raw.method === 'GET' &&
+    request.headers.accept &&
+    request.headers.accept.includes('text/html')
+  ) {
+    reply.sendFile('index.html');
+  } else {
+    reply.status(404).send({ error: 'Not Found' });
+  }
+});
+
 fastify.listen({ port: 7000, host: '0.0.0.0' }, (err: Error | null) => {
   if (err) throw err;
   console.log('Server listening on https://127.0.0.1:7000');

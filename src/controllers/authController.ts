@@ -85,13 +85,23 @@ export const authRoutes = async (fastify: FastifyInstance) => {
     }
   });
 
-  fastify.get('/login/success', async (request: FastifyRequest, reply: FastifyReply) => {
-    // Show a simple HTML page for success
-    reply.type('text/html').send('<h1>Google OAuth2 login successful!</h1><p>You are now logged in.</p>');
-  });
+  // fastify.get('/login/success', async (request: FastifyRequest, reply: FastifyReply) => {
+  //   // Show a simple HTML page for success
+  //   reply.type('text/html').send('<h1>Google OAuth2 login successful!</h1><p>You are now logged in.</p>');
+  // });
 
-  fastify.get('/login/failure', async (request: FastifyRequest, reply: FastifyReply) => {
-    reply.type('text/html').send('<h1>Google OAuth2 login failed.</h1>');
+  // fastify.get('/login/failure', async (request: FastifyRequest, reply: FastifyReply) => {
+  //   reply.type('text/html').send('<h1>Google OAuth2 login failed.</h1>');
+  // });
+
+  // Optional: Protected route for SPA to check auth status
+  fastify.get('/api/me', async (request: FastifyRequest, reply: FastifyReply) => {
+    try {
+      const user = await (fastify as any).jwt.verify(request.cookies.token);
+      reply.send({ email: user.email, name: user.name });
+    } catch {
+      reply.status(401).send({ error: 'Unauthorized' });
+    }
   });
 };
 
