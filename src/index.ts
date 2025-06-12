@@ -23,7 +23,8 @@ const fastify = Fastify({
   https: {
     key: fs.readFileSync('/app/key.pem'),
     cert: fs.readFileSync('/app/cert.pem'),
-  }
+  },
+  logger: true // Enable logger for request/response and errors
 });
 
 fastify.register(websocket);
