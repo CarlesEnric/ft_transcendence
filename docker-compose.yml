@@ -13,3 +13,66 @@ services:
     env_file:
       - .env
     restart: unless-stopped
+
+
+# services:
+#   auth:
+#     build: ./auth
+#     ports:
+#       - "7001:7001"
+#     env_file:
+#       - ./auth/.env
+#     restart: unless-stopped
+
+#   frontend:
+#     build: ./frontend
+#     ports:
+#       - "3000:3000"
+#     env_file:
+#       - ./frontend/.env
+#     restart: unless-stopped
+
+#   db:
+#     image: postgres:15
+#     environment:
+#       POSTGRES_USER: user
+#       POSTGRES_PASSWORD: password
+#       POSTGRES_DB: transcendence
+#     ports:
+#       - "5432:5432"
+#     volumes:
+#       - db_data:/var/lib/postgresql/data
+#     restart: unless-stopped
+
+#   api-gateway:
+#     build: ./api-gateway
+#     ports:
+#       - "8000:8000"
+#     env_file:
+#       - ./api-gateway/.env
+#     depends_on:
+#       - auth
+#       - backend
+#       - pong
+#     restart: unless-stopped
+
+#   backend:
+#     build: ./backend
+#     ports:
+#       - "7000:7000"
+#     env_file:
+#       - ./backend/.env
+#     depends_on:
+#       - db
+#     restart: unless-stopped
+
+#   pong:
+#     build: ./pong
+#     ports:
+#       - "4000:4000"
+#     env_file:
+#       - ./pong/.env
+#     restart: unless-stopped
+
+# volumes:
+#   db_data:

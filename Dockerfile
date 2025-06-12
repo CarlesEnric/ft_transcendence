@@ -3,12 +3,13 @@
 # Steps:
 # 1. Uses the official Node.js 24 Alpine image for a lightweight container.
 # 2. Sets the working directory to /app.
-# 3. Copies package.json and package-lock.json (if present) for dependency installation.
-# 4. Installs dependencies using npm.
-# 5. Copies the rest of the application source code into the container.
-# 6. Builds the application using the npm build script.
-# 7. Exposes port 7000 for external access.
-# 8. Sets the default command to start the application using npm.
+# 3. Installs OpenSSL for SSL certificate generation.
+# 4. Copies package.json and package-lock.json (if present) for dependency installation.
+# 5. Installs dependencies using npm.
+# 6. Copies the rest of the application source code into the container.
+# 7. Builds the application using the npm build script.
+# 8. Exposes port 7000 for external access.
+# 9. Sets the default command to start the application using npm.
 FROM node:24-alpine
 
 WORKDIR /app

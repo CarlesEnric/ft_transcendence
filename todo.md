@@ -287,3 +287,574 @@ docker-compose up --build
   }
 }
 ```
+
+-----------------------------------------------------------------------------
+
+Great! Here is the **full microservices structure** for your project, with the exact content for each main file.  
+**Copy each file to the specified path.**  
+You can expand each service as needed.
+
+---
+
+## 1. **Directory Structure**
+
+```
+ft_transcendence/
+│
+├── auth/
+│   ├── src/
+│   │   └── index.ts
+│   ├── package.json
+│   ├── Dockerfile
+│   ├── tsconfig.json
+│   └── .env
+│
+├── backend/
+│   ├── src/
+│   │   └── index.ts
+│   ├── package.json
+│   ├── Dockerfile
+│   ├── tsconfig.json
+│   └── .env
+│
+├── frontend/
+│   ├── public/
+│   │   └── index.html
+│   ├── src/
+│   │   └── main.ts
+│   ├── package.json
+│   ├── Dockerfile
+│   ├── tsconfig.json
+│   └── .env
+│
+├── pong/
+│   ├── src/
+│   │   └── index.ts
+│   ├── package.json
+│   ├── Dockerfile
+│   ├── tsconfig.json
+│   └── .env
+│
+├── api-gateway/
+│   ├── src/
+│   │   └── index.js
+│   ├── package.json
+│   ├── Dockerfile
+│   └── .env
+│
+├── docker-compose.yml
+└── db_data/   # Docker volume for Postgres
+```
+
+---
+
+## 2. **File Contents**
+
+---
+
+### **docker-compose.yml**
+````yaml
+version: '3.8'
+
+services:
+  db:
+    image: postgres:15
+    environment:
+      POSTGRES_USER: user
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: transcendence
+    ports:
+      - "5432:5432"
+    volumes:
+      - db_data:/var/lib/postgresql/data
+    restart: unless-stopped
+
+  api-gateway:
+    build: ./api-gateway
+    ports:
+      - "8000:8000"
+    env_file:
+      - ./api-gateway/.env
+    depends_on:
+      - auth
+      - backend
+      - pong
+      - frontend
+    restart: unless-stopped
+
+  backend:
+    build: ./backend
+    ports:
+      - "7000:7000"
+    env_file:
+      - ./backend/.env
+    depends_on:
+      - db
+    restart: unless-stopped
+
+  auth:
+    build: ./auth
+    ports:
+      - "7001:7001"
+    env_file:
+      - ./auth/.env
+    depends_on:
+      - db
+    restart: unless-stopped
+
+  pong:
+    build: ./pong
+    ports:
+      - "4000:4000"
+    env_file:
+      - ./pong/.env
+    restart: unless-stopped
+
+  frontend:
+    build: ./frontend
+    ports:
+      - "3000:3000"
+    env_file:
+      - ./frontend/.env
+    restart: unless-stopped
+
+volumes:
+  db_data:
+````
+
+---
+
+### **api-gateway/src/index.js**
+````javascript
+import express from 'express';
+import { createProxyMiddleware } from 'http-proxy-middleware';
+
+const app = express();
+
+app.use('/auth', createProxyMiddleware({ target: 'http://auth:7001', changeOrigin: true }));
+app.use('/api', createProxyMiddleware({ target: 'http://backend:7000', changeOrigin: true }));
+app.use('/pong', createProxyMiddleware({ target: 'http://pong:4000', ws: true, changeOrigin: true }));
+app.use('/', createProxyMiddleware({ target: 'http://frontend:3000', changeOrigin: true }));
+
+app.listen(8000, () => console.log('API Gateway running on port 8000'));
+````
+
+---
+
+### **api-gateway/package.json**
+````json
+{
+  "name": "api-gateway",
+  "version": "1.0.0",
+  "main": "src/index.js",
+  "type": "module",
+  "scripts": {
+    "start": "node src/index.js"
+  },
+  "dependencies": {
+    "express": "^4.18.2",
+    "http-proxy-middleware": "^2.0.6"
+  }
+}
+````
+
+---
+
+### **api-gateway/Dockerfile**
+````dockerfile
+FROM node:24-alpine
+WORKDIR /app
+COPY package*.json ./
+RUN npm install
+COPY . .
+EXPOSE 8000
+CMD ["node", "src/index.js"]
+````
+
+---
+
+### **backend/src/index.ts**
+````typescript
+import Fastify from 'fastify';
+import { Pool } from 'pg';
+
+const fastify = Fastify();
+const db = new Pool({ connectionString: process.env.DATABASE_URL });
+
+fastify.get('/api/hello', async (request, reply) => {
+  const res = await db.query('SELECT NOW()');
+  reply.send({ message: 'Hello from backend!', time: res.rows[0].now });
+});
+
+fastify.listen({ port: 7000, host: '0.0.0.0' }, err => {
+  if (err) throw err;
+  console.log('Backend running on port 7000');
+});
+````
+
+---
+
+### **backend/package.json**
+````json
+{
+  "name": "backend",
+  "version": "1.0.0",
+  "main": "dist/index.js",
+  "type": "module",
+  "scripts": {
+    "build": "tsc",
+    "start": "node dist/index.js",
+    "dev": "ts-node src/index.ts"
+  },
+  "dependencies": {
+    "fastify": "^4.25.0",
+    "pg": "^8.11.3"
+  },
+  "devDependencies": {
+    "typescript": "^5.0.0",
+    "ts-node": "^10.9.1",
+    "@types/node": "^20.0.0"
+  }
+}
+````
+
+---
+
+### **backend/Dockerfile**
+````dockerfile
+FROM node:24-alpine
+WORKDIR /app
+COPY package*.json ./
+RUN npm install
+COPY . .
+RUN npm run build
+EXPOSE 7000
+CMD ["node", "dist/index.js"]
+````
+
+---
+
+### **backend/tsconfig.json**
+````json
+{
+  "compilerOptions": {
+    "target": "ES2020",
+    "module": "NodeNext",
+    "moduleResolution": "nodenext",
+    "strict": true,
+    "esModuleInterop": true,
+    "skipLibCheck": true,
+    "forceConsistentCasingInFileNames": true,
+    "outDir": "./dist"
+  },
+  "include": ["src/**/*.ts"],
+  "exclude": ["node_modules"]
+}
+````
+
+---
+
+### **auth/src/index.ts**
+````typescript
+import Fastify from 'fastify';
+import { Pool } from 'pg';
+
+const fastify = Fastify();
+const db = new Pool({ connectionString: process.env.DATABASE_URL });
+
+fastify.post('/auth/login', async (request, reply) => {
+  // Your login logic here
+  reply.send({ token: 'jwt-token' });
+});
+
+fastify.listen({ port: 7001, host: '0.0.0.0' }, err => {
+  if (err) throw err;
+  console.log('Auth running on port 7001');
+});
+````
+
+---
+
+### **auth/package.json**
+````json
+{
+  "name": "auth",
+  "version": "1.0.0",
+  "main": "dist/index.js",
+  "type": "module",
+  "scripts": {
+    "build": "tsc",
+    "start": "node dist/index.js",
+    "dev": "ts-node src/index.ts"
+  },
+  "dependencies": {
+    "fastify": "^4.25.0",
+    "pg": "^8.11.3"
+  },
+  "devDependencies": {
+    "typescript": "^5.0.0",
+    "ts-node": "^10.9.1",
+    "@types/node": "^20.0.0"
+  }
+}
+````
+
+---
+
+### **auth/Dockerfile**
+````dockerfile
+FROM node:24-alpine
+WORKDIR /app
+COPY package*.json ./
+RUN npm install
+COPY . .
+RUN npm run build
+EXPOSE 7001
+CMD ["node", "dist/index.js"]
+````
+
+---
+
+### **auth/tsconfig.json**
+````json
+{
+  "compilerOptions": {
+    "target": "ES2020",
+    "module": "NodeNext",
+    "moduleResolution": "nodenext",
+    "strict": true,
+    "esModuleInterop": true,
+    "skipLibCheck": true,
+    "forceConsistentCasingInFileNames": true,
+    "outDir": "./dist"
+  },
+  "include": ["src/**/*.ts"],
+  "exclude": ["node_modules"]
+}
+````
+
+---
+
+### **pong/src/index.ts**
+````typescript
+import Fastify from 'fastify';
+import websocket from '@fastify/websocket';
+
+const fastify = Fastify();
+fastify.register(websocket);
+
+fastify.get('/pong/ws', { websocket: true }, (connection, req) => {
+  connection.socket.on('message', message => {
+    connection.socket.send('pong: ' + message);
+  });
+});
+
+fastify.listen({ port: 4000, host: '0.0.0.0' }, err => {
+  if (err) throw err;
+  console.log('Pong running on port 4000');
+});
+````
+
+---
+
+### **pong/package.json**
+````json
+{
+  "name": "pong",
+  "version": "1.0.0",
+  "main": "dist/index.js",
+  "type": "module",
+  "scripts": {
+    "build": "tsc",
+    "start": "node dist/index.js",
+    "dev": "ts-node src/index.ts"
+  },
+  "dependencies": {
+    "fastify": "^4.25.0",
+    "@fastify/websocket": "^7.0.0"
+  },
+  "devDependencies": {
+    "typescript": "^5.0.0",
+    "ts-node": "^10.9.1",
+    "@types/node": "^20.0.0"
+  }
+}
+````
+
+---
+
+### **pong/Dockerfile**
+````dockerfile
+FROM node:24-alpine
+WORKDIR /app
+COPY package*.json ./
+RUN npm install
+COPY . .
+RUN npm run build
+EXPOSE 4000
+CMD ["node", "dist/index.js"]
+````
+
+---
+
+### **pong/tsconfig.json**
+````json
+{
+  "compilerOptions": {
+    "target": "ES2020",
+    "module": "NodeNext",
+    "moduleResolution": "nodenext",
+    "strict": true,
+    "esModuleInterop": true,
+    "skipLibCheck": true,
+    "forceConsistentCasingInFileNames": true,
+    "outDir": "./dist"
+  },
+  "include": ["src/**/*.ts"],
+  "exclude": ["node_modules"]
+}
+````
+
+---
+
+### **frontend/public/index.html**
+````html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Fastify OAuth2 SPA</title>
+</head>
+<body>
+  <div id="app"></div>
+  <script src="/main.js"></script>
+</body>
+</html>
+````
+
+---
+
+### **main.ts**
+````typescript
+function render() {
+  const app = document.getElementById('app');
+  if (!app) {
+    console.error('App element not found');
+    return;
+  }
+  
+  switch (window.location.pathname) {
+    case '/':
+      app.innerHTML = `
+        <h1>Welcome to Fastify OAuth2 SPA</h1>
+        <a href="/login/google">Login with Google</a>
+        <div id="status"></div>
+      `;
+      checkAuth();
+      break;
+    case '/login/success':
+      app.innerHTML = `
+        <h1>Login Successful!</h1>
+        <a href="/" onclick="navigate(event, '/')">Go Home</a>
+      `;
+      checkAuth();
+      break;
+    case '/login/failure':
+      app.innerHTML = `
+        <h1>Login Failed!</h1>
+        <a href="/" onclick="navigate(event, '/')">Go Home</a>
+      `;
+      break;
+    default:
+      app.innerHTML = `<h1>404 Not Found</h1>`;
+  }
+}
+
+function navigate(event: Event, path: string): void {
+  event.preventDefault();
+  window.history.pushState({}, '', path);
+  render();
+}
+
+function checkAuth(): void {
+  fetch('/api/me', { credentials: 'include' })
+    .then(res => res.ok ? res.json() : null)
+    .then(user => {
+      const status = document.getElementById('status');
+      if (status) {
+        if (user && user.email) {
+          status.innerHTML = `<p>Logged in as: ${user.email}</p>`;
+        } else {
+          status.innerHTML = `<p>Not logged in.</p>`;
+        }
+      }
+    });
+}
+
+window.onpopstate = render;
+window.onload = render;
+````
+
+---
+
+### **frontend/package.json**
+````json
+{
+  "name": "frontend",
+  "version": "1.0.0",
+  "main": "public/main.js",
+  "type": "module",
+  "scripts": {
+    "build": "tsc",
+    "start": "serve -s public -l 3000"
+  },
+  "dependencies": {
+    "serve": "^14.2.0"
+  },
+  "devDependencies": {
+    "typescript": "^5.0.0"
+  }
+}
+````
+
+---
+
+### **frontend/Dockerfile**
+````dockerfile
+FROM node:24-alpine
+WORKDIR /app
+COPY package*.json ./
+RUN npm install
+COPY . .
+RUN npm run build
+RUN npm install -g serve
+EXPOSE 3000
+CMD ["serve", "-s", "public", "-l", "3000"]
+````
+
+---
+
+### **frontend/tsconfig.json**
+````json
+{
+  "compilerOptions": {
+    "target": "ES2020",
+    "module": "ESNext",
+    "strict": true,
+    "esModuleInterop": true,
+    "skipLibCheck": true,
+    "forceConsistentCasingInFileNames": true,
+    "outDir": "./public"
+  },
+  "include": ["src/**/*.ts"],
+  "exclude": ["node_modules"]
+}
+````
+
+---
+
+**You can now copy these files into your new structure and build your microservices project!  
+Let me know if you want to add authentication logic, database models, or Pong game logic next.**
+
+Similar code found with 1 license type
