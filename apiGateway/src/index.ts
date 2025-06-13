@@ -41,18 +41,14 @@ fastify.register((fastifyHttpProxy as any).default || fastifyHttpProxy, {
   http2: false
 });
 
-fastify.listen('8000', '0.0.0.0', (err: Error | null, address: string) => {
-  if (err) {
-    console.error(err);
+async function start_listen() {
+  try {
+    const address = await fastify.listen({ port: 8000, host: '0.0.0.0' });
+    console.log('API Gateway running on', address);
+  } catch (err) {
+    fastify.log.error(err);
     process.exit(1);
   }
-  console.log('API Gateway running on port 8000');
-});
+};
 
-// fastify.listen({ port: 8000, host: '0.0.0.0' }, (err: Error | null, address: string) => {
-//   if (err) {
-//     console.error(err);
-//     process.exit(1);
-//   }
-//   console.log('API Gateway runnning on port 8000');
-// });
+start_listen();

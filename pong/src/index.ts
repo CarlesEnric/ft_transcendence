@@ -17,21 +17,24 @@ fastify.get('/pong/ws', { websocket: true }, (connection, req) => {
   });
 });
 
-fastify.listen({ port: 4000, host: '0.0.0.0' }, (err: Error | null, address: string) => {
-  if (err) {
-    console.error(err);
-    process.exit(1);
-  }
-  console.log('Pong running on port 4000');
-});
-
-// Servidor HTTP només per redirigir a HTTPS
+// HTTP redirect server
 const redirect = Fastify();
 redirect.all('*', (request, reply) => {
   const host = request.headers.host?.replace(/:\d+$/, ':4000') || '';
   reply.redirect(301, `https://${host}${request.raw.url}`);
 });
-redirect.listen({ port: 4080, host: '0.0.0.0' }, (err: Error | null, address: string) => {
-  if (err) throw err;
-  console.log('HTTP redirect server running on port 4080');
-});
+
+async function start_listen() {
+  try {
+    const address = await fastify.listen({ port: 4000, host: '0.0.0.0' });
+    console.log('Auth server running on', address);
+
+    const redirectAddress = await redirect.listen({ port: 4080, host: '0.0.0.0' });
+    console.log('HTTP redirect server running on', redirectAddress);
+  } catch (err) {
+    console.error(err);
+    process.exit(1);
+  }  
+}
+
+start_listen();

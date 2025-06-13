@@ -19,21 +19,24 @@ fastify.setNotFoundHandler((request: FastifyRequest, reply: FastifyReply) => {
   reply.sendFile('index.html');
 });
 
-fastify.listen({ port: 3000, host: '0.0.0.0' }, (err: Error | null, address: string) => {
-  if (err) {
-    console.error(err);
-    process.exit(1);
-  }
-  console.log('Frontend running on port 3000');
-});
-
-  // HTTP redirect server
+// HTTP redirect server
 const redirect = Fastify();
 redirect.all('*', (request, reply) => {
   const host = request.headers.host?.replace(/:\d+$/, ':3000') || '';
   reply.redirect(301, `https://${host}${request.raw.url}`);
 });
-redirect.listen({ port: 3080, host: '0.0.0.0' }, (err: Error | null, address: string) => {
-  if (err) throw err;
-  console.log('HTTP redirect server running on port 3080');
-});
+
+async function start_listen() {
+  try {
+    const address = await fastify.listen({ port: 3000, host: '0.0.0.0' });
+    console.log('Auth server running on', address);
+
+    const redirectAddress = await redirect.listen({ port: 3080, host: '0.0.0.0' });
+    console.log('HTTP redirect server running on', redirectAddress);
+  } catch (err) {
+    console.error(err);
+    process.exit(1);
+  }  
+}
+
+start_listen();
