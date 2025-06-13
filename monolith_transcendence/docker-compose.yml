@@ -1,0 +1,18 @@
+# This docker-compose file defines the following service:
+# 
+# app:
+#   - Builds the Docker image from the current directory (.)
+#   - Maps port 7000 on the host to port 7000 in the container
+#   - Sets the environment variable NODE_ENV to 'production'
+#   - Restarts the container unless it is explicitly stopped
+
+services:
+  app:
+    build: .
+    ports:
+      - "7000:7000"
+    env_file:
+      - .env
+    restart: unless-stopped
+
+

@@ -277,7 +277,7 @@ docker-compose up --build
     "@fastify/oauth2": "^7.4.0",
     "@fastify/static": "^7.6.0",
     "@fastify/websocket": "^7.0.0",
-    "fastify": "^4.25.0",
+    "fastify": "^5.0.0",
     "sqlite3": "^5.1.6"
   },
   "devDependencies": {

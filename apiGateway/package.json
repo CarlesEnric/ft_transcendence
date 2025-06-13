@@ -1,0 +1,19 @@
+{
+  "name": "api-gateway",
+  "version": "1.0.0",
+  "main": "src/index.ts",
+  "type": "module",
+  "scripts": {
+    "build": "tsc",
+    "start": "node dist/index.js"
+  },
+  "dependencies": {
+    "fastify": "^5.0.0",
+    "@fastify/http-proxy": "^11.2.0"
+  },
+  "devDependencies": {
+  "typescript": "^5.0.0",
+  "ts-node": "^10.9.1",
+  "@types/node": "^20.0.0"
+  }
+}

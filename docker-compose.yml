@@ -1,15 +1,70 @@
-# This docker-compose file defines the following service:
-# 
-# app:
-#   - Builds the Docker image from the current directory (.)
-#   - Maps port 7000 on the host to port 7000 in the container
-#   - Sets the environment variable NODE_ENV to 'production'
-#   - Restarts the container unless it is explicitly stopped
 services:
-  app:
-    build: .
+  api-gateway:
+    build: ./apiGateway
+    ports:
+      - "8000:8000"
+    env_file:
+      - ./apiGateway/.env
+    volumes:
+      - ./gateway-data:/app/data
+    depends_on:
+      - auth
+      - backend
+      - pong
+      - frontend
+    restart: unless-stopped
+    networks:
+      - ft_net
+
+  backend:
+    build: ./backend
     ports:
       - "7000:7000"
     env_file:
-      - .env
+      - ./backend/.env
+    volumes:
+      - ./db:/app/db
     restart: unless-stopped
+    networks:
+      - ft_net
+
+  auth:
+    build: ./auth
+    ports:
+      - "7001:7001"
+    env_file:
+      - ./auth/.env
+    volumes:
+      - ./db:/app/db
+    restart: unless-stopped
+    networks:
+      - ft_net
+
+  pong:
+    build: ./pong
+    ports:
+      - "4000:4000"
+    env_file:
+      - ./pong/.env
+    volumes:
+      - ./pong-data:/app/data
+    restart: unless-stopped
+    networks:
+      - ft_net
+
+  frontend:
+    build: ./frontend
+    ports:
+      - "3000:3000"
+    env_file:
+      - ./frontend/.env
+    restart: unless-stopped
+    networks:
+      - ft_net
+
+volumes:
+  db:
+
+networks:
+  ft_net:
+    driver: bridge

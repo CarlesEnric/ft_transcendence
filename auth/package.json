@@ -1,0 +1,27 @@
+{
+  "name": "auth",
+  "version": "1.0.0",
+  "main": "dist/index.js",
+  "type": "module",
+  "scripts": {
+    "build": "tsc",
+    "start": "node dist/index.js",
+    "dev": "ts-node src/index.ts"
+  },
+  "dependencies": {
+    "fastify": "^5.0.0",
+    "@fastify/cookie": "^11.0.2",
+    "@fastify/jwt": "^9.1.0",
+    "@fastify/oauth2": "^8.1.2",
+    "sqlite3": "^5.1.6",
+    "node-fetch": "^3.3.2",
+    "jwt-decode": "^4.0.0"
+  },
+  "devDependencies": {
+    "typescript": "^5.0.0",
+    "ts-node": "^10.9.1",
+    "@types/node": "^20.0.0",
+    "@types/jwt-decode": "^2.2.1",
+    "@types/node-fetch": "^3.0.3"
+  }
+}

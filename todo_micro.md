@@ -396,7 +396,7 @@ CMD ["npm", "run", "start"]
     "dev": "ts-node src/index.ts"
   },
   "dependencies": {
-    "fastify": "^4.25.0",
+    "fastify": "^5.0.0",
     "sqlite3": "^5.1.6",
     "sqlite": "^4.2.1"
   },
@@ -466,7 +466,7 @@ auth/
     "dev": "ts-node src/index.ts"
   },
   "dependencies": {
-    "fastify": "^4.25.0",
+    "fastify": "^5.0.0",
     "@fastify/jwt": "^7.0.0",
     "@fastify/oauth2": "^7.4.0",
     "node-fetch": "^3.3.2"
@@ -682,7 +682,7 @@ server/
     "dev": "ts-node src/index.ts"
   },
   "dependencies": {
-    "fastify": "^4.25.0",
+    "fastify": "^5.0.0",
     "node-fetch": "^3.3.2"
   },
   "devDependencies": {
@@ -960,7 +960,7 @@ api-gateway/
     "dev": "ts-node src/index.ts"
   },
   "dependencies": {
-    "fastify": "^4.25.0",
+    "fastify": "^5.0.0",
     "@fastify/http-proxy": "^7.5.0"
   },
   "devDependencies": {
@@ -1172,7 +1172,7 @@ pong/
     "dev": "ts-node src/index.ts"
   },
   "dependencies": {
-    "fastify": "^4.25.0",
+    "fastify": "^5.0.0",
     "node-fetch": "^3.3.2",
     "@fastify/websocket": "^7.0.0"
   },
@@ -1588,7 +1588,7 @@ DATABASE_URL=http://database:6000
     "dev": "ts-node src/index.ts"
   },
   "dependencies": {
-    "fastify": "^4.25.0",
+    "fastify": "^5.0.0",
     "node-fetch": "^3.3.2",
     "@fastify/websocket": "^7.0.0"
   },
@@ -1629,4 +1629,58 @@ RUN npm install
 COPY . .
 CMD ["npm", "run", "start"]
 ````
+
+-------------------------------------------------------------------------------------
+
+Aquí tens la signatura compatible i segura per a totes les crides a listen als teus microserveis, utilitzant la signatura de paràmetres separats (port com a string):
+
+Exemple per a qualsevol servei Fastify:
+// HTTPS server
+fastify.listen('PORT', '0.0.0.0', (err: Error | null, address: string) => {
+  if (err) {
+    console.error(err);
+    process.exit(1);
+  }
+  console.log('Service running on port PORT');
+});
+
+// HTTP redirect server
+redirect.listen('HTTP_PORT', '0.0.0.0', (err: Error | null, address: string) => {
+  if (err) throw err;
+  console.log('HTTP redirect server running on port HTTP_PORT');
+});
+Exemple aplicat al teu index.ts:
+fastify.listen('8000', '0.0.0.0', (err: Error | null, address: string) => {
+  if (err) {
+    console.error(err);
+    process.exit(1);
+  }
+  console.log('API Gateway running on port 8000');
+});
+Exemple per a la resta de serveis:
+Frontend
+fastify.listen('3000', '0.0.0.0', (err: Error | null, address: string) => { ... });
+redirect.listen('3080', '0.0.0.0', (err: Error | null, address: string) => { ... });
+Backend
+fastify.listen('7000', '0.0.0.0', (err: Error | null, address: string) => { ... });
+redirect.listen('7080', '0.0.0.0', (err: Error | null, address: string) => { ... });
+Pong
+fastify.listen('4000', '0.0.0.0', (err: Error | null, address: string) => { ... });
+redirect.listen('4080', '0.0.0.0', (err: Error | null, address: string) => { ... });
+Auth
+fastify.listen('7001', '0.0.0.0', (err: Error | null, address: string) => { ... });
+redirect.listen('7081', '0.0.0.0', (err: Error | null, address: string) => { ... });
+Recorda:
+
+El port és un string com a primer paràmetre.
+El host també és un string.
+La callback és (err: Error | null, address: string) => void.
+Amb aquest patró, desapareixeran tots els errors de tipus a totes les crides a listen!---
+
+Recorda:
+
+El port és un string com a primer paràmetre.
+El host també és un string.
+La callback és (err: Error | null, address: string) => void.
+Amb aquest patró, desapareixeran tots els errors de tipus a totes les crides a listen!
 
