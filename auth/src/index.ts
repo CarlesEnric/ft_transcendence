@@ -10,6 +10,15 @@ const fastify = Fastify({
   https: {
     key: fs.readFileSync('/app/key.pem'),
     cert: fs.readFileSync('/app/cert.pem'),
+  },
+  logger: {
+    level: 'debug',
+    transport: {
+      target: 'pino-pretty',
+      options: {
+        colorize: true
+      }
+    }
   }
 });
 
@@ -19,25 +28,24 @@ fastify.register(dbPlugin);
 fastify.register(oauth2Plugin);
 fastify.register(authRoutes);
 
-
-// HTTP redirect server
-const redirect = Fastify();
-redirect.all('*', (request, reply) => {
-  const host = request.headers.host?.replace(/:\d+$/, ':7001') || '';
-  reply.redirect(301, `https://${host}${request.raw.url}`);
-});
-
-async function start_listen() {
+const start = async () => {
   try {
-    const address = await fastify.listen({ port: 7001, host: '0.0.0.0' });
-    console.log('Auth server running on', address);
+    // Start HTTPS server
+    await fastify.listen({ port: 7001, host: "0.0.0.0" });
+    fastify.log.info("Auth running on https://localhost:7001");
 
-    const redirectAddress = await redirect.listen({ port: 7080, host: '0.0.0.0' });
-    console.log('HTTP redirect server running on', redirectAddress);
+    // Start HTTP redirect server
+    const redirect = Fastify();
+    redirect.all('*', (request, reply) => {
+      const host = request.headers.host?.replace(/:\d+$/, ':7001') || '';
+      reply.status(301).redirect(`https://${host}${request.url}`);
+    });
+    await redirect.listen({ port: 7081, host: "0.0.0.0" });
+    console.log("HTTP redirect server running on http://localhost:7081");
   } catch (err) {
-    console.error(err);
+    fastify.log.error(err);
     process.exit(1);
-  }  
-}
+  }
+};
 
-start_listen();
+start();

@@ -1,24 +1,24 @@
 import { FastifyInstance } from 'fastify';
-import sqlite3 from 'sqlite3';
+import betterSqlite3 from 'better-sqlite3';
 
 export const dbPlugin = async (fastify: FastifyInstance) => {
-  fastify.decorate('db', new sqlite3.Database('/app/db/db.sqlite', sqlite3.OPEN_READWRITE | sqlite3.OPEN_CREATE, (err) => {
-    if (err) {
-      console.error('Error connecting to SQLite:', err);
-    } else {
-      console.log('SQLite DB connected');
-    }
-  }));
+  // Crea la connexió a la base de dades (sincrònic)
+  const db = betterSqlite3('/app/db/db.sqlite');
 
+  // Decora Fastify amb la instància de la DB
+  fastify.decorate('db', db);
+
+  // Funció per inicialitzar la DB
   fastify.decorate('initDb', () => {
-    fastify.db.run(`
+    db.prepare(`
       CREATE TABLE IF NOT EXISTS users (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         name TEXT NOT NULL,
         email TEXT NOT NULL UNIQUE
       );
-    `);
+    `).run();
   });
 
+  // Inicialitza la DB
   fastify.initDb();
 };
