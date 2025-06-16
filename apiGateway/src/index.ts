@@ -24,9 +24,18 @@ fastify.register((fastifyHttpProxy as any).default || fastifyHttpProxy, {
   prefix: '/auth',
   rewritePrefix: '/auth',
   http2: false,
-  unidici: {
+  undici: {
     rejectUnauthorized: false // Disable SSL verification for local development
   }
+});
+
+// Proxy /auth → auth microservice (api/me login)
+fastify.register((fastifyHttpProxy as any).default || fastifyHttpProxy, {
+  upstream: 'https://auth:7001',
+  prefix: '/api/me',
+  rewritePrefix: '/auth/api/me',
+  http2: false,
+  undici: { rejectUnauthorized: false }
 });
 
 // Proxy /api → backend microservice
@@ -35,29 +44,29 @@ fastify.register((fastifyHttpProxy as any).default || fastifyHttpProxy, {
   prefix: '/api',
   rewritePrefix: '/api',
   http2: false,
-  unidici: {
+  undici: {
     rejectUnauthorized: false // Disable SSL verification for local development
   }
 });
 
 // Proxy /pong → pong microservice (WebSocket not supported by http-proxy, només HTTP)
 fastify.register((fastifyHttpProxy as any).default || fastifyHttpProxy, {
-  upstream: 'https://pong:4000',
+  upstream: 'http://pong:4000',
   prefix: '/pong',
   rewritePrefix: '/pong',
   http2: false,
-  unidici: {
+  undici: {
     rejectUnauthorized: false // Disable SSL verification for local development
   }
 });
 
 // Proxy everything else → frontend
 fastify.register((fastifyHttpProxy as any).default || fastifyHttpProxy, {
-  upstream: 'https://frontend:3000',
+  upstream: 'http://frontend:3000',
   prefix: '/',
   rewritePrefix: '/',
   http2: false,
-  unidici: {
+  undici: {
     rejectUnauthorized: false // Disable SSL verification for local development
   }
 });

@@ -8,13 +8,14 @@ export const oauth2Plugin = async (fastify: FastifyInstance) => {
     credentials: {
       client: {
         id: process.env.GOOGLE_CLIENT_ID || 'GOOGLE_CLIENT_ID',
-        secret: process.env.GOOGLE_CLIENT_SECRET || 'GOOGLE_CLIENT_SECRET'
-      }
+        secret: process.env.GOOGLE_CLIENT_SECRET || 'GOOGLE_CLIENT_SECRET',
+      },
     },
-    startRedirectPath: '/auth/login/google',
-    callbackUri: process.env.GOOGLE_CALLBACK_URI || 'https://localhost:7001/auth/login/google/callback',
+    //startRedirectPath: '/auth/login/google',  // <-- ruta backen
+    callbackUri: process.env.GOOGLE_CALLBACK_URI || 'https://localhost:8000/auth/login/google/callback',  // <-- callback backend
     discovery: {
-      issuer: 'https://accounts.google.com'
-    }
+      issuer: 'https://accounts.google.com',
+    },
   });
 };
+

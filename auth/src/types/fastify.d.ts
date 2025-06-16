@@ -5,5 +5,9 @@ declare module 'fastify' {
   interface FastifyInstance {
     db: Database;
     initDb: () => void;
+  
+    googleOAuth2: {
+    	getAccessTokenFromAuthorizationCodeFlow(request: any): Promise<{ access_token: string }>;
+    };
   }
 }

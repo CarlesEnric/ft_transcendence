@@ -10,13 +10,20 @@
   },
   "dependencies": {
     "fastify": "^5.4.0",
-    "better-sqlite3": "11.10.0"
+    "@fastify/cookie": "^11.0.2",
+    "@fastify/jwt": "^9.1.0",
+    "@fastify/oauth2": "^8.1.2",
+    "better-sqlite3": "11.10.0",
+    "node-fetch": "^3.3.2",
+    "jwt-decode": "^4.0.0"
   },
   "devDependencies": {
     "typescript": "^5.8.3",
     "ts-node": "^10.9.2",
     "@types/node": "^24.0.1",
+    "@types/jwt-decode": "^2.2.1",
+    "@types/node-fetch": "^2.6.12",
     "fastify-pino-pretty": "5.1.0",
     "@types/better-sqlite3": "^7.6.13"
   }
-}
+ }

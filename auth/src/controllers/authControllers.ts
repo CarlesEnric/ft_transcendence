@@ -76,7 +76,7 @@ export const authRoutes = async (fastify: FastifyInstance) => {
       } else {
         // Issue JWT for existing user
         const jwtToken = (fastify as any).jwt.sign({ email: row.email, name: row.name });
-        reply.setCookie('token', jwtToken, { path: '/', httpOnly: true, secure: true });
+        reply.setCookie('token', jwtToken, { path: '/', httpOnly: true, secure: true, sameSite: 'none' });
         return reply.redirect('/auth/login/success');
       }
     } catch (err) {

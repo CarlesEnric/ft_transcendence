@@ -39,7 +39,7 @@ function navigate(event: Event, path: string): void {
 }
 
 function checkAuth(): void {
-  fetch('/api/me', { credentials: 'include' })
+  fetch('/auth/api/me', { credentials: 'include' })
     .then(res => res.ok ? res.json() : null)
     .then(user => {
       const status = document.getElementById('status');
