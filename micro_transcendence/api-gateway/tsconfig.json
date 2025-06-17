@@ -1,0 +1,32 @@
+// This is the TypeScript configuration file (tsconfig.json) for the project.
+// It specifies compiler options and file inclusion/exclusion patterns.
+//
+// compilerOptions:
+//   target: Sets the JavaScript language version output to ES2020.
+//   module: Uses CommonJS module system (suitable for Node.js).
+//   strict: Enables all strict type-checking options for safer code.
+//   esModuleInterop: Allows default imports from modules with no default export.
+//   skipLibCheck: Skips type checking of declaration files for faster builds.
+//   forceConsistentCasingInFileNames: Ensures file name casing consistency across the project.
+//   outDir: Outputs compiled JavaScript files to the './dist' directory.
+//
+// include:
+//   Includes all TypeScript files under the 'src' directory and its subdirectories.
+//
+// exclude:
+//   Excludes the 'node_modules' directory from compilation.
+{
+  "compilerOptions": {
+    "target": "ES2020",
+    "module": "NodeNext",
+    "moduleResolution": "nodenext",
+    "strict": true,
+    "esModuleInterop": true,
+    "allowSyntheticDefaultImports": true,
+    "skipLibCheck": true,
+    "forceConsistentCasingInFileNames": true,
+    "outDir": "./dist"
+  },
+  "include": ["**/*.ts"],
+  "exclude": ["node_modules"]
+}

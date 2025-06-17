@@ -1,0 +1,38 @@
+{
+  "name": "frontend-service",
+  "version": "1.0.0",
+  "description": "Exemple Fastify OAuth2 amb TypeScript i SQLite",
+  "main": "dist/index.js",
+  "type": "module",
+  "scripts": {
+    "build-server": "tsc --project tsconfig.json",
+    "build-front": "tsc --project tsconfig.front.json",
+    "build": "npm run build-server && npm run build-front",
+    "start": "node dist/index.js"
+  },
+  "author": "",
+  "license": "MIT",
+  "dependencies": {
+    "fastify": "^5.4.0",
+    "@fastify/cookie": "^11.0.2",
+    "@fastify/jwt": "^9.1.0",
+    "@fastify/oauth2": "^8.1.2",
+    "@fastify/static": "^8.2.0",
+    "@fastify/websocket": "^7.0.0",
+    "@fastify/cors": "^11.0.1",
+    "@fastify/http-proxy": "^11.1.0",
+    "better-sqlite3": "11.10.0",
+    "sqlite3": "^5.1.6",
+    "node-fetch": "^3.3.2",
+    "jwt-decode": "^4.0.0"
+  },
+  "devDependencies": {
+    "typescript": "^5.8.3",
+    "ts-node": "^10.9.2",
+    "@types/node": "^24.0.1",
+    "@types/jwt-decode": "^2.2.1",
+    "@types/node-fetch": "^2.6.12",
+    "fastify-pino-pretty": "5.1.0",
+    "@types/better-sqlite3": "^7.6.13"
+  }
+}

@@ -1,0 +1,70 @@
+services:
+  api-gateway:
+    build: ./api-gateway
+    ports:
+      - '8000:8000'
+    depends_on:
+      - auth-service
+      - frontend-service
+      - backend-service
+      - game-service
+    env_file:
+      - ./api-gateway/.env
+    volumes:
+      - ./gateway-data:/app/data
+    networks:
+      - ft_net
+
+  auth-service:
+    build: ./auth-service
+    ports:
+      - '7001:7001'
+    env_file:
+      - ./auth-service/.env
+    volumes:
+      - ./db:/app/db
+    networks:
+      - ft_net
+
+  frontend-service:
+    build: ./frontend-service
+    ports:
+      - '7002:7002'
+    env_file:
+      - ./frontend-service/.env
+    volumes:
+      - ./frontend-data:/app/data
+    networks:
+      - ft_net
+
+  backend-service:
+    build: ./backend-service
+    ports:
+      - '7003:7003'
+    env_file:
+      - ./backend-service/.env
+    volumes:
+      - ./db:/app/db
+    networks:
+      - ft_net
+  
+  game-service:
+    build: ./game-service
+    ports:
+      - '7004:7004'
+    env_file:
+      - ./game-service/.env
+    volumes:
+      - ./game-service-data:/app/data
+    networks:
+      - ft_net
+
+networks:
+  ft_net:
+    driver: bridge
+
+volumes:
+  db:
+  gateway-data:
+  frontend-data:
+  game-service-data:

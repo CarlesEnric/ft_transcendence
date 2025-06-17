@@ -1,0 +1,6 @@
+    body { font-family: sans-serif; margin: 0; }
+    nav { background: #222; color: #fff; padding: 1em; }
+    nav a { color: #fff; margin-right: 1em; text-decoration: none; }
+    nav a.active { text-decoration: underline; }
+    #app { padding: 2em; }
+    .hidden { display: none; }
