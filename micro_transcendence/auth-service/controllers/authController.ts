@@ -87,13 +87,19 @@ export const authRoutes = async (fastify: FastifyInstance) => {
     }
   });
 
-  fastify.get('/login/success', async (request: FastifyRequest, reply: FastifyReply) => {
-    // Show a simple HTML page for success
-    reply.type('text/html').send('<h1>Google OAuth2 login successful!</h1><p>You are now logged in.</p>');
-  });
+  // fastify.get('/login/success', async (request: FastifyRequest, reply: FastifyReply) => {
+  //   // Show a simple HTML page for success
+  //   reply.type('text/html').send('<h1>Google OAuth2 login successful!</h1><p>You are now logged in.</p>');
+  // });
 
-  fastify.get('/login/failure', async (request: FastifyRequest, reply: FastifyReply) => {
-    reply.type('text/html').send('<h1>Google OAuth2 login failed.</h1>');
+  // fastify.get('/login/failure', async (request: FastifyRequest, reply: FastifyReply) => {
+  //   reply.type('text/html').send('<h1>Google OAuth2 login failed.</h1>');
+  // });
+
+  // Endpoint to initiate Google OAuth2 login and logout
+  fastify.post('/logout', async (request, reply) => {
+    reply.clearCookie('token', { path: '/', httpOnly: true, secure: true });
+    reply.send({ ok: true });
   });
 
 

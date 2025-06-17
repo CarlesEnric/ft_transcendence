@@ -26,6 +26,15 @@ fastify.addHook('onSend', async (request, reply, payload) => {
   return payload;
 });
 
+// Get the current directory and file name to avoid 404 errors
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+// Serve static files for the SPA when not existing routes are requested
+fastify.setNotFoundHandler((request, reply) => {
+  reply.type('text/html').send(
+    fs.readFileSync(path.join(__dirname, '../public/index.html'))
+  );
+});
 
 const start = async () => {
   try {

@@ -20,7 +20,6 @@ const routes: Record<string, (user: any) => string> = {
     <h1>Perfil d'usuari</h1>
     <p>Nom: ${user.name}</p>
     <p>Email: ${user.email}</p>
-    <button id="logout">Logout</button>
   `
 };
 
@@ -99,7 +98,7 @@ function renderSPA(path: string, user: any) {
       <a href="/games" data-link>Jocs</a>
       <a href="/tournament" data-link>Torneig</a>
       <a href="/profile" data-link>Perfil</a>
-      <span> | Hola, ${user.name} <button id="logout">Logout</button></span>
+      <span> | Hola, ${user.name} <button id="logout" class="button">Logout</button></span>
     </nav>
     <div id="spa-content"></div>
   `;
@@ -123,8 +122,8 @@ function renderSPA(path: string, user: any) {
   });
 
   // Logout
-  document.getElementById('logout')?.addEventListener('click', () => {
-    document.cookie = "token=; path=/; expires=Thu, 01 Jan 1970 00:00:00 UTC;";
+  document.getElementById('logout')?.addEventListener('click', async () => {
+    await fetch('/auth/logout', { method: 'POST', credentials: 'include' });
     window.history.pushState({}, '', '/');
     render('/');
   });
