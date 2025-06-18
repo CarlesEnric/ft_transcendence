@@ -2,6 +2,9 @@ import { FastifyInstance, FastifyRequest, FastifyReply } from 'fastify';
 import fetch from 'node-fetch';
 import { jwtDecode } from 'jwt-decode';
 import { promisify } from 'util';
+//import bcrypt from 'bcrypt';
+
+const users: {name: string, email: string, password: string}[] = []
 
 export const authRoutes = async (fastify: FastifyInstance) => {
   // Manually handle the Google OAuth2 callback for custom config
@@ -112,6 +115,39 @@ export const authRoutes = async (fastify: FastifyInstance) => {
       reply.status(401).send({ error: 'Unauthorized' });
     }
   });
+
+//   fastify.post('/auth/register', async (request, reply) => {
+//   const { name, email, password } = request.body as any
+
+//   if (users.find(u => u.email === email)) {
+//     return reply.status(400).send({ error: 'Email ja registrat' })
+//   }
+
+//   const hash = await bcrypt.hash(password, 10)
+//   users.push({ name, email, password: hash })
+
+//   // CREA I ENVIA LA COOKIE JWT
+//   const jwtToken = (fastify as any).jwt.sign({ email, name });
+//   reply.setCookie('token', jwtToken, { path: '/', httpOnly: true, secure: true });
+
+//   reply.status(201).send({ ok: true })
+// })
+
+// fastify.post('/auth/login', async (request, reply) => {
+//   const { email, password } = request.body as any
+//   const user = users.find(u => u.email === email)
+//   if (!user) return reply.status(401).send({ error: 'Usuari no trobat' })
+
+//   const valid = await bcrypt.compare(password, user.password)
+//   if (!valid) return reply.status(401).send({ error: 'Contrasenya incorrecta' })
+
+//   // CREA I ENVIA LA COOKIE JWT
+//   const jwtToken = (fastify as any).jwt.sign({ email: user.email, name: user.name });
+//   reply.setCookie('token', jwtToken, { path: '/', httpOnly: true, secure: true });
+
+//   reply.send({ ok: true, name: user.name, email: user.email })
+// })
+  
 };
 
 // Type for Google user info
