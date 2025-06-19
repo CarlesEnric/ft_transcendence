@@ -44,7 +44,7 @@ async function render(path = window.location.pathname) {
     app.innerHTML = `
       <h1>Benvingut!</h1>
       <a href="/auth/login/google">Login amb Google</a>
-      <p>O <a href="#" id="show-register">Registra't manualment</a></p>
+      <p>O <a href="#" id="show-register">Registra't manualment</a> | <a href="#" id="show-login">Login manual</a></p>
       <div id="register-form" class="hidden">
         <form id="register">
           <input type="text" name="name" placeholder="Nom" required />
@@ -53,11 +53,27 @@ async function render(path = window.location.pathname) {
           <button type="submit">Registra't</button>
         </form>
       </div>
+      <div id="login-form" class="hidden">
+        <form id="login">
+          <input type="email" name="email" placeholder="Email" required />
+          <input type="password" name="password" placeholder="Password" required />
+          <button type="submit">Login</button>
+        </form>
+      </div>
     `;
-    // Mostra el formulari de registre si es clica
+    
+    // Mostra el formulari de registre
     document.getElementById('show-register')?.addEventListener('click', e => {
       e.preventDefault();
-      document.getElementById('register-form')!.classList.remove('hidden')
+      document.getElementById('register-form')!.classList.remove('hidden');
+      document.getElementById('login-form')!.classList.add('hidden');
+    });
+
+    // Mostra el formulari de login
+    document.getElementById('show-login')?.addEventListener('click', e => {
+      e.preventDefault();
+      document.getElementById('login-form')!.classList.remove('hidden');
+      document.getElementById('register-form')!.classList.add('hidden');
     });
 
     // Handler de registre
@@ -72,6 +88,21 @@ async function render(path = window.location.pathname) {
       });
       if (res.ok) window.location.reload();
       else alert('Error al registrar');
+    });
+
+    // Handler de login manual
+    document.getElementById('login')?.addEventListener('submit', async e => {
+      e.preventDefault();
+      const form = e.target as HTMLFormElement;
+      const data = Object.fromEntries(new FormData(form));
+      const res = await fetch('/auth/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include', // Necessari per enviar cookies
+        body: JSON.stringify(data)
+      });
+      if (res.ok) window.location.reload();
+      else alert('Error al fer login');
     });
     return;
   }

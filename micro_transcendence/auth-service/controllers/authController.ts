@@ -2,9 +2,8 @@ import { FastifyInstance, FastifyRequest, FastifyReply } from 'fastify';
 import fetch from 'node-fetch';
 import { jwtDecode } from 'jwt-decode';
 import { promisify } from 'util';
-//import bcrypt from 'bcrypt';
+import bcrypt from 'bcrypt';
 
-const users: {name: string, email: string, password: string}[] = []
 
 export const authRoutes = async (fastify: FastifyInstance) => {
   // Manually handle the Google OAuth2 callback for custom config
@@ -74,15 +73,15 @@ export const authRoutes = async (fastify: FastifyInstance) => {
         }
         // Issue JWT for new user
         const jwtToken = (fastify as any).jwt.sign({ email: user.email, name: user.name });
-        reply.setCookie('token', jwtToken, { path: '/', httpOnly: true, secure: true });
+        reply.setCookie('token', jwtToken, { path: '/', httpOnly: true, secure: false }); // recorda posar secure: true en producció
         // return reply.redirect('/login/success');
-        return reply.redirect('https://127.0.0.1:8000'); // Redirect to home page
+        return reply.redirect('https://localhost:8000'); // Redirect to home page
       } else {
         // Issue JWT for existing user
         const jwtToken = (fastify as any).jwt.sign({ email: row.email, name: row.name });
-        reply.setCookie('token', jwtToken, { path: '/', httpOnly: true, secure: true });
+        reply.setCookie('token', jwtToken, { path: '/', httpOnly: true, secure: false }); // recorda posar secure: true en producció
         // return reply.redirect('/login/success');
-        return reply.redirect('https://127.0.0.1:8000'); // Redirect to home page
+        return reply.redirect('https://localhost:8000'); // Redirect to home page
       }
     } catch (err) {
       console.error('OAuth2 callback error:', err);
@@ -101,7 +100,7 @@ export const authRoutes = async (fastify: FastifyInstance) => {
 
   // Endpoint to initiate Google OAuth2 login and logout
   fastify.post('/logout', async (request, reply) => {
-    reply.clearCookie('token', { path: '/', httpOnly: true, secure: true });
+    reply.clearCookie('token', { path: '/', httpOnly: true, secure: false }); // recorda posar secure: true en producció
     reply.send({ ok: true });
   });
 
@@ -116,37 +115,52 @@ export const authRoutes = async (fastify: FastifyInstance) => {
     }
   });
 
-//   fastify.post('/auth/register', async (request, reply) => {
-//   const { name, email, password } = request.body as any
+  // fastify.post('/register', async (request, reply) => {
+  //   const { name, email, password } = request.body as any
 
-//   if (users.find(u => u.email === email)) {
-//     return reply.status(400).send({ error: 'Email ja registrat' })
-//   }
+  //   // Validació bàsica
+  //   if (!name || !email || !password || password.length < 6) {
+  //     return reply.status(400).send({ error: 'Camps buits o contrasenya massa curta' });
+  //   }
 
-//   const hash = await bcrypt.hash(password, 10)
-//   users.push({ name, email, password: hash })
+  //   const db = (fastify as any).db;
+  //   const dbGet = promisify(db.get.bind(db));
+  //   const dbRun = promisify(db.run.bind(db));
 
-//   // CREA I ENVIA LA COOKIE JWT
-//   const jwtToken = (fastify as any).jwt.sign({ email, name });
-//   reply.setCookie('token', jwtToken, { path: '/', httpOnly: true, secure: true });
+  //   // Comprova si l'usuari ja existeix
+  //   const existing = await dbGet('SELECT * FROM users WHERE email = ?', [email]);
+  //   if (existing) {
+  //     return reply.status(400).send({ error: 'Email ja registrat' });
+  //   }
 
-//   reply.status(201).send({ ok: true })
-// })
+  //   const hash = await bcrypt.hash(password, 10);
+  //   await dbRun('INSERT INTO users (name, email, password) VALUES (?, ?, ?)', [name, email, hash]);
 
-// fastify.post('/auth/login', async (request, reply) => {
-//   const { email, password } = request.body as any
-//   const user = users.find(u => u.email === email)
-//   if (!user) return reply.status(401).send({ error: 'Usuari no trobat' })
+  //   // CREA I ENVIA LA COOKIE JWT
+  //   const jwtToken = (fastify as any).jwt.sign({ email, name });
+  //   reply.setCookie('token', jwtToken, { path: '/', httpOnly: true, secure: false, sameSite: 'lax' }); // recorda posar secure: true en producció
 
-//   const valid = await bcrypt.compare(password, user.password)
-//   if (!valid) return reply.status(401).send({ error: 'Contrasenya incorrecta' })
+  //   reply.status(201).send({ ok: true, name, email })
+  // })
 
-//   // CREA I ENVIA LA COOKIE JWT
-//   const jwtToken = (fastify as any).jwt.sign({ email: user.email, name: user.name });
-//   reply.setCookie('token', jwtToken, { path: '/', httpOnly: true, secure: true });
+  // fastify.post('/login', async (request, reply) => {
 
-//   reply.send({ ok: true, name: user.name, email: user.email })
-// })
+  //   const { email, password } = request.body as any
+  //   const db = (fastify as any).db;
+  //   const dbGet = promisify(db.get.bind(db));
+
+  //   const user = await dbGet('SELECT * FROM users WHERE email = ?', [email]);
+  //   if (!user) return reply.status(401).send({ error: 'Usuari no trobat' })
+
+  //   const valid = await bcrypt.compare(password, user.password)
+  //   if (!valid) return reply.status(401).send({ error: 'Contrasenya incorrecta' })
+
+  //   // CREA I ENVIA LA COOKIE JWT
+  //   const jwtToken = (fastify as any).jwt.sign({ email: user.email, name: user.name });
+  //   reply.setCookie('token', jwtToken, { path: '/', httpOnly: true, secure: false, sameSite: 'lax' }); // recorda posar secure: true en producció
+
+  //   reply.send({ ok: true, name: user.name, email: user.email })
+  // })
   
 };
 

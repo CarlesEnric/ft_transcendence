@@ -22,8 +22,8 @@ fastify.register(fastifyCookie, {
   secret: 'unsecretsegur', // només si cal
   parseOptions: {
     httpOnly: true,
-    secure: false, // posa-ho a false per local amb self-signed
-    sameSite: 'lax'
+    secure: false, // posa-ho a false per local amb self-signed i true en producció
+    sameSite: 'lax' // 'lax' és segura per a la majoria de casos, ex: autenticació amb OAuth2
   }
 });
 

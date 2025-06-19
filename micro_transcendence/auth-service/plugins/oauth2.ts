@@ -18,7 +18,7 @@ export const oauth2Plugin = async (fastifyInstance: FastifyInstance) => {
       },
     },
     startRedirectPath: '/login/google',
-    callbackUri: 'https://127.0.0.1:8000/auth/login/google/callback',
+    callbackUri: 'https://localhost:8000/auth/login/google/callback',
     callbackUriParams: {
       successRedirect: '/login/success',
       failureRedirect: '/login/failure'
