@@ -115,52 +115,52 @@ export const authRoutes = async (fastify: FastifyInstance) => {
     }
   });
 
-  // fastify.post('/register', async (request, reply) => {
-  //   const { name, email, password } = request.body as any
+  fastify.post('/register', async (request, reply) => {
+    const { name, email, password } = request.body as any
 
-  //   // Validació bàsica
-  //   if (!name || !email || !password || password.length < 6) {
-  //     return reply.status(400).send({ error: 'Camps buits o contrasenya massa curta' });
-  //   }
+    // Validació bàsica
+    if (!name || !email || !password || password.length < 6) {
+      return reply.status(400).send({ error: 'Camps buits o contrasenya massa curta' });
+    }
 
-  //   const db = (fastify as any).db;
-  //   const dbGet = promisify(db.get.bind(db));
-  //   const dbRun = promisify(db.run.bind(db));
+    const db = (fastify as any).db;
+    const dbGet = promisify(db.get.bind(db));
+    const dbRun = promisify(db.run.bind(db));
 
-  //   // Comprova si l'usuari ja existeix
-  //   const existing = await dbGet('SELECT * FROM users WHERE email = ?', [email]);
-  //   if (existing) {
-  //     return reply.status(400).send({ error: 'Email ja registrat' });
-  //   }
+    // Comprova si l'usuari ja existeix
+    const existing = await dbGet('SELECT * FROM users WHERE email = ?', [email]);
+    if (existing) {
+      return reply.status(400).send({ error: 'Email ja registrat' });
+    }
 
-  //   const hash = await bcrypt.hash(password, 10);
-  //   await dbRun('INSERT INTO users (name, email, password) VALUES (?, ?, ?)', [name, email, hash]);
+    const hash = await bcrypt.hash(password, 10);
+    await dbRun('INSERT INTO users (name, email, password) VALUES (?, ?, ?)', [name, email, hash]);
 
-  //   // CREA I ENVIA LA COOKIE JWT
-  //   const jwtToken = (fastify as any).jwt.sign({ email, name });
-  //   reply.setCookie('token', jwtToken, { path: '/', httpOnly: true, secure: false, sameSite: 'lax' }); // recorda posar secure: true en producció
+    // CREA I ENVIA LA COOKIE JWT
+    const jwtToken = (fastify as any).jwt.sign({ email, name });
+    reply.setCookie('token', jwtToken, { path: '/', httpOnly: true, secure: false, sameSite: 'lax' }); // recorda posar secure: true en producció
 
-  //   reply.status(201).send({ ok: true, name, email })
-  // })
+    reply.status(201).send({ ok: true, name, email })
+  })
 
-  // fastify.post('/login', async (request, reply) => {
+  fastify.post('/login', async (request, reply) => {
 
-  //   const { email, password } = request.body as any
-  //   const db = (fastify as any).db;
-  //   const dbGet = promisify(db.get.bind(db));
+    const { email, password } = request.body as any
+    const db = (fastify as any).db;
+    const dbGet = promisify(db.get.bind(db));
 
-  //   const user = await dbGet('SELECT * FROM users WHERE email = ?', [email]);
-  //   if (!user) return reply.status(401).send({ error: 'Usuari no trobat' })
+    const user = await dbGet('SELECT * FROM users WHERE email = ?', [email]);
+    if (!user) return reply.status(401).send({ error: 'Usuari no trobat' })
 
-  //   const valid = await bcrypt.compare(password, user.password)
-  //   if (!valid) return reply.status(401).send({ error: 'Contrasenya incorrecta' })
+    const valid = await bcrypt.compare(password, user.password)
+    if (!valid) return reply.status(401).send({ error: 'Contrasenya incorrecta' })
 
-  //   // CREA I ENVIA LA COOKIE JWT
-  //   const jwtToken = (fastify as any).jwt.sign({ email: user.email, name: user.name });
-  //   reply.setCookie('token', jwtToken, { path: '/', httpOnly: true, secure: false, sameSite: 'lax' }); // recorda posar secure: true en producció
+    // CREA I ENVIA LA COOKIE JWT
+    const jwtToken = (fastify as any).jwt.sign({ email: user.email, name: user.name });
+    reply.setCookie('token', jwtToken, { path: '/', httpOnly: true, secure: false, sameSite: 'lax' }); // recorda posar secure: true en producció
 
-  //   reply.send({ ok: true, name: user.name, email: user.email })
-  // })
+    reply.send({ ok: true, name: user.name, email: user.email })
+  })
   
 };
 

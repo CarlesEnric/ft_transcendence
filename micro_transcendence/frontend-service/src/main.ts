@@ -81,12 +81,13 @@ async function render(path = window.location.pathname) {
       e.preventDefault();
       const form = e.target as HTMLFormElement;
       const data = Object.fromEntries(new FormData(form));
-      const res = await fetch('/auth/register', {
+      const res = await fetch('/register', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(data)
       });
-      if (res.ok) window.location.reload();
+      // if (res.ok) window.location.reload();
+      if (res.ok) window.location.href = '/home';
       else alert('Error al registrar');
     });
 
@@ -95,13 +96,14 @@ async function render(path = window.location.pathname) {
       e.preventDefault();
       const form = e.target as HTMLFormElement;
       const data = Object.fromEntries(new FormData(form));
-      const res = await fetch('/auth/login', {
+      const res = await fetch('/login', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         credentials: 'include', // Necessari per enviar cookies
         body: JSON.stringify(data)
       });
-      if (res.ok) window.location.reload();
+      // if (res.ok) window.location.reload();
+      if (res.ok) window.location.href = '/home';
       else alert('Error al fer login');
     });
     return;
