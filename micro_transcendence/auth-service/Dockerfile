@@ -3,7 +3,7 @@
 # Steps:
 # 1. Uses the official Node.js 24 Alpine image for a lightweight container.
 # 2. Sets the working directory to /app.
-# 3. Installs OpenSSL for SSL certificate generation.
+# 3. Installs OpenSSL for SSL certificate generation and other necessary packages like sqlite, python3, and build tools.
 # 4. Copies package.json and package-lock.json (if present) for dependency installation.
 # 5. Installs dependencies using npm.
 # 6. Copies the rest of the application source code into the container.
@@ -12,7 +12,7 @@
 # 9. Sets the default command to start the application using npm.
 FROM node:24-alpine
 WORKDIR /app
-RUN apk add --no-cache python3 python3-dev py3-setuptools make g++ openssl
+RUN apk add --no-cache sqlite python3 python3-dev py3-setuptools make g++ openssl
 COPY package*.json ./
 RUN npm install
 RUN npm install -g npm@latest

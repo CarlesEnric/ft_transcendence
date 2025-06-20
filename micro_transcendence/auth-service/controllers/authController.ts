@@ -140,7 +140,8 @@ export const authRoutes = async (fastify: FastifyInstance) => {
     const jwtToken = (fastify as any).jwt.sign({ email, name });
     reply.setCookie('token', jwtToken, { path: '/', httpOnly: true, secure: false, sameSite: 'lax' }); // recorda posar secure: true en producció
 
-    reply.status(201).send({ ok: true, name, email })
+    //reply.status(201).send({ ok: true, name, email })
+    return reply.redirect('https://localhost:8000');
   })
 
   fastify.post('/login', async (request, reply) => {
@@ -158,8 +159,8 @@ export const authRoutes = async (fastify: FastifyInstance) => {
     // CREA I ENVIA LA COOKIE JWT
     const jwtToken = (fastify as any).jwt.sign({ email: user.email, name: user.name });
     reply.setCookie('token', jwtToken, { path: '/', httpOnly: true, secure: false, sameSite: 'lax' }); // recorda posar secure: true en producció
-
-    reply.send({ ok: true, name: user.name, email: user.email })
+    //reply.send({ ok: true, name: user.name, email: user.email })
+    return reply.redirect('https://localhost:8000');
   })
   
 };

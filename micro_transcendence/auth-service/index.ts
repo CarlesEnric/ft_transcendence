@@ -32,6 +32,7 @@ fastify.register(jwt, { secret: 'supersecret' });
 // Registra plugins i rutes d’autenticació
 fastify.register(async (instance) => {
   await dbPlugin(instance);
+  instance.initDb(); // Inicialitza la base de dades si cal
   await oauth2Plugin(instance);
   await authRoutes(instance);
 });
