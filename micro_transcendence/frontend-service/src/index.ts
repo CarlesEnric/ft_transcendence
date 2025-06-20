@@ -3,6 +3,7 @@ import fastifyStatic from '@fastify/static';
 import * as fs from 'fs';
 import * as path from 'path';
 import { fileURLToPath } from 'url';
+import helmet from '@fastify/helmet';
 
 const fastify = Fastify({
   https: {
@@ -10,6 +11,16 @@ const fastify = Fastify({
     cert: fs.readFileSync('/app/cert.pem'),
   },
   logger: true,
+});
+
+// Registra Helmet per a seguretat i CSP
+await fastify.register(helmet, {
+  contentSecurityPolicy: {
+    directives: {
+      defaultSrc: ["'self'"],
+      connectSrc: ["'self'", "https://localhost:8000"], // Permet scripts inline per a facilitar el desenvolupament
+    }
+  }
 });
 
 
@@ -20,7 +31,7 @@ fastify.register(fastifyStatic, {
 });
 
 
-// Serveix fitxers estàtics per a la carpeta /assets
+// Serveix fitxers estàtics per a la carpeta /assets i és una capçalera de seguretat Content-Security-Policy(CSP) i és necessari per evitar errors de seguretat
 fastify.addHook('onSend', async (request, reply, payload) => {
   reply.header('Content-Security-Policy', "default-src 'self'; script-src 'self';");
   return payload;

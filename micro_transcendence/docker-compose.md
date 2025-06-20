@@ -172,4 +172,10 @@ sqlite3 /app/db/db.sqlite
 Inside sqlite3:
 ```bash
 SELECT name, email, password FROM users;
+SELECT * FROM users;
+```
+
+Per fer una prova de si agafa registre o no des del host:
+```bash
+curl -k -X POST https://localhost:7001/register -H "Content-Type: application/json" -d '{"name":"Test","email":"test@prova.com","password":"123456"}'
 ```

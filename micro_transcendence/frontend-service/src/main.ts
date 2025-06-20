@@ -81,7 +81,7 @@ async function render(path = window.location.pathname) {
       e.preventDefault();
       const form = e.target as HTMLFormElement;
       const data = Object.fromEntries(new FormData(form));
-      const res = await fetch('/register', {
+      const res = await fetch('/auth/register', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(data)
@@ -96,7 +96,7 @@ async function render(path = window.location.pathname) {
       e.preventDefault();
       const form = e.target as HTMLFormElement;
       const data = Object.fromEntries(new FormData(form));
-      const res = await fetch('/login', {
+      const res = await fetch('/auth/login', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         credentials: 'include', // Necessari per enviar cookies
