@@ -1,21 +1,29 @@
 # Fitxer de docker-compose principal
 DC_FILE=docker-compose.yml
 
+# Colors per a la terminal
+RED=\033[1;31m
+GREEN=\033[1;32m
+YELLOW=\033[1;33m
+BLUE=\033[1;34m
+CYAN=\033[1;36m
+RESET=\033[0m
+
 # Arrenca serveis en mode desatès amb reconstrucció
 all up:
 	sudo docker compose -f $(DC_FILE) up --build -d > /dev/null 2>&1
-	echo "\033[1;32m🍀 Services started successfully!\033[0m"
-	echo "\033[1;36m🌐 Access at: \033[1mhttps://localhost:8000\033[0m"
+	echo "${GREEN}🍀 Services started successfully!${RESET}"
+	echo "${CYAN}🌐 Access at: ${GREEN}https://localhost:8000${RESET}"
 
 # Atura els serveis (contenidors actius)
 stop:
 	sudo docker compose -f $(DC_FILE) stop > /dev/null 2>&1
-	echo "\033[1;33m🛑  Services stopped\033[0m"
+	echo "${YELLOW}🛑  Services stopped${RESET}"
 
 # Elimina contenidors creats per docker-compose
 down:
 	sudo docker compose -f $(DC_FILE) down --remove-orphans > /dev/null 2>&1
-	echo "\033[1;31m🗑️  Containers removed\033[0m"
+	echo "${RED}🗑️  Containers removed${RESET}"
 
 # Reinicia els serveis
 restart:
@@ -28,30 +36,30 @@ ps:
 
 # Mostra els logs en viu
 logs:
-	echo "\033[1;34m📋 Showing logs (Ctrl+C to exit):\033[0m"
+	echo "${BLUE}📋 Showing logs (Ctrl+C to exit):${RESET}"
 	sudo docker compose -f $(DC_FILE) logs -f
 
 # Reconstrueix les imatges
 rebuild:
 	sudo docker compose -f $(DC_FILE) build
-	echo "\033[1;33m📑 Images rebuilt\033[0m"
+	echo "${YELLOW}📑 Images rebuilt${RESET}"
 
 # Neteja contenidors, volums i sistemes orfes
 clean:
 	sudo docker compose -f $(DC_FILE) down -v --remove-orphans > /dev/null 2>&1
 	sudo docker system prune -f > /dev/null 2>&1
-	echo "\033[1;35m🧼 Cleanup complete\033[0m"
+	echo "${MAGENTA}🧼 Cleanup complete${RESET}"
 
 # Neteja completa (volums, imatges, contenidors, xarxes)
 fclean:
 	sudo docker compose -f $(DC_FILE) down --volumes --rmi all --remove-orphans > /dev/null 2>&1
 	sudo docker system prune -a --volumes -f > /dev/null 2>&1
-	echo "\033[1;31m🧽 Full Docker cleanup complete\033[0m"
+	echo "${RED}🧽 Full Docker cleanup complete${RESET}"
 
 # Neteja de recursos no utilitzats
 prune:
 	sudo docker system prune -a --volumes -f > /dev/null 2>&1
-	echo "\033[1;34m🚽 Docker system pruned\033[0m"
+	echo "${BLUE}🚽 Docker system pruned${RESET}"
 
 # Reexecuta (neteja i torna a pujar)
 re: down all

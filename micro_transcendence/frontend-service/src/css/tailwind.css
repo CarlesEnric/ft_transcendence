@@ -3,4 +3,9 @@
 /* Import component styles */
 @tailwind components;
 /* Import utility styles */
-@tailwind utilities; 
+@tailwind utilities;
+
+#renderCanvas {
+  width: 800px;
+  height: 600px;
+}

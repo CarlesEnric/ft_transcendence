@@ -28,8 +28,8 @@ const routes: Record<string, (user: any) => string> = {
   '/games': (user) => `
     <h1>Zona de Jocs</h1>
     <p>Accedeix als diferents jocs disponibles.</p>
-    <canvas id="renderCanvas" style="width: 800px; height: 600px;"></canvas>
-    <script type="module" src="/src/pong/main.ts"></script>
+    <canvas id="renderCanvas"></canvas>
+    <script type="module" src="/dist/pong/main.js"></script>
   `,
   '/tournament': (user) => `
     <h1>Torneig</h1>
