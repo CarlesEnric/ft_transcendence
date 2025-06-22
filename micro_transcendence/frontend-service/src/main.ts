@@ -1,3 +1,20 @@
+// protegir de l'XSS evitant que l'usuari pugui injectar codi maliciós amb HTML especials
+function escapeHTML(str: string) {
+  return String(str).replace(/[&<>"'`=\/]/g, s =>
+    ({
+      '&': '&amp;',
+      '<': '&lt;',
+      '>': '&gt;',
+      '"': '&quot;',
+      "'": '&#39;',
+      '`': '&#96;',
+      '=': '&#61;',
+      '/': '&#47;',
+    }[s]!)
+  );
+}
+
+
 // Rutes SPA (només accessibles si estàs autenticat)
 const routes: Record<string, (user: any) => string> = {
   '/home': (user) => `
@@ -11,6 +28,8 @@ const routes: Record<string, (user: any) => string> = {
   '/games': (user) => `
     <h1>Zona de Jocs</h1>
     <p>Accedeix als diferents jocs disponibles.</p>
+    <canvas id="renderCanvas" style="width: 800px; height: 600px;"></canvas>
+    <script type="module" src="/src/pong/main.ts"></script>
   `,
   '/tournament': (user) => `
     <h1>Torneig</h1>
@@ -18,8 +37,8 @@ const routes: Record<string, (user: any) => string> = {
   `,
   '/profile': (user) => `
     <h1>Perfil d'usuari</h1>
-    <p>Nom: ${user.name}</p>
-    <p>Email: ${user.email}</p>
+    <p>Nom: ${escapeHTML(user.name)}</p>
+    <p>Email: ${escapeHTML(user.email)}</p>
   `
 };
 
@@ -131,7 +150,7 @@ function renderSPA(path: string, user: any) {
       <a href="/games" data-link>Jocs</a>
       <a href="/tournament" data-link>Torneig</a>
       <a href="/profile" data-link>Perfil</a>
-      <span> | Hola, ${user.name} <button id="logout" class="button">Logout</button></span>
+      <span> | Hola, ${escapeHTML(user.name)} <button id="logout" class="button">Logout</button></span>
     </nav>
     <div id="spa-content"></div>
   `;

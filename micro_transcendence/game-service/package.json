@@ -23,7 +23,10 @@
     "better-sqlite3": "11.10.0",
     "sqlite3": "^5.1.6",
     "node-fetch": "^3.3.2",
-    "jwt-decode": "^4.0.0"
+    "jwt-decode": "^4.0.0",
+    "babylonjs": "^8.13.0",
+    "ws":"8.18.2",
+    "jsonwebtoken": "^9.0.2"
   },
   "devDependencies": {
     "typescript": "^5.8.3",
@@ -32,6 +35,8 @@
     "@types/jwt-decode": "^2.2.1",
     "@types/node-fetch": "^2.6.12",
     "fastify-pino-pretty": "5.1.0",
-    "@types/better-sqlite3": "^7.6.13"
+    "@types/better-sqlite3": "^7.6.13",
+    "@types/ws": "^8.18.1",
+    "@types/jsonwebtoken": "^9.0.10"
   }
 }
