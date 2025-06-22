@@ -7,6 +7,7 @@
   "scripts": {
     "build-server": "tsc --project tsconfig.json",
     "build-front": "tsc --project tsconfig.front.json",
+    "build:css": "postcss src/css/tailwind.css -o ./public/styles/styles.css",
     "build": "npm run build-server && npm run build-front",
     "start": "node dist/index.js"
   },
@@ -34,6 +35,11 @@
     "@types/jwt-decode": "^2.2.1",
     "@types/node-fetch": "^2.6.12",
     "fastify-pino-pretty": "5.1.0",
-    "@types/better-sqlite3": "^7.6.13"
+    "@types/better-sqlite3": "^7.6.13",
+    "autoprefixer":"10.4.21",
+    "postcss":"8.5.6",
+    "postcss-cli":"11.0.1",
+    "tailwindcss":"4.1.10",
+    "@tailwindcss/postcss":"4.0.0-alpha.13"
   }
 }

@@ -42,7 +42,7 @@ async function render(path = window.location.pathname) {
   if (!user) {
     // Mostra només login/registre
     app.innerHTML = `
-      <h1>Benvingut!</h1>
+      <h1 class="text-3xl font-bold text-blue-600">Benvingut!</h1>
       <a href="/auth/login/google">Login amb Google</a>
       <p>O <a href="#" id="show-register">Registra't manualment</a> | <a href="#" id="show-login">Login manual</a></p>
       <div id="register-form" class="hidden">

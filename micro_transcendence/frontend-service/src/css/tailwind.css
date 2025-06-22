@@ -1,0 +1,6 @@
+/* Import base styles  */
+@tailwind base;
+/* Import component styles */
+@tailwind components;
+/* Import utility styles */
+@tailwind utilities; 
