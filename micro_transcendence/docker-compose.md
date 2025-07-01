@@ -179,3 +179,8 @@ Per fer una prova de si agafa registre o no des del host:
 ```bash
 curl -k -X POST https://localhost:7001/register -H "Content-Type: application/json" -d '{"name":"Test","email":"test@prova.com","password":"123456"}'
 ```
+
+Watch active ports
+```bash
+netstat -tulpn
+```

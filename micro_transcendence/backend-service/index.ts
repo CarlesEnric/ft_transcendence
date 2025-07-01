@@ -11,8 +11,8 @@ const fastify = Fastify({
 
 const start = async () => {
   try {
-    await fastify.listen({ port: 7003, host: "0.0.0.0" });
-    fastify.log.info("Backend-service running on https://localhost:7003");
+    await fastify.listen({ port: 7002, host: "0.0.0.0" });
+    fastify.log.info("Backend-service running on https://backend-service:7002");
   } catch (err) {
     fastify.log.error(err);
     process.exit(1);

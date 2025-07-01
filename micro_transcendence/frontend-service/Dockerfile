@@ -21,6 +21,6 @@ COPY init_ssl.sh .
 RUN chmod +x /app/init_ssl.sh
 RUN npm run build:css
 RUN npm run build
-EXPOSE 7002
+# EXPOSE 7003
 ENTRYPOINT ["/app/init_ssl.sh"]
 CMD ["node", "dist/index.js"]

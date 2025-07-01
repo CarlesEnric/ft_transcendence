@@ -23,7 +23,7 @@ async function registerHelmet() {
       directives: {
         defaultSrc: ["'self'"],
         connectSrc: ["'self'", "https://localhost:8000"], // Permet scripts inline per a facilitar el desenvolupament
-        scriptSrc: ["'self'"], // Permet scripts inline per a facilitar el desenvolupament
+        scriptSrc: ["'self'","https://cdn.jsdelivr.net"], // Permet scripts inline per a facilitar el desenvolupament
         styleSrc: ["'self'", "'unsafe-inline'"], // Permet estils inline per a facilitar el desenvolupament
       }
     }
@@ -113,7 +113,7 @@ const start = async () => {
   try {
     await registerHelmet();
     await fastify.listen({ port: 7004, host: "0.0.0.0" });
-    fastify.log.info("Game-service running on https://localhost:7004");
+    fastify.log.info("Game-service running on https://game-service:7004");
   } catch (err) {
     fastify.log.error(err);
     process.exit(1);

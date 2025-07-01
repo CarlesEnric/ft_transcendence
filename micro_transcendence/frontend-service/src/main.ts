@@ -29,7 +29,6 @@ const routes: Record<string, (user: any) => string> = {
     <h1>Zona de Jocs</h1>
     <p>Accedeix als diferents jocs disponibles.</p>
     <canvas id="renderCanvas"></canvas>
-    <script type="module" src="/dist/pong/main.js"></script>
   `,
   '/tournament': (user) => `
     <h1>Torneig</h1>
@@ -159,6 +158,12 @@ function renderSPA(path: string, user: any) {
   const spaContent = document.getElementById('spa-content');
   if (routes[path]) {
     spaContent!.innerHTML = routes[path](user);
+    // Carrega el Pong només si és la vista de jocs
+    if (path === '/games') {
+      import('./pong/main.js').catch(err => {
+        console.error('Error carregant el joc Pong:', err);
+      });
+    }
   } else {
     spaContent!.innerHTML = `<h1>404 Not Found</h1>`;
   }

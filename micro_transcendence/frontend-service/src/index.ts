@@ -19,6 +19,7 @@ await fastify.register(helmet, {
     directives: {
       defaultSrc: ["'self'"],
       connectSrc: ["'self'", "https://localhost:8000"], // Permet scripts inline per a facilitar el desenvolupament
+      scriptSrc: ["'self'", "https://cdn.jsdelivr.net"], // Permet scripts inline per a facilitar el desenvolupament
     }
   }
 });
@@ -50,8 +51,8 @@ fastify.setNotFoundHandler((request, reply) => {
 const start = async () => {
   try {
     // Start HTTPS server
-    await fastify.listen({ port: 7002, host: "0.0.0.0" });
-    fastify.log.info("Frontend running on https://localhost:7002");
+    await fastify.listen({ port: 7003, host: "0.0.0.0" });
+    fastify.log.info("Frontend running on https://frontend-service:7003");
   } catch (err) {
     fastify.log.error(err);
     process.exit(1);

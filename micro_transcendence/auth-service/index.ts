@@ -41,7 +41,7 @@ fastify.register(async (instance) => {
 const start = async () => {
   try {
     await fastify.listen({ port: 7001, host: "0.0.0.0" });
-    fastify.log.info("Auth-service running on https://localhost:7001");
+    fastify.log.info("Auth-service running on https://auth-service:7001");
   } catch (err) {
     fastify.log.error(err);
     process.exit(1);

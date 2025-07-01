@@ -47,8 +47,8 @@ app.register((fastifyHttpProxy as any).default || fastifyHttpProxy, {
 });
 
 app.register((fastifyHttpProxy as any).default || fastifyHttpProxy, {
-  upstream: 'https://frontend-service:7002', // frontend-service
-  prefix: '/',
+  upstream: 'https://backend-service:7002',  // backend-service
+  prefix: '/backend',
   http2: false,
   httpOnly: true,
   secure: true, // només si tot és HTTPS
@@ -62,8 +62,8 @@ app.register((fastifyHttpProxy as any).default || fastifyHttpProxy, {
 });
 
 app.register((fastifyHttpProxy as any).default || fastifyHttpProxy, {
-  upstream: 'https://backend-service:7003',  // backend-service
-  prefix: '/backend',
+  upstream: 'https://frontend-service:7003', // frontend-service
+  prefix: '/',
   http2: false,
   httpOnly: true,
   secure: true, // només si tot és HTTPS

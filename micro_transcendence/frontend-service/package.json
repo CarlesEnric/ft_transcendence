@@ -27,7 +27,8 @@
     "sqlite3": "^5.1.6",
     "node-fetch": "^3.3.2",
     "jwt-decode": "^4.0.0",
-    "ws":"8.18.2"
+    "ws":"8.18.2",
+    "babylonjs": "^8.14.1"
   },
   "devDependencies": {
     "typescript": "^5.8.3",
@@ -42,6 +43,7 @@
     "postcss-cli":"11.0.1",
     "tailwindcss":"4.1.10",
     "@tailwindcss/postcss":"4.0.0-alpha.13",
-    "@types/ws": "^8.18.1"
+    "@types/ws": "^8.18.1",
+    "@types/babylon": "^6.16.9"
   }
 }

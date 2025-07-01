@@ -17,8 +17,6 @@ services:
 
   auth-service:
     build: ./auth-service
-    ports:
-      - '7001:7001'
     env_file:
       - ./auth-service/.env
     volumes:
@@ -28,8 +26,6 @@ services:
 
   frontend-service:
     build: ./frontend-service
-    ports:
-      - '7002:7002'
     env_file:
       - ./frontend-service/.env
     volumes:
@@ -39,8 +35,6 @@ services:
 
   backend-service:
     build: ./backend-service
-    ports:
-      - '7003:7003'
     env_file:
       - ./backend-service/.env
     volumes:
@@ -50,8 +44,6 @@ services:
   
   game-service:
     build: ./game-service
-    ports:
-      - '7004:7004'
     env_file:
       - ./game-service/.env
     volumes:
