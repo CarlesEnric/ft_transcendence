@@ -19,15 +19,15 @@ await fastify.register(helmet, {
     directives: {
       defaultSrc: ["'self'"],
       connectSrc: ["'self'", "https://localhost:8000"], // Permet scripts inline per a facilitar el desenvolupament
-      scriptSrc: ["'self'", "https://cdn.jsdelivr.net"], // Permet scripts inline per a facilitar el desenvolupament
+      scriptSrc: ["'self'"], // Permet scripts inline per a facilitar el desenvolupament
     }
   }
 });
 
 
-// Serveix fitxers estàtics directament des de /public al root
+// Serveix fitxers estàtics directament des de /public o /dist al root, depèn de la configuració de Vite
 fastify.register(fastifyStatic, {
-  root: path.join(process.cwd(), 'public'),
+  root: path.join(process.cwd(), 'dist'),
   prefix: '/',
 });
 
@@ -44,7 +44,7 @@ const __dirname = path.dirname(__filename);
 // Serve static files for the SPA when not existing routes are requested
 fastify.setNotFoundHandler((request, reply) => {
   reply.type('text/html').send(
-    fs.readFileSync(path.join(__dirname, '../public/index.html'))
+    fs.readFileSync(path.join(__dirname, '../dist/index.html'))
   );
 });
 

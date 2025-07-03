@@ -8,7 +8,8 @@
     "build-server": "tsc --project tsconfig.json",
     "build-front": "tsc --project tsconfig.front.json",
     "build:css": "postcss src/css/tailwind.css -o ./public/styles/styles.css",
-    "build": "npm run build-server && npm run build-front",
+    "vite-build": "vite build",
+    "build": "npm run build:css && npm run vite-build && npm run build-server && npm run build-front",
     "start": "node dist/index.js"
   },
   "author": "",
@@ -44,6 +45,7 @@
     "tailwindcss":"4.1.10",
     "@tailwindcss/postcss":"4.0.0-alpha.13",
     "@types/ws": "^8.18.1",
-    "@types/babylon": "^6.16.9"
+    "@types/babylon": "^6.16.9",
+    "vite": "^7.0.0"
   }
 }

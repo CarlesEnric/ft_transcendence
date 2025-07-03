@@ -4,7 +4,7 @@ import https from 'https';
 import WebSocket, { WebSocketServer } from 'ws';
 import jwt from 'jsonwebtoken';
 import { IncomingMessage } from 'http';
-import { PongGame } from './game/pong';
+import { PongGame } from './game/pong.js';
 import helmet from '@fastify/helmet';
 
 
@@ -23,7 +23,7 @@ async function registerHelmet() {
       directives: {
         defaultSrc: ["'self'"],
         connectSrc: ["'self'", "https://localhost:8000"], // Permet scripts inline per a facilitar el desenvolupament
-        scriptSrc: ["'self'","https://cdn.jsdelivr.net"], // Permet scripts inline per a facilitar el desenvolupament
+        scriptSrc: ["'self'"], // Permet scripts inline per a facilitar el desenvolupament
         styleSrc: ["'self'", "'unsafe-inline'"], // Permet estils inline per a facilitar el desenvolupament
       }
     }

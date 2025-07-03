@@ -4,7 +4,6 @@ import { FastifyRequest } from 'fastify';
 import { IncomingHttpHeaders } from 'http';
 import fs from 'fs';
 
-
 const app = Fastify({
   https: {
     key: fs.readFileSync('/app/key.pem'),
@@ -21,7 +20,6 @@ const app = Fastify({
   }
 });
 
-
 const rewriteHeaders = (req: FastifyRequest, headers: IncomingHttpHeaders) => {
   // Copia totes les cookies de la request original
   if (req.headers.cookie) {
@@ -29,7 +27,6 @@ const rewriteHeaders = (req: FastifyRequest, headers: IncomingHttpHeaders) => {
   }
   return headers;
 };
-
 
 app.register((fastifyHttpProxy as any).default || fastifyHttpProxy, {
   upstream: 'https://auth-service:7001', // auth-service

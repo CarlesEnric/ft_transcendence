@@ -12,15 +12,31 @@
 # 9. Sets the default command to start the application using npm.
 FROM node:24-alpine
 WORKDIR /app
+
+# Instal·la dependències de sistema
 RUN apk add --no-cache python3 python3-dev py3-setuptools make g++ openssl
+
+# Instal·la dependències Node
 COPY package*.json ./
 RUN npm install
-RUN npm install -g npm@latest serve
+
+# Copia el codi font
 COPY . .
-COPY init_ssl.sh .
+
+# Dona permisos a l'script d'inicialització SSL
 RUN chmod +x /app/init_ssl.sh
+
+# Build de CSS (si es fa servir Tailwind o PostCSS)
 RUN npm run build:css
+
+# Build de frontend (Vite)
+RUN npx vite build
+
+# Build de backend (compila TS a JS)
 RUN npm run build
+
+# Exposa el port (descomenta si vols exposar-lo)
 # EXPOSE 7003
+
 ENTRYPOINT ["/app/init_ssl.sh"]
 CMD ["node", "dist/index.js"]

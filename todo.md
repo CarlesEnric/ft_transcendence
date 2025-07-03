@@ -47,3 +47,96 @@ import * as BABYLON from 'https://cdn.jsdelivr.net/npm/babylonjs@6.41.0/babylon.
 > **Nota:** Assegura’t que el teu `main.js` s’exporta com a mòdul (`<script type="module" ...>`) i que el navegador suporta ES Modules.
 
 ---
+
+**Avantatges d’un bundler (com Vite) per un projecte:**
+
+- **Importació de mòduls moderna:** Pots fer `import * as BABYLON from 'babylonjs'` i altres imports d’NPM sense preocupar-te de rutes ni de carregar scripts externs manualment.
+- **Compilació automàtica de TypeScript:** Vite compila `.ts` a `.js` i ho serveix al navegador sense passos manuals.
+- **Hot Reload:** Quan canvies el codi, el navegador es refresca automàticament.
+- **Optimització:** El codi JS i CSS es minifica i optimitza per producció.
+- **Gestió d’actius:** Pots importar imatges, CSS, etc. directament des del teu codi.
+- **Compatibilitat CSP:** No cal carregar scripts externs (CDN), així que la teva CSP pot ser més estricta i segura.
+
+**només instal·lar Vite al microservei que serveix el frontend** (on tens el teu SPA, BabylonJS, etc.), no a tots els microserveis.
+
+### **Per què?**
+- Vite és un bundler i servidor de desenvolupament per a aplicacions web (frontend).
+- Els altres microserveis (auth, backend, game-service, etc.) són serveis de backend i no necessiten Vite.
+
+
+---
+
+### **Com aplicar Vite al teu projecte ja creat**
+
+#### **1. Instal·la Vite i dependències**
+
+Des de la carpeta del teu frontend (ex: `frontend-service`):
+
+```bash
+npm install -D vite
+npm install babylonjs
+```
+
+#### **2. Crea la configuració bàsica de Vite**
+
+Afegeix un fitxer `vite.config.ts` a la carpeta arrel del frontend:
+
+```typescript
+import { defineConfig } from 'vite';
+
+export default defineConfig({
+  root: './', // o el directori on tens el teu index.html
+  build: {
+    outDir: 'dist',
+  },
+});
+```
+
+#### **3. Estructura recomanada**
+
+```
+frontend-service/
+├── index.html
+├── src/
+│   └── pong/
+│       └── main.ts
+├── vite.config.ts
+├── package.json
+└── ...
+```
+
+#### **4. Modifica el teu `index.html`**
+
+Assegura’t que el teu HTML apunta al fitxer TypeScript:
+
+```html
+<script type="module" src="/src/pong/main.ts"></script>
+```
+
+#### **5. Fes servir imports moderns**
+
+Ara pots fer servir:
+
+```typescript
+import * as BABYLON from 'babylonjs';
+// ...la resta del teu codi...
+```
+
+#### **6. Executa el servidor de desenvolupament**
+
+```bash
+npx vite
+```
+Obre el navegador a l’adreça que et dona Vite (normalment http://localhost:5173).
+
+#### **7. Compila per producció**
+
+```bash
+npx vite build
+```
+Els fitxers optimitzats es generaran a la carpeta `dist/`.
+
+---
+
+
+MIRAR el tema de JWT amb la part del pong, veure error en el navegador
