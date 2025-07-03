@@ -109,7 +109,7 @@ export const authRoutes = async (fastify: FastifyInstance) => {
   fastify.get('/api/me', async (request: FastifyRequest, reply: FastifyReply) => {
     try {
       const user = await (fastify as any).jwt.verify(request.cookies.token);
-      reply.send({ email: user.email, name: user.name });
+      reply.send({ email: user.email, name: user.name, token: request.cookies.token });
     } catch {
       reply.status(401).send({ error: 'Unauthorized' });
     }
@@ -158,7 +158,7 @@ export const authRoutes = async (fastify: FastifyInstance) => {
     // CREA I ENVIA LA COOKIE JWT
     const jwtToken = (fastify as any).jwt.sign({ email: user.email, name: user.name });
     reply.setCookie('token', jwtToken, { path: '/', httpOnly: true, secure: false, sameSite: 'lax' }); // recorda posar secure: true en producció
-    reply.send({ ok: true, name: user.name, email: user.email }) // no enviar la contrasenya mai per seguretat
+    reply.send({ ok: true, name: user.name, email: user.email, token: jwtToken }) // no enviar la contrasenya mai per seguretat
   })
   
 };

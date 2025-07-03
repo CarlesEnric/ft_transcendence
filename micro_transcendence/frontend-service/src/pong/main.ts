@@ -32,33 +32,44 @@ if (!canvas) {
   let myPlayer = 1;
 
   // Obté el token i connecta al WebSocket
-  const token = getCookie('token');
-  if (!token) {
-    alert('No s\'ha trobat el token d\'autenticació. Torna a iniciar sessió.');
-    throw new Error('Token JWT no trobat');
+  async function getToken() {
+    const res = await fetch('/auth/api/me', { credentials: 'include' });
+    if (res.ok) {
+      const data = await res.json();
+      return data.token;
+    }
+    return null;
   }
-  const socket = new WebSocket(`wss://localhost:8000/game?token=${token}`);
 
-  socket.onmessage = (event) => {
-    const msg = JSON.parse(event.data);
-    if (msg.type === 'welcome') {
-      myPlayer = msg.player;
+  (async () => {
+    const token = await getToken();
+    if (!token) {
+      alert('No s\'ha trobat el token d\'autenticació. Torna a iniciar sessió.');
+      throw new Error('Token JWT no trobat');
     }
-    if (msg.type === 'state') {
-      paddle1.position.y = msg.paddle1.y;
-      paddle2.position.y = msg.paddle2.y;
-      ball.position.x = msg.ball.x;
-      ball.position.y = msg.ball.y;
-      // Aquí pots mostrar la puntuació amb un element HTML si vols
-    }
-  };
+    const socket = new WebSocket(`wss://localhost:8000/game?token=${token}`);
 
-  window.addEventListener('keydown', (e) => {
-    if (myPlayer === 1 && (e.key === 'ArrowUp' || e.key === 'ArrowDown')) {
-      socket.send(JSON.stringify({ type: 'move', direction: e.key === 'ArrowUp' ? 'up' : 'down' }));
-    }
-    if (myPlayer === 2 && (e.key === 'w' || e.key === 's')) {
-      socket.send(JSON.stringify({ type: 'move', direction: e.key === 'w' ? 'up' : 'down' }));
-    }
-  });
+    socket.onmessage = (event) => {
+      const msg = JSON.parse(event.data);
+      if (msg.type === 'welcome') {
+        myPlayer = msg.player;
+      }
+      if (msg.type === 'state') {
+        paddle1.position.y = msg.paddle1.y;
+        paddle2.position.y = msg.paddle2.y;
+        ball.position.x = msg.ball.x;
+        ball.position.y = msg.ball.y;
+        // Aquí pots mostrar la puntuació amb un element HTML si vols
+      }
+    };
+
+    window.addEventListener('keydown', (e) => {
+      if (myPlayer === 1 && (e.key === 'ArrowUp' || e.key === 'ArrowDown')) {
+        socket.send(JSON.stringify({ type: 'move', direction: e.key === 'ArrowUp' ? 'up' : 'down' }));
+      }
+      if (myPlayer === 2 && (e.key === 'w' || e.key === 's')) {
+        socket.send(JSON.stringify({ type: 'move', direction: e.key === 'w' ? 'up' : 'down' }));
+      }
+    });
+  })();
 }
