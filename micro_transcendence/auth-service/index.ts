@@ -1,8 +1,6 @@
 import Fastify from 'fastify';
 import jwt from '@fastify/jwt';
 import fastifyCookie from '@fastify/cookie';
-import fastifyStatic from '@fastify/static';
-import path from 'path';
 import fs from 'fs';
 
 import { dbPlugin } from './plugins/db.js';
