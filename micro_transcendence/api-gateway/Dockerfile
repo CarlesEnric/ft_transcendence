@@ -12,7 +12,7 @@
 # 9. Sets the default command to start the application using npm.
 FROM node:24-alpine
 WORKDIR /app
-RUN apk add --no-cache python3 python3-dev py3-setuptools make g++ openssl
+RUN apk add --no-cache openssl
 COPY package*.json ./
 RUN npm install
 RUN npm install -g npm@latest

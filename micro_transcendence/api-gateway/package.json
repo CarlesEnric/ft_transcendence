@@ -32,7 +32,6 @@
     "@types/node": "^24.0.1",
     "@types/jwt-decode": "^2.2.1",
     "@types/node-fetch": "^2.6.12",
-    "fastify-pino-pretty": "5.1.0",
-    "@types/better-sqlite3": "^7.6.13"
+    "fastify-pino-pretty": "5.1.0"
   }
 }
