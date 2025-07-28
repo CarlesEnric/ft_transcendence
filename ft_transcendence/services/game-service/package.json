@@ -1,0 +1,30 @@
+{
+  "name": "game-service",
+  "version": "1.0.0",
+  "description": "Game service - Pong game logic, WebSocket multiplayer, room management",
+  "main": "dist/index.js",
+  "scripts": {
+    "dev": "nodemon --exec ts-node src/index.ts",
+    "build": "tsc",
+    "start": "node dist/index.js",
+    "clean": "rm -rf dist",
+    "type-check": "tsc --noEmit"
+  },
+  "author": "cteixido, fcosta-f, iassambe, avolcy, aduenas-",
+  "license": "MIT",
+  "dependencies": {
+    "fastify": "^5.4.0",
+    "@fastify/websocket": "^11.1.0",
+    "sqlite3": "^5.1.1",
+    "ws": "^8.18.3",
+    "zod": "^4.0.5"
+  },
+  "devDependencies": {
+    "typescript": "^5.8.3",
+    "@types/node": "^24.0.13",
+    "@types/ws": "^8.18.1",
+    "ts-node": "^10.9.2",
+    "nodemon": "^3.1.10"
+  },
+  "keywords": ["fastify", "game", "pong", "websocket", "multiplayer"]
+}

@@ -1,0 +1,21 @@
+{
+  "name": "shared",
+  "version": "1.0.0",
+  "description": "Shared utilities - Common types, validation schemas, constants",
+  "main": "dist/index.js",
+  "scripts": {
+    "build": "tsc",
+    "clean": "rm -rf dist",
+    "type-check": "tsc --noEmit"
+  },
+  "author": "cteixido, fcosta-f, iassambe, avolcy, aduenas-",
+  "license": "MIT",
+  "dependencies": {
+    "zod": "^4.0.5"
+  },
+  "devDependencies": {
+    "typescript": "^5.8.3",
+    "@types/node": "^24.0.13"
+  },
+  "keywords": ["shared", "types", "validation", "utilities"]
+}

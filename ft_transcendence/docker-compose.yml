@@ -1,0 +1,127 @@
+networks:
+  transcendence-net:
+    driver: bridge
+
+volumes:
+  auth-db:
+  user-db:
+  game-db:
+  match-db:
+  user-uploads:
+  frontend-static:
+
+services:
+  # API Gateway - Only exposed service
+  api-gateway:
+    build:
+      context: ./services/api-gateway
+      dockerfile: Dockerfile
+    image: transcendence/api-gateway
+    container_name: api-gateway
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+    networks:
+      - transcendence-net
+    volumes:
+      - ./services/api-gateway/src:/app/src:ro        # Read-only: prevents container from modifying source code
+      - frontend-static:/app/frontend:ro              # Read-only: static files from frontend build
+    env_file:
+      - ./services/api-gateway/.env
+    depends_on:
+      - auth-service
+      - user-service
+      - game-service
+      - match-service
+      - frontend
+
+  # Frontend - React SPA (Static files only)
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    image: transcendence/frontend
+    container_name: frontend
+    restart: unless-stopped
+    networks:
+      - transcendence-net
+    volumes:
+      - frontend-static:/app/dist                     # Share built static files with API Gateway
+    env_file:
+      - ./frontend/.env
+
+  # Auth Service - JWT Authentication
+  auth-service:
+    build:
+      context: ./services/auth-service
+      dockerfile: Dockerfile
+    image: transcendence/auth
+    container_name: auth
+    restart: unless-stopped
+    networks:
+      - transcendence-net
+    volumes:
+      - ./services/auth-service/src:/app/src:ro       # Read-only: prevents container from modifying source code
+      - auth-db:/app/database                         # Read-write: database needs to be writable
+    env_file:
+      - ./services/auth-service/.env
+
+  # User Service - Profile management
+  user-service:
+    build:
+      context: ./services/user-service
+      dockerfile: Dockerfile
+    image: transcendence/user
+    container_name: user
+    restart: unless-stopped
+    networks:
+      - transcendence-net
+    volumes:
+      - ./services/user-service/src:/app/src:ro       # Read-only: prevents container from modifying source code
+      - user-db:/app/database                         # Read-write: database needs to be writable
+      - user-uploads:/app/uploads                     # Read-write: file uploads need to be writable
+    env_file:
+      - ./services/user-service/.env
+    depends_on:
+      - auth-service
+
+  # Game Service - Pong logic + WebSockets
+  game-service:
+    build:
+      context: ./services/game-service
+      dockerfile: Dockerfile
+    image: transcendence/game
+    container_name: game
+    restart: unless-stopped
+    networks:
+      - transcendence-net
+    volumes:
+      - ./services/game-service/src:/app/src:ro       # Read-only: prevents container from modifying source code
+      - game-db:/app/database                         # Read-write: database needs to be writable
+    env_file:
+      - ./services/game-service/.env
+    depends_on:
+      - auth-service
+      - user-service
+
+  # Match Service - History/statistics
+  match-service:
+    build:
+      context: ./services/match-service
+      dockerfile: Dockerfile
+    image: transcendence/match
+    container_name: match
+    restart: unless-stopped
+    networks:
+      - transcendence-net
+    volumes:
+      - ./services/match-service/src:/app/src:ro      # Read-only: prevents container from modifying source code
+      - match-db:/app/database                        # Read-write: database needs to be writable
+    env_file:
+      - ./services/match-service/.env
+    depends_on:
+      - auth-service
+      - user-service
+      - game-service
+

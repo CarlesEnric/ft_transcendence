@@ -1,0 +1,27 @@
+{
+  "name": "match-service",
+  "version": "1.0.0",
+  "description": "Match service - Game history, statistics, matchmaking system",
+  "main": "dist/index.js",
+  "scripts": {
+    "dev": "nodemon --exec ts-node src/index.ts",
+    "build": "tsc",
+    "start": "node dist/index.js",
+    "clean": "rm -rf dist",
+    "type-check": "tsc --noEmit"
+  },
+  "author": "cteixido, fcosta-f, iassambe, avolcy, aduenas-",
+  "license": "MIT",
+  "dependencies": {
+    "fastify": "^5.4.0",
+    "sqlite3": "^5.1.1",
+    "zod": "^4.0.5"
+  },
+  "devDependencies": {
+    "typescript": "^5.8.3",
+    "@types/node": "^24.0.13",
+    "ts-node": "^10.9.2",
+    "nodemon": "^3.1.10"
+  },
+  "keywords": ["fastify", "match-history", "statistics", "matchmaking"]
+}
