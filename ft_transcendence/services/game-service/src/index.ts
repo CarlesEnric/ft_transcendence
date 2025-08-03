@@ -1,5 +1,8 @@
 import fastify from 'fastify';
 import { readFileSync } from 'fs';
+import 'dotenv/config';
+import fastifyJwt from '@fastify/jwt';
+import fastifyCookie from '@fastify/cookie';
 
 const server = fastify({
   logger: { level: 'info' },
@@ -8,6 +11,15 @@ const server = fastify({
     cert: readFileSync('/app/ssl/cert.pem')
   }
 });
+
+// Register plugins
+if (!process.env.JWT_SECRET) {
+  throw new Error('JWT_SECRET is not set');
+}
+server.register(fastifyJwt, { secret: process.env.JWT_SECRET });
+server.register(fastifyCookie);
+
+// Decorate request with authenticate method
 
 // Health check endpoint
 server.get('/health', async (_request, reply) => {
