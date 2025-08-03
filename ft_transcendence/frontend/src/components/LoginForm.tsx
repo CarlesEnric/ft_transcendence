@@ -1,11 +1,12 @@
 import React, { useState } from 'react';
+import { apiFetch } from '../services/api';
 
 interface LoginFormProps {
-  onLoginSuccess: (data: string | { token: string; user: { userId: number; username: string; email: string } }) => void;
+  onLoginSuccess: (user: { userId: number; username: string; email: string }) => void;
   oauthError?: string | null;
 }
 
-const LoginForm: React.FC<LoginFormProps> = ({ onLoginSuccess, oauthError }) => {
+const LoginForm: React.FC<LoginFormProps> = ({ onLoginSuccess, oauthError }: LoginFormProps) => {
   console.log('📝 LoginForm component loading...');
   const [isLogin, setIsLogin] = useState(true);
   const [formData, setFormData] = useState({
@@ -16,14 +17,14 @@ const LoginForm: React.FC<LoginFormProps> = ({ onLoginSuccess, oauthError }) => 
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
 
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>): void => {
     setFormData({
       ...formData,
       [e.target.name]: e.target.value
     });
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>): Promise<void> => {
     e.preventDefault();
     setLoading(true);
     setError('');
@@ -34,7 +35,7 @@ const LoginForm: React.FC<LoginFormProps> = ({ onLoginSuccess, oauthError }) => 
         ? { email: formData.email, password: formData.password }
         : formData;
 
-      const response = await fetch(`https://localhost/api/auth${endpoint}`, {
+          const response = await apiFetch(`https://localhost/api/auth${endpoint}`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -45,7 +46,7 @@ const LoginForm: React.FC<LoginFormProps> = ({ onLoginSuccess, oauthError }) => 
       const data = await response.json();
 
       if (response.ok && data.success) {
-        onLoginSuccess(data);
+        onLoginSuccess(data.user);
       } else {
         setError(data.error || 'Authentication failed');
       }
@@ -56,7 +57,7 @@ const LoginForm: React.FC<LoginFormProps> = ({ onLoginSuccess, oauthError }) => 
     }
   };
 
-  const handleGoogleLogin = () => {
+  const handleGoogleLogin = (): void => {
     // Redirect to Google OAuth
     window.location.href = 'https://localhost/api/auth/google';
   };

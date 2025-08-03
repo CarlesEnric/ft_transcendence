@@ -18,13 +18,16 @@
     "@fastify/jwt": "^9.1.0",
     "@fastify/oauth2": "^8.1.2",
     "jsonwebtoken": "^9.0.2",
+    "dotenv": "^17.2.1",
     "bcrypt": "^6.0.0",
-    "sqlite3": "^5.1.1",
+    "sqlite": "^5.1.1",
+    "sqlite3": "^5.1.7",
     "zod": "^4.0.5",
     "speakeasy": "^2.0.0",
     "qrcode": "^1.5.4",
     "node-fetch": "^3.3.2",
-    "jwt-decode": "^4.0.0"
+    "jwt-decode": "^4.0.0",
+    "@fastify/cookie": "^11.0.2"
   },
   "devDependencies": {
     "typescript": "^5.8.3",

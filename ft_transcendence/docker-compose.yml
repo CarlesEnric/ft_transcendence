@@ -48,8 +48,6 @@ services:
       - transcendence-net
     volumes:
       - frontend-static:/app/dist                     # Share built static files with API Gateway
-    env_file:
-      - ./frontend/.env
 
   # Auth Service - JWT Authentication
   auth-service:
@@ -79,7 +77,7 @@ services:
       - transcendence-net
     volumes:
       - ./services/user-service/src:/app/src:ro       # Read-only: prevents container from modifying source code
-      - user-db:/app/database                         # Read-write: database needs to be writable
+      - auth-db:/app/database                         # Shared DB with auth-service
       - user-uploads:/app/uploads                     # Read-write: file uploads need to be writable
     env_file:
       - ./services/user-service/.env

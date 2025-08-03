@@ -11,6 +11,7 @@ RUN apk add --no-cache \
     py3-pip \
     make \
     g++ \
+    dotenv \
     sqlite-dev
 
 # Copy package files

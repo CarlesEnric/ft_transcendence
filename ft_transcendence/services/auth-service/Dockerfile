@@ -4,7 +4,7 @@ FROM node:24-alpine
 WORKDIR /app
 
 # Install system dependencies
-RUN apk add --no-cache sqlite openssl
+RUN apk add --no-cache python3 make g++ sqlite openssl
 
 # Copy package files
 COPY package*.json ./
@@ -18,6 +18,7 @@ RUN chmod +x ssl/ssl.sh
 
 # Copy source code
 COPY . .
+
 
 # Build TypeScript
 RUN npm run build

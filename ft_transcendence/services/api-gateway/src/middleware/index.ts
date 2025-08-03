@@ -8,15 +8,17 @@ import rateLimit from '@fastify/rate-limit';
 import helmet from '@fastify/helmet';
 import fastifyStatic from '@fastify/static';
 import websocket from '@fastify/websocket';
+import fastifyCookie from '@fastify/cookie';
 import fs from 'fs';
 import path from 'path';
 import { AppConfig } from '../config/index.js';
-import { ServerInstance, CORSCallback, RateLimitContext, AppRequest, ErrorResponse } from '../types/index.js';
+import { FastifyInstance } from 'fastify';
+import { CORSCallback, RateLimitContext, ErrorResponse } from '../types/index.js';
 
 /**
  * Register security middleware (Helmet)
  */
-export const registerSecurity = async (server: ServerInstance): Promise<void> => {
+export const registerSecurity = async (server: FastifyInstance): Promise<void> => {
   await server.register(helmet, {
     contentSecurityPolicy: {
       directives: {
@@ -38,7 +40,7 @@ export const registerSecurity = async (server: ServerInstance): Promise<void> =>
 /**
  * Register CORS middleware
  */
-export const registerCORS = async (server: ServerInstance, config: AppConfig): Promise<void> => {
+export const registerCORS = async (server: FastifyInstance, config: AppConfig): Promise<void> => {
   await server.register(cors, {
     origin: (origin: string | undefined, callback: CORSCallback) => {
       // Allow requests with no origin (like mobile apps or curl requests)
@@ -73,26 +75,24 @@ export const registerCORS = async (server: ServerInstance, config: AppConfig): P
 /**
  * Register rate limiting middleware
  */
-export const registerRateLimit = async (server: ServerInstance, config: AppConfig): Promise<void> => {
+export const registerRateLimit = async (server: FastifyInstance, config: AppConfig): Promise<void> => {
   await server.register(rateLimit, {
     max: config.rateLimit.max,
     timeWindow: config.rateLimit.timeWindow,
-    errorResponseBuilder: (request: AppRequest, context: RateLimitContext): ErrorResponse => {
-      return {
-        code: 429,
-        error: 'Too Many Requests',
-        message: `Rate limit exceeded, retry in ${context.ttl}ms`,
-        date: Date.now(),
-        expiresIn: context.ttl
-      };
-    }
+    errorResponseBuilder: (_request, context: any) => ({
+      code: 429,
+      error: 'Too Many Requests',
+      message: `Rate limit exceeded, retry in ${context.ttl}ms`,
+      date: Date.now(),
+      expiresIn: context.ttl
+    }),
   });
 };
 
 /**
  * Register static file serving
  */
-export const registerStaticFiles = async (server: ServerInstance, config: AppConfig): Promise<void> => {
+export const registerStaticFiles = async (server: FastifyInstance, config: AppConfig): Promise<void> => {
   // Don't register fastify-static as it conflicts with our custom not found handler
   // Static file serving will be handled in the not found handler
 };
@@ -100,14 +100,15 @@ export const registerStaticFiles = async (server: ServerInstance, config: AppCon
 /**
  * Register WebSocket support
  */
-export const registerWebSocket = async (server: ServerInstance): Promise<void> => {
+export const registerWebSocket = async (server: FastifyInstance): Promise<void> => {
   await server.register(websocket);
 };
 
 /**
  * Register all middleware
  */
-export const registerAllMiddleware = async (server: ServerInstance, config: AppConfig): Promise<void> => {
+export const registerAllMiddleware = async (server: FastifyInstance, config: AppConfig): Promise<void> => {
+  // await server.register(fastifyCookie); // Registered in server.ts
   await registerWebSocket(server);
   await registerSecurity(server);
   await registerCORS(server, config);

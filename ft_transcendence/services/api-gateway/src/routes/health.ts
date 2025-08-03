@@ -4,14 +4,15 @@
  */
 
 import { AppConfig } from '../config/index.js';
-import { ServerInstance, AppRequest, AppReply } from '../types/index.js';
+import { FastifyInstance } from 'fastify';
+import { FastifyRequest, FastifyReply } from 'fastify';
 
 /**
  * Setup health check routes
  */
-export const setupHealthRoutes = (server: ServerInstance, config: AppConfig): void => {
+export const setupHealthRoutes = (server: FastifyInstance, config: AppConfig): void => {
   // Health check endpoint
-  server.get('/health', async (request: AppRequest, reply: AppReply) => {
+  server.get('/health', async (request: FastifyRequest, reply: FastifyReply) => {
     return { 
       status: 'ok', 
       timestamp: new Date().toISOString(),
@@ -22,7 +23,7 @@ export const setupHealthRoutes = (server: ServerInstance, config: AppConfig): vo
   });
 
   // API information endpoint
-  server.get('/api', async (request: AppRequest, reply: AppReply) => {
+  server.get('/api', async (request: FastifyRequest, reply: FastifyReply) => {
     return {
       name: 'FT_TRANSCENDENCE API Gateway',
       version: '1.0.0',

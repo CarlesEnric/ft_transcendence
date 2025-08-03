@@ -6,7 +6,9 @@
 import fs from 'fs';
 import path from 'path';
 import { AppConfig } from '../config/index.js';
-import { ServerInstance, AppRequest, AppReply, ErrorResponse } from '../types/index.js';
+import { FastifyInstance } from 'fastify';
+import { FastifyRequest, FastifyReply } from 'fastify';
+import { ErrorResponse } from '../types/index.js';
 
 /**
  * Get MIME type for a file extension
@@ -35,9 +37,9 @@ const getMimeType = (filePath: string): string => {
 /**
  * Setup error handlers
  */
-export const setupErrorHandlers = (server: ServerInstance, config: AppConfig): void => {
+export const setupErrorHandlers = (server: FastifyInstance, config: AppConfig): void => {
   // Static file serving and SPA fallback
-  server.setNotFoundHandler((request: AppRequest, reply: AppReply) => {
+  server.setNotFoundHandler((request: FastifyRequest, reply: FastifyReply) => {
     const url = request.url;
     
     // If it's an API route, return 404
@@ -74,7 +76,7 @@ export const setupErrorHandlers = (server: ServerInstance, config: AppConfig): v
   });
 
   // Global error handler
-  server.setErrorHandler((error: Error, request: AppRequest, reply: AppReply) => {
+  server.setErrorHandler((error: Error, request: FastifyRequest, reply: FastifyReply) => {
     server.log.error('Unhandled error:', error);
     
     const errorResponse: ErrorResponse = {
@@ -91,7 +93,7 @@ export const setupErrorHandlers = (server: ServerInstance, config: AppConfig): v
 /**
  * Setup graceful shutdown
  */
-export const setupGracefulShutdown = (server: ServerInstance): void => {
+export const setupGracefulShutdown = (server: FastifyInstance): void => {
   const gracefulShutdown = async (signal: string): Promise<void> => {
     server.log.info(`Received ${signal}, shutting down gracefully...`);
     
@@ -112,7 +114,7 @@ export const setupGracefulShutdown = (server: ServerInstance): void => {
 /**
  * Start the server with proper logging
  */
-export const startServer = async (server: ServerInstance, config: AppConfig): Promise<void> => {
+export const startServer = async (server: FastifyInstance, config: AppConfig): Promise<void> => {
   try {
     const address = await server.listen({ 
       port: config.port, 
@@ -142,7 +144,7 @@ export const startServer = async (server: ServerInstance, config: AppConfig): Pr
 /**
  * Start the HTTP redirect server
  */
-export const startRedirectServer = async (server: ServerInstance, config: AppConfig): Promise<void> => {
+export const startRedirectServer = async (server: FastifyInstance, config: AppConfig): Promise<void> => {
   try {
     const address = await server.listen({ 
       port: 80, 

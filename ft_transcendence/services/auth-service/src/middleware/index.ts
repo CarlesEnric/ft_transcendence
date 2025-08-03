@@ -10,6 +10,10 @@ import { config } from '../config/index.js';
  * Register all middleware
  */
 export async function registerAllMiddleware(server: FastifyInstance): Promise<void> {
+
+  // Register cookie support for JWT in cookies FIRST (to avoid duplicate registration)
+  await server.register(import('@fastify/cookie'));
+
   // Register JWT authentication
   await server.register(import('@fastify/jwt'), {
     secret: config.jwt.secret,

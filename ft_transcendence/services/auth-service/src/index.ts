@@ -1,3 +1,5 @@
+
+import 'dotenv/config';
 /**
  * Auth Service Main Entry Point
  * Modular architecture with separated concerns

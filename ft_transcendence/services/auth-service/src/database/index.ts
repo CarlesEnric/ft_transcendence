@@ -26,27 +26,18 @@ export function findUserByEmail(db: sqlite3.Database, email: string): Promise<an
 
 export function initializeDatabase(db: sqlite3.Database): void {
   db.serialize(() => {
+
     db.run(`
       CREATE TABLE IF NOT EXISTS users (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         username TEXT UNIQUE NOT NULL,
         email TEXT UNIQUE NOT NULL,
-        password_hash TEXT,
-        google_id TEXT UNIQUE,
-        profile_picture TEXT,
-        is_verified BOOLEAN DEFAULT 0,
-        created_at DATETIME DEFAULT CURRENT_TIMESTAMP
-      )
-    `);
-
-    db.run(`
-      CREATE TABLE IF NOT EXISTS oauth_users (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        google_id TEXT UNIQUE NOT NULL,
-        username TEXT UNIQUE NOT NULL,
-        email TEXT UNIQUE NOT NULL,
-        display_name TEXT NOT NULL,
+        password_hash TEXT,           -- nullable per OAuth
+        provider TEXT,                -- nullable per usuaris ordinaris
+        provider_id TEXT,             -- nullable per usuaris ordinaris
+        display_name TEXT,
         avatar_url TEXT,
+        is_verified BOOLEAN DEFAULT 0,
         created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
         updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
       )
@@ -69,9 +60,11 @@ export function initializeDatabase(db: sqlite3.Database): void {
  * OAuth-specific database functions
  */
 
-export function getUserByGoogleId(db: sqlite3.Database, googleId: string): Promise<any> {
+
+// OAuth: cerca per provider i provider_id
+export function getUserByOAuth(db: sqlite3.Database, provider: string, provider_id: string): Promise<any> {
   return new Promise((resolve, reject) => {
-    db.get('SELECT * FROM oauth_users WHERE google_id = ?', [googleId], (err, row) => {
+    db.get('SELECT * FROM users WHERE provider = ? AND provider_id = ?', [provider, provider_id], (err, row) => {
       if (err) reject(err);
       else resolve(row);
     });
@@ -79,24 +72,23 @@ export function getUserByGoogleId(db: sqlite3.Database, googleId: string): Promi
 }
 
 export function createOAuthUser(db: sqlite3.Database, userData: {
-  google_id: string;
+  provider: string;
+  provider_id: string;
   username: string;
   email: string;
   display_name: string;
   avatar_url?: string;
 }): Promise<any> {
   return new Promise((resolve, reject) => {
-    const { google_id, username, email, display_name, avatar_url } = userData;
-    
+    const { provider, provider_id, username, email, display_name, avatar_url } = userData;
     db.run(`
-      INSERT INTO oauth_users (google_id, username, email, display_name, avatar_url) 
-      VALUES (?, ?, ?, ?, ?)
-    `, [google_id, username, email, display_name, avatar_url || null], function(this: sqlite3.RunResult, err) {
+      INSERT INTO users (provider, provider_id, username, email, display_name, avatar_url) 
+      VALUES (?, ?, ?, ?, ?, ?)
+    `, [provider, provider_id, username, email, display_name, avatar_url || null], function(this: sqlite3.RunResult, err) {
       if (err) {
         reject(err);
       } else {
-        // Return the created user
-        db.get('SELECT * FROM oauth_users WHERE id = ?', [this.lastID], (err, row) => {
+        db.get('SELECT * FROM users WHERE id = ?', [this.lastID], (err, row) => {
           if (err) reject(err);
           else resolve(row);
         });
@@ -108,7 +100,7 @@ export function createOAuthUser(db: sqlite3.Database, userData: {
 export function updateUserAvatar(db: sqlite3.Database, userId: number, avatarUrl: string): Promise<void> {
   return new Promise((resolve, reject) => {
     db.run(`
-      UPDATE oauth_users 
+      UPDATE users 
       SET avatar_url = ?, updated_at = CURRENT_TIMESTAMP 
       WHERE id = ?
     `, [avatarUrl, userId], (err) => {
@@ -121,32 +113,32 @@ export function updateUserAvatar(db: sqlite3.Database, userId: number, avatarUrl
 /**
  * Create user with OAuth data (accepts object parameter)
  */
+
 export function createUserInDB(db: sqlite3.Database, userData: {
   username: string;
   email: string;
-  google_id?: string;
-  profile_picture?: string | null;
-  is_verified?: boolean;
   password_hash?: string | null;
+  display_name?: string | null;
+  avatar_url?: string | null;
+  is_verified?: boolean;
 }): Promise<any> {
   return new Promise((resolve, reject) => {
     const {
       username,
       email,
-      google_id,
-      profile_picture,
-      is_verified,
-      password_hash
+      password_hash,
+      display_name,
+      avatar_url,
+      is_verified
     } = userData;
 
     db.run(`
-      INSERT INTO users (username, email, google_id, profile_picture, is_verified, password_hash) 
+      INSERT INTO users (username, email, password_hash, display_name, avatar_url, is_verified) 
       VALUES (?, ?, ?, ?, ?, ?)
-    `, [username, email, google_id || null, profile_picture || null, is_verified || false, password_hash || null], function(err) {
+    `, [username, email, password_hash || null, display_name || null, avatar_url || null, is_verified || false], function(err) {
       if (err) {
         reject(err);
       } else {
-        // Return the created user
         db.get('SELECT * FROM users WHERE id = ?', [this.lastID], (err, row) => {
           if (err) reject(err);
           else resolve(row);

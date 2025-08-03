@@ -6,7 +6,7 @@
 import { FastifyInstance, FastifyRequest, FastifyReply } from 'fastify';
 import sqlite3 from 'sqlite3';
 import fetch from 'node-fetch';
-import { createUserInDB, findUserByEmail } from '../database/index.js';
+import { getUserByOAuth, createOAuthUser } from '../database/index.js';
 import { generateJWTToken } from '../auth/index.js';
 import { config } from '../config/index.js';
 
@@ -70,36 +70,38 @@ export async function registerOAuthRoutes(fastify: FastifyInstance, options: OAu
       // Fetch user info from Google
       const userInfo = await fetchGoogleUserInfo(accessToken);
 
-      // Find or create user in database
-      let user = await findUserByEmail(db, userInfo.email);
-      
-      if (!user) {
-        // Create new user with OAuth2 data
-        const userData = {
-          username: userInfo.email.split('@')[0], // Use email prefix as username
-          email: userInfo.email,
-          password_hash: null, // No password for OAuth2 users
-          google_id: userInfo.id,
-          profile_picture: userInfo.picture || null,
-          is_verified: true, // OAuth2 users are pre-verified
-        };
 
-        user = await createUserInDB(db, userData);
-      } else if (!user.google_id) {
-        // Link existing user with Google account
-        fastify.log.info('Linking existing user with Google account');
-        // TODO: Implement linkUserWithGoogle function if needed
+      // Cerca per provider/provider_id
+      let user = await getUserByOAuth(db, 'google', userInfo.id);
+      if (!user) {
+        user = await createOAuthUser(db, {
+          provider: 'google',
+          provider_id: userInfo.id,
+          username: userInfo.email.split('@')[0],
+          email: userInfo.email,
+          display_name: userInfo.name,
+          avatar_url: userInfo.picture
+        });
       }
 
       // Generate JWT token for the user
+
       const token = generateJWTToken({
         userId: user.id,
         username: user.username,
         email: user.email
       });
 
-      // Redirect to frontend with JWT token
-      return reply.redirect(`${config.frontend.url}?token=${token}`);
+      // Set JWT as HTTP-only cookie
+      reply.setCookie('jwt', token, {
+        httpOnly: true,
+        secure: true,
+        sameSite: 'none',
+        path: '/',
+      });
+
+      // Redirect to frontend WITHOUT token in URL
+      return reply.redirect(`${config.frontend.url}`);
 
     } catch (error) {
       fastify.log.error('OAuth2 callback error:', error);

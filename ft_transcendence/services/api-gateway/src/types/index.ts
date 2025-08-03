@@ -3,38 +3,6 @@
  * Custom types to handle Fastify server variations
  */
 
-// Generic server instance type to avoid fastify import issues
-// Using any for register to avoid complex Fastify type conflicts
-export interface ServerInstance {
-  register: any;
-  listen: (options: { port: number; host: string }) => Promise<string>;
-  close: () => Promise<void>;
-  get: {
-    (path: string, handler: any): void;
-    (path: string, options: any, handler: any): void;
-  };
-  post: {
-    (path: string, handler: any): void;
-    (path: string, options: any, handler: any): void;
-  };
-  put: {
-    (path: string, handler: any): void;
-    (path: string, options: any, handler: any): void;
-  };
-  delete: {
-    (path: string, handler: any): void;
-    (path: string, options: any, handler: any): void;
-  };
-  setNotFoundHandler: (handler: any) => void;
-  setErrorHandler: (handler: any) => void;
-  log: {
-    info: (message: string, ...args: any[]) => void;
-    error: (message: string, ...args: any[]) => void;
-    debug: (message: string, ...args: any[]) => void;
-    warn: (message: string, ...args: any[]) => void;
-  };
-}
-
 // Common request type
 export interface AppRequest {
   ip: string;
@@ -44,6 +12,8 @@ export interface AppRequest {
   body?: any;
   params?: any;
   query?: any;
+  // Added for JWT user injection by Fastify JWT
+  user?: { userId: string | number; [key: string]: any };
 }
 
 // Common reply type

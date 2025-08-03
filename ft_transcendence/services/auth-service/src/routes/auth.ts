@@ -74,11 +74,20 @@ export function setupAuthRoutes(server: FastifyInstance, db: sqlite3.Database): 
       // Generate JWT token
       const token = generateJWTToken(user);
 
+      // Set JWT as HTTP-only cookie
+      reply.setCookie('jwt', token, {
+        httpOnly: true,
+        secure: true,
+        sameSite: 'none',
+        path: '/',
+        // expires: ... // Optional: set expiry if needed
+      });
+
       return reply.code(201).send({
         success: true,
         message: 'User registered successfully',
-        user: userResponse,
-        token
+        user: userResponse
+        // No token in body
       });
 
     } catch (error) {
@@ -135,11 +144,20 @@ export function setupAuthRoutes(server: FastifyInstance, db: sqlite3.Database): 
       // Generate JWT token
       const token = generateJWTToken(user, config.jwt.secret, config.jwt.expiresIn);
 
+      // Set JWT as HTTP-only cookie
+      reply.setCookie('jwt', token, {
+        httpOnly: true,
+        secure: true,
+        sameSite: 'none',
+        path: '/',
+        // expires: ... // Optional: set expiry if needed
+      });
+
       return reply.code(200).send({
         success: true,
         message: 'Login successful',
-        user: userResponse,
-        token
+        user: userResponse
+        // No token in body
       });
 
     } catch (error) {
@@ -154,19 +172,22 @@ export function setupAuthRoutes(server: FastifyInstance, db: sqlite3.Database): 
   // Token Validation Endpoint
   server.get('/validate', async (request: FastifyRequest, reply: FastifyReply) => {
     try {
+      // Try to get token from Authorization header, else from cookie
+      let token;
       const authHeader = request.headers.authorization;
-      if (!authHeader || !authHeader.startsWith('Bearer ')) {
+      if (authHeader && authHeader.startsWith('Bearer ')) {
+        token = authHeader.substring(7);
+      } else if (request.cookies && request.cookies.jwt) {
+        token = request.cookies.jwt;
+      }
+      if (!token) {
         return reply.code(401).send({ 
           success: false, 
           error: 'Missing or invalid authorization header' 
         });
       }
-
-      const token = authHeader.substring(7); // Remove 'Bearer ' prefix
-
       // Verify JWT token (this will throw if invalid)
       const decoded = verifyJWTToken(token, config.jwt.secret);
-
       return reply.code(200).send({
         success: true,
         message: 'Token is valid',
@@ -184,19 +205,22 @@ export function setupAuthRoutes(server: FastifyInstance, db: sqlite3.Database): 
   // User Profile Endpoint
   server.get('/profile', async (request: FastifyRequest, reply: FastifyReply) => {
     try {
-      // Check for Authorization header
+      // Try to get token from Authorization header, else from cookie
+      let token;
       const authHeader = request.headers.authorization;
-      if (!authHeader || !authHeader.startsWith('Bearer ')) {
+      if (authHeader && authHeader.startsWith('Bearer ')) {
+        token = authHeader.split(' ')[1];
+      } else if (request.cookies && request.cookies.jwt) {
+        token = request.cookies.jwt;
+      }
+      if (!token) {
         return reply.code(401).send({
           success: false,
           error: 'Authorization token required'
         });
       }
-
       // Extract and verify token
-      const token = authHeader.split(' ')[1];
       let decodedToken;
-      
       try {
         decodedToken = verifyJWTToken(token, config.jwt.secret);
       } catch (error) {

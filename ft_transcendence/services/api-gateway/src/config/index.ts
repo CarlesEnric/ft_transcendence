@@ -3,12 +3,6 @@
  * Centralizes all environment variable handling
  */
 
-export interface ServiceConfig {
-  auth: string;
-  user: string;
-  game: string;
-  match: string;
-}
 
 export interface AppConfig {
   port: number;
@@ -19,7 +13,12 @@ export interface AppConfig {
     keyPath: string;
     certPath: string;
   };
-  services: ServiceConfig;
+  services: {
+    auth: string;
+    user: string;
+    game: string;
+    match: string;
+  };
   frontend: {
     url: string;
     staticPath: string;
@@ -35,12 +34,16 @@ export interface AppConfig {
   };
 }
 
+
 /**
  * Load and validate configuration from environment variables
  */
 export const loadConfig = (): AppConfig => {
+  // Si SSL està activat, port per defecte 443; si no, 80
+  const sslEnabled = process.env.SSL_ENABLED === 'true';
+  const defaultPort = sslEnabled ? 443 : 80;
   return {
-    port: parseInt(process.env.PORT || '443', 10),
+    port: parseInt(process.env.PORT || String(defaultPort), 10),
     host: process.env.HOST || '0.0.0.0',
     nodeEnv: process.env.NODE_ENV || 'development',
     
@@ -69,7 +72,7 @@ export const loadConfig = (): AppConfig => {
     
     cors: {
       origin: process.env.CORS_ORIGIN || '*',
-      methods: (process.env.CORS_METHODS || 'GET,POST,PUT,DELETE,OPTIONS,PATCH').split(','),
+      methods: (process.env.CORS_METHODS || 'GET,POST,PUT,DELETE,PATCH,OPTIONS').split(','),
       credentials: process.env.CORS_CREDENTIALS === 'true',
     },
   };

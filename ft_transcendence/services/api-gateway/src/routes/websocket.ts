@@ -3,12 +3,13 @@
  * Handles WebSocket connections for games
  */
 
-import { ServerInstance, WebSocketConnection, WebSocketRequest } from '../types/index.js';
+import { WebSocketConnection, WebSocketRequest } from '../types/index.js';
+import { FastifyInstance } from 'fastify';
 
 /**
  * Setup WebSocket routes
  */
-export const setupWebSocketRoutes = (server: ServerInstance): void => {
+export const setupWebSocketRoutes = (server: FastifyInstance): void => {
   server.register(async (fastify: any) => {
     // Game WebSocket endpoint
     fastify.get('/ws/game', { websocket: true }, (connection: WebSocketConnection, request: WebSocketRequest) => {
