@@ -16,12 +16,10 @@ services:
     build:
       context: ./services/api-gateway
       dockerfile: Dockerfile
-    image: transcendence/api-gateway
     container_name: api-gateway
     restart: unless-stopped
     ports:
-      - "80:80"
-      - "443:443"
+      - "3000:3000"  # HTTPS on port 3000
     networks:
       - transcendence-net
     volumes:
@@ -41,7 +39,6 @@ services:
     build:
       context: ./frontend
       dockerfile: Dockerfile
-    image: transcendence/frontend
     container_name: frontend
     restart: unless-stopped
     networks:
@@ -54,7 +51,7 @@ services:
     build:
       context: ./services/auth-service
       dockerfile: Dockerfile
-    image: transcendence/auth
+    
     container_name: auth
     restart: unless-stopped
     networks:
@@ -70,7 +67,6 @@ services:
     build:
       context: ./services/user-service
       dockerfile: Dockerfile
-    image: transcendence/user
     container_name: user
     restart: unless-stopped
     networks:
@@ -89,7 +85,6 @@ services:
     build:
       context: ./services/game-service
       dockerfile: Dockerfile
-    image: transcendence/game
     container_name: game
     restart: unless-stopped
     networks:
@@ -108,7 +103,6 @@ services:
     build:
       context: ./services/match-service
       dockerfile: Dockerfile
-    image: transcendence/match
     container_name: match
     restart: unless-stopped
     networks:

@@ -6,10 +6,11 @@ import 'dotenv/config';
  */
 
 import { createServer, createDatabase, startServer } from './server.js';
-import { registerAllMiddleware } from './middleware/index.js';
+import { registerAllMiddleware } from './middleware/auth.middleware.js';
 import { setupHealthRoutes } from './routes/health.js';
 import { setupAuthRoutes } from './routes/auth.js';
 import { registerOAuthRoutes } from './routes/oauth2.js';
+import { setup2FARoutes } from './routes/twoFactor.js';
 
 /**
  * Main application setup
@@ -25,6 +26,7 @@ const main = async (): Promise<void> => {
   // Setup routes
   setupHealthRoutes(server);
   setupAuthRoutes(server, db);
+  setup2FARoutes(server, db);
   await registerOAuthRoutes(server, { db });
 
   // Setup graceful shutdown handlers

@@ -5,10 +5,10 @@
 
 import { FastifyInstance, FastifyRequest, FastifyReply } from 'fastify';
 import sqlite3 from 'sqlite3';
-import { config } from '../config/index.js';
-import { parseRegistrationData, parseLoginData } from '../validation/index.js';
-import { createUserInDB, findUserByUsername, findUserByEmail } from '../database/index.js';
-import { hashPassword, verifyPassword, generateJWTToken, createUserResponse, verifyJWTToken } from '../auth/index.js';
+import { config } from '../config/auth.config.js';
+import { parseRegistrationData, parseLoginData } from '../validation/auth.validation.js';
+import { createUserInDB, findUserByUsername, findUserByEmail } from '../database/database.connection.js';
+import { hashPassword, verifyPassword, generateJWTToken, createUserResponse, verifyJWTToken } from '../auth/auth.handlers.js';
 
 interface RegistrationRequestBody {
   username: string;
@@ -75,13 +75,15 @@ export function setupAuthRoutes(server: FastifyInstance, db: sqlite3.Database): 
       const token = generateJWTToken(user);
 
       // Set JWT as HTTP-only cookie
-      reply.setCookie('jwt', token, {
+      const cookieOptions = {
         httpOnly: true,
-        secure: true,
-        sameSite: 'none',
+        secure: config.nodeEnv === 'production', // Only secure in production
+        sameSite: config.nodeEnv === 'production' ? 'none' as const : 'lax' as const,
         path: '/',
-        // expires: ... // Optional: set expiry if needed
-      });
+        maxAge: 24 * 60 * 60 * 1000, // 24 hours
+      };
+      
+      reply.setCookie('jwt', token, cookieOptions);
 
       return reply.code(201).send({
         success: true,
@@ -91,7 +93,7 @@ export function setupAuthRoutes(server: FastifyInstance, db: sqlite3.Database): 
       });
 
     } catch (error) {
-      server.log.error('Registration error:', error);
+      server.log.error(`Registration error: ${error instanceof Error ? error.message : String(error)}`);
       return reply.code(500).send({ 
         success: false, 
         error: 'Internal server error during registration',
@@ -145,13 +147,15 @@ export function setupAuthRoutes(server: FastifyInstance, db: sqlite3.Database): 
       const token = generateJWTToken(user, config.jwt.secret, config.jwt.expiresIn);
 
       // Set JWT as HTTP-only cookie
-      reply.setCookie('jwt', token, {
+      const cookieOptions = {
         httpOnly: true,
-        secure: true,
-        sameSite: 'none',
+        secure: config.nodeEnv === 'production', // Only secure in production
+        sameSite: config.nodeEnv === 'production' ? 'none' as const : 'lax' as const,
         path: '/',
-        // expires: ... // Optional: set expiry if needed
-      });
+        maxAge: 24 * 60 * 60 * 1000, // 24 hours
+      };
+      
+      reply.setCookie('jwt', token, cookieOptions);
 
       return reply.code(200).send({
         success: true,
@@ -161,7 +165,7 @@ export function setupAuthRoutes(server: FastifyInstance, db: sqlite3.Database): 
       });
 
     } catch (error) {
-      server.log.error('Login error:', error);
+      server.log.error(`Login error: ${error instanceof Error ? error.message : String(error)}`);
       return reply.code(500).send({ 
         success: false, 
         error: 'Internal server error during login' 
@@ -260,7 +264,7 @@ export function setupAuthRoutes(server: FastifyInstance, db: sqlite3.Database): 
       });
 
     } catch (error) {
-      server.log.error('Profile error:', error);
+      server.log.error(`Profile error: ${error instanceof Error ? error.message : String(error)}`);
       return reply.code(500).send({
         success: false,
         error: 'Internal server error',
@@ -269,27 +273,36 @@ export function setupAuthRoutes(server: FastifyInstance, db: sqlite3.Database): 
     }
   });
 
-  // Manual Google OAuth2 route (fallback)
-  server.get('/google', async (request: FastifyRequest, reply: FastifyReply) => {
+  // User Logout Endpoint
+  server.post('/logout', async (request: FastifyRequest, reply: FastifyReply) => {
     try {
-      const clientId = config.oauth.google.clientId;
-      const redirectUri = config.oauth.google.redirectUri;
-      const scope = 'profile email';
-      const state = Math.random().toString(36).substring(7); // Simple state for CSRF protection
-      
-      const authUrl = `https://accounts.google.com/o/oauth2/v2/auth?` +
-        `client_id=${encodeURIComponent(clientId)}&` +
-        `redirect_uri=${encodeURIComponent(redirectUri)}&` +
-        `scope=${encodeURIComponent(scope)}&` +
-        `response_type=code&` +
-        `state=${state}`;
-      
-      return reply.redirect(authUrl);
+      // Cookie options should match exactly those used when setting the cookie
+      const cookieOptions = {
+        httpOnly: true,
+        secure: config.nodeEnv === 'production', // Only secure in production
+        sameSite: config.nodeEnv === 'production' ? 'none' as const : 'lax' as const,
+        path: '/',
+      };
+
+      // Clear the JWT cookie
+      reply.clearCookie('jwt', cookieOptions);
+
+      // Alternative: Set the cookie to expire immediately as a fallback
+      reply.setCookie('jwt', '', {
+        ...cookieOptions,
+        expires: new Date(0) // Set to past date to expire immediately
+      });
+
+      return reply.code(200).send({
+        success: true,
+        message: 'Logout successful'
+      });
+
     } catch (error) {
-      server.log.error('OAuth2 redirect error:', error);
+      server.log.error(`Logout error: ${error instanceof Error ? error.message : String(error)}`);
       return reply.code(500).send({
         success: false,
-        error: 'OAuth2 configuration error'
+        error: 'Internal server error during logout'
       });
     }
   });

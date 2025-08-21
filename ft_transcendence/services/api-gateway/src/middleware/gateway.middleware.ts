@@ -11,9 +11,9 @@ import websocket from '@fastify/websocket';
 import fastifyCookie from '@fastify/cookie';
 import fs from 'fs';
 import path from 'path';
-import { AppConfig } from '../config/index.js';
+import { AppConfig } from '../config/gateway.config.js';
 import { FastifyInstance } from 'fastify';
-import { CORSCallback, RateLimitContext, ErrorResponse } from '../types/index.js';
+import { CORSCallback, RateLimitContext, ErrorResponse } from '../types/gateway.types.js';
 
 /**
  * Register security middleware (Helmet)

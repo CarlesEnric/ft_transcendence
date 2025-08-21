@@ -3,10 +3,10 @@
  * Handles routing requests to appropriate services
  */
 
-import { AppConfig } from '../config/index.js';
+import { AppConfig } from '../config/gateway.config.js';
 import { FastifyInstance } from 'fastify';
 import { FastifyRequest, FastifyReply } from 'fastify';
-import { ErrorResponse } from '../types/index.js';
+import { ErrorResponse } from '../types/gateway.types.js';
 
 /**
  * Setup proxy route for a specific service
@@ -40,7 +40,7 @@ export const setupProxyRoute = (server: FastifyInstance, prefix: string, target:
       },
       replyOptions: {
         onError: (reply: FastifyReply, error: Error) => {
-          server.log.error(`Proxy error for ${target}:`, error);
+          server.log.error(`Proxy error for ${target}: ${error.message}`);
           const errorResponse: ErrorResponse = {
             code: 502,
             error: 'Bad Gateway',
@@ -48,6 +48,7 @@ export const setupProxyRoute = (server: FastifyInstance, prefix: string, target:
             service: prefix
           };
           reply.code(502).send(errorResponse);
+          return;
         }
       }
     });
@@ -60,6 +61,6 @@ export const setupProxyRoute = (server: FastifyInstance, prefix: string, target:
 export const setupAllProxyRoutes = (server: FastifyInstance, config: AppConfig): void => {
   setupProxyRoute(server, '/api/auth', config.services.auth);
   setupProxyRoute(server, '/api/users', config.services.user);
-  setupProxyRoute(server, '/api/games', config.services.game);
+  setupProxyRoute(server, '/api/game', config.services.game);
   setupProxyRoute(server, '/api/matches', config.services.match);
 };

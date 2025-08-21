@@ -6,9 +6,9 @@
 import { FastifyInstance, FastifyRequest, FastifyReply } from 'fastify';
 import sqlite3 from 'sqlite3';
 import fetch from 'node-fetch';
-import { getUserByOAuth, createOAuthUser } from '../database/index.js';
-import { generateJWTToken } from '../auth/index.js';
-import { config } from '../config/index.js';
+import { getUserByOAuth, createOAuthUser } from '../database/database.connection.js';
+import { generateJWTToken } from '../auth/auth.handlers.js';
+import { config } from '../config/auth.config.js';
 
 interface OAuthRouteOptions {
   db: sqlite3.Database;
@@ -23,6 +23,26 @@ interface GoogleUserInfo {
 
 export async function registerOAuthRoutes(fastify: FastifyInstance, options: OAuthRouteOptions) {
   const { db } = options;
+
+  /**
+   * Initiate Google OAuth2 flow
+   * Redirects user to Google's authorization server
+   */
+  fastify.get('/google', async (request: FastifyRequest, reply: FastifyReply) => {
+    const state = Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
+    
+    const authUrl = [
+      'https://accounts.google.com/o/oauth2/v2/auth?',
+      `client_id=${encodeURIComponent(config.oauth.google.clientId)}`,
+      `redirect_uri=${encodeURIComponent(config.oauth.google.redirectUri)}`,
+      'response_type=code',
+      'scope=' + encodeURIComponent('openid email profile'),
+      `state=${state}`
+    ].join('&');
+
+    fastify.log.info(`Redirecting to Google OAuth: ${authUrl}`);
+    return reply.redirect(authUrl);
+  });
 
   /**
    * Manual Google OAuth2 callback handler
@@ -51,16 +71,26 @@ export async function registerOAuthRoutes(fastify: FastifyInstance, options: OAu
         `redirect_uri=${encodeURIComponent(config.oauth.google.redirectUri)}`
       ].join('&');
 
-      const tokenResponse = await fetch('https://oauth2.googleapis.com/token', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/x-www-form-urlencoded',
-        },
-        body: tokenParams,
-      });
+      fastify.log.info(`Attempting token exchange with Google OAuth2 API`);
+      
+      let tokenResponse;
+      try {
+        tokenResponse = await fetch('https://oauth2.googleapis.com/token', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/x-www-form-urlencoded',
+          },
+          body: tokenParams,
+        });
+      } catch (fetchError: any) {
+        fastify.log.error(`Token fetch request failed: ${fetchError instanceof Error ? fetchError.message : String(fetchError)}`);
+        fastify.log.error(`Fetch error details:`, fetchError);
+        return reply.redirect(`${config.frontend.url}?error=network_error`);
+      }
 
       if (!tokenResponse.ok) {
-        fastify.log.error('Token exchange failed:', await tokenResponse.text());
+        const errorText = await tokenResponse.text();
+        fastify.log.error(`Token exchange failed with status ${tokenResponse.status}: ${errorText}`);
         return reply.redirect(`${config.frontend.url}?error=token_exchange_failed`);
       }
 
@@ -96,7 +126,7 @@ export async function registerOAuthRoutes(fastify: FastifyInstance, options: OAu
       reply.setCookie('jwt', token, {
         httpOnly: true,
         secure: true,
-        sameSite: 'none',
+        sameSite: 'lax',
         path: '/',
       });
 
@@ -104,33 +134,9 @@ export async function registerOAuthRoutes(fastify: FastifyInstance, options: OAu
       return reply.redirect(`${config.frontend.url}`);
 
     } catch (error) {
-      fastify.log.error('OAuth2 callback error:', error);
+      fastify.log.error(`OAuth2 callback error: ${error instanceof Error ? error.message : String(error)}`);
       return reply.redirect(`${config.frontend.url}?error=callback_failed`);
     }
-  });
-
-  /**
-   * Get authenticated user profile
-   * GET /auth/profile
-   */
-  fastify.get('/auth/profile', {
-    preHandler: async (request: FastifyRequest, reply: FastifyReply) => {
-      try {
-        await request.jwtVerify();
-      } catch (err) {
-        reply.send(err);
-      }
-    }
-  }, async (request: FastifyRequest, reply: FastifyReply) => {
-    const user = request.user as any;
-    return reply.send({
-      success: true,
-      user: {
-        userId: user.userId,
-        username: user.username,
-        email: user.email
-      }
-    });
   });
 }
 

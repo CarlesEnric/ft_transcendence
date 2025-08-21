@@ -88,3 +88,39 @@ export interface CreateUserData {
   profile_picture?: string | null;
   is_verified?: boolean;
 }
+
+// 2FA related types
+export interface TwoFactorSetup {
+  secret: string;
+  qrCodeUrl: string;
+  manualEntryKey: string;
+  backupCodes: string[];
+}
+
+export interface TwoFactorSettings {
+  two_factor_enabled: boolean;
+  two_factor_secret?: string;
+  backup_codes?: string;
+}
+
+export interface Setup2FAResponse {
+  success: boolean;
+  setup?: {
+    secret: string;
+    qrCode: string;
+    manualEntryKey: string;
+    backupCodes: string[];
+  };
+  error?: string;
+}
+
+export interface Verify2FARequest {
+  token: string;
+  secret?: string;
+  isBackupCode?: boolean;
+}
+
+export interface TwoFactorStatus {
+  enabled: boolean;
+  backupCodesRemaining: number;
+}

@@ -38,6 +38,9 @@ export function initializeDatabase(db: sqlite3.Database): void {
         display_name TEXT,
         avatar_url TEXT,
         is_verified BOOLEAN DEFAULT 0,
+        two_factor_enabled BOOLEAN DEFAULT 0,
+        two_factor_secret TEXT,       -- TOTP secret key
+        backup_codes TEXT,           -- JSON array of backup codes
         created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
         updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
       )
@@ -143,6 +146,97 @@ export function createUserInDB(db: sqlite3.Database, userData: {
           if (err) reject(err);
           else resolve(row);
         });
+      }
+    });
+  });
+}
+
+/**
+ * 2FA-specific database functions
+ */
+
+// Enable 2FA for a user
+export function enable2FA(db: sqlite3.Database, userId: number, secret: string, backupCodes: string[]): Promise<void> {
+  return new Promise((resolve, reject) => {
+    const backupCodesJson = JSON.stringify(backupCodes);
+    db.run(
+      'UPDATE users SET two_factor_enabled = 1, two_factor_secret = ?, backup_codes = ? WHERE id = ?',
+      [secret, backupCodesJson, userId],
+      function(err) {
+        if (err) reject(err);
+        else resolve();
+      }
+    );
+  });
+}
+
+// Disable 2FA for a user
+export function disable2FA(db: sqlite3.Database, userId: number): Promise<void> {
+  return new Promise((resolve, reject) => {
+    db.run(
+      'UPDATE users SET two_factor_enabled = 0, two_factor_secret = NULL, backup_codes = NULL WHERE id = ?',
+      [userId],
+      function(err) {
+        if (err) reject(err);
+        else resolve();
+      }
+    );
+  });
+}
+
+// Get 2FA settings for a user
+export function get2FASettings(db: sqlite3.Database, userId: number): Promise<any> {
+  return new Promise((resolve, reject) => {
+    db.get(
+      'SELECT two_factor_enabled, two_factor_secret, backup_codes FROM users WHERE id = ?',
+      [userId],
+      (err, row) => {
+        if (err) reject(err);
+        else resolve(row);
+      }
+    );
+  });
+}
+
+// Use a backup code
+export function useBackupCode(db: sqlite3.Database, userId: number, usedCode: string): Promise<boolean> {
+  return new Promise((resolve, reject) => {
+    // Get current backup codes
+    db.get('SELECT backup_codes FROM users WHERE id = ?', [userId], (err, row: any) => {
+      if (err) {
+        reject(err);
+        return;
+      }
+      
+      if (!row || !row.backup_codes) {
+        resolve(false);
+        return;
+      }
+      
+      try {
+        const backupCodes = JSON.parse(row.backup_codes);
+        const codeIndex = backupCodes.indexOf(usedCode);
+        
+        if (codeIndex === -1) {
+          resolve(false);
+          return;
+        }
+        
+        // Remove the used code
+        backupCodes.splice(codeIndex, 1);
+        const updatedCodes = JSON.stringify(backupCodes);
+        
+        // Update database
+        db.run(
+          'UPDATE users SET backup_codes = ? WHERE id = ?',
+          [updatedCodes, userId],
+          function(err) {
+            if (err) reject(err);
+            else resolve(true);
+          }
+        );
+      } catch (parseErr) {
+        reject(parseErr);
       }
     });
   });

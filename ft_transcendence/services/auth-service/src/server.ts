@@ -6,22 +6,28 @@
 import fastify, { FastifyInstance } from 'fastify';
 import sqlite3 from 'sqlite3';
 import { readFileSync } from 'fs';
-import { config } from './config/index.js';
-import { initializeDatabase } from './database/index.js';
+import { config } from './config/auth.config.js';
+import { initializeDatabase } from './database/database.connection.js';
 
 /**
  * Create and configure Fastify server instance
  */
-export function createServer(): FastifyInstance {
-  const server = fastify({ 
+export function createServer(): any {
+  const serverOptions: any = { 
     logger: { 
       level: config.logLevel as any
-    },
-    https: {
+    }
+  };
+
+  // Only add HTTPS configuration if SSL is enabled
+  if (config.ssl.enabled) {
+    serverOptions.https = {
       key: readFileSync(config.ssl.keyPath),
       cert: readFileSync(config.ssl.certPath)
-    }
-  });
+    };
+  }
+
+  const server = fastify(serverOptions);
 
   return server;
 }
@@ -48,7 +54,7 @@ export async function startServer(server: FastifyInstance): Promise<void> {
     server.log.info(`Auth Service started successfully!`);
     server.log.info(`Server listening on ${address}`);
   } catch (error) {
-    server.log.error('Failed to start Auth Service:', error);
+    server.log.error(`Failed to start Auth Service: ${error instanceof Error ? error.message : String(error)}`);
     throw error;
   }
 }

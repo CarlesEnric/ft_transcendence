@@ -7,14 +7,14 @@ import 'dotenv/config';
 
 
 import fs from 'fs';
-import { config } from './config/index.js';
+import { config } from './config/gateway.config.js';
 //import { createServer, createRedirectServer } from './server.js';
 import { createServer } from './server.js';
-import { registerAllMiddleware } from './middleware/index.js';
+import { registerAllMiddleware } from './middleware/gateway.middleware.js';
 import { setupAllProxyRoutes } from './routes/proxy.js';
 import { setupWebSocketRoutes } from './routes/websocket.js';
 import { setupHealthRoutes } from './routes/health.js';
-import { setupErrorHandlers, setupGracefulShutdown, startServer, startRedirectServer } from './utils/index.js';
+import { setupErrorHandlers, setupGracefulShutdown, startServer, startRedirectServer } from './utils/gateway.utils.js';
 import { FastifyInstance } from 'fastify';
 
 /**

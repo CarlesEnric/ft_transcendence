@@ -7,7 +7,7 @@ import fastify from 'fastify';
 import fastifyJwt from '@fastify/jwt';
 import fastifyCookie from '@fastify/cookie';
 import fs from 'fs';
-import { AppConfig } from './config/index.js';
+import { AppConfig } from './config/gateway.config.js';
 import { FastifyInstance } from 'fastify';
 
 /**
@@ -105,7 +105,9 @@ export const createServer = (config: AppConfig): FastifyInstance => {
     server.log.info('preHandler for', request.url);
     if (
       request.url.startsWith('/api/') &&
-      !request.url.startsWith('/api/auth/') // afegeix aquí totes les rutes públiques
+      !request.url.startsWith('/api/auth/') && // auth endpoints are public
+      !request.url.startsWith('/api/ws/') && // websocket endpoints are public for now
+      !request.url.includes('/health') // health endpoints are public (matches /health anywhere in path)
     ) {
       await server.authenticate(request, reply);
     }

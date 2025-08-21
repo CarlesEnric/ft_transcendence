@@ -27,13 +27,15 @@
     "jsonwebtoken": "^9.0.2",
     "dotenv": "^17.2.1",
     "node-fetch": "^3.3.2",
-    "jwt-decode": "^4.0.0"
+    "jwt-decode": "^4.0.0",
+    "ws": "^8.14.2"
   },
   "devDependencies": {
     "typescript": "^5.8.3",
     "ts-node": "^10.9.2",
     "@types/node": "^24.0.1",
     "@types/jwt-decode": "^2.2.1",
-    "@types/node-fetch": "^2.6.12"
+    "@types/node-fetch": "^2.6.12",
+    "@types/ws": "^8.5.9"
   }
 }

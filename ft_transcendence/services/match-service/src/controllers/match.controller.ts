@@ -1,7 +1,7 @@
 // src/controllers/matchesController.ts
 
 import type { FastifyRequest, FastifyReply } from 'fastify';
-import { PostMatch } from '../schemas/matches.schema.js';
+import { PostMatch } from '../schemas/match.validation.schema.js';
 import type { infer as zInfer } from 'zod';
 
 type MatchBody = zInfer<typeof PostMatch>;

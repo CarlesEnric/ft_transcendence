@@ -4,7 +4,7 @@
  */
 
 import { FastifyInstance } from 'fastify';
-import { config } from '../config/index.js';
+import { config } from '../config/auth.config.js';
 
 /**
  * Register all middleware

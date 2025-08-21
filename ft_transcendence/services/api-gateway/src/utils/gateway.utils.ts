@@ -5,10 +5,10 @@
 
 import fs from 'fs';
 import path from 'path';
-import { AppConfig } from '../config/index.js';
+import { AppConfig } from '../config/gateway.config.js';
 import { FastifyInstance } from 'fastify';
 import { FastifyRequest, FastifyReply } from 'fastify';
-import { ErrorResponse } from '../types/index.js';
+import { ErrorResponse } from '../types/gateway.types.js';
 
 /**
  * Get MIME type for a file extension
@@ -77,7 +77,7 @@ export const setupErrorHandlers = (server: FastifyInstance, config: AppConfig): 
 
   // Global error handler
   server.setErrorHandler((error: Error, request: FastifyRequest, reply: FastifyReply) => {
-    server.log.error('Unhandled error:', error);
+    server.log.error(`Unhandled error: ${error.message}`);
     
     const errorResponse: ErrorResponse = {
       code: 500,
@@ -87,6 +87,7 @@ export const setupErrorHandlers = (server: FastifyInstance, config: AppConfig): 
     };
     
     reply.code(500).send(errorResponse);
+    return;
   });
 };
 
@@ -102,7 +103,7 @@ export const setupGracefulShutdown = (server: FastifyInstance): void => {
       server.log.info('Server closed successfully');
       process.exit(0);
     } catch (error) {
-      server.log.error('Error during shutdown:', error);
+      server.log.error(`Error during shutdown: ${(error as Error).message}`);
       process.exit(1);
     }
   };
@@ -136,7 +137,7 @@ export const startServer = async (server: FastifyInstance, config: AppConfig): P
     }
     
   } catch (error) {
-    server.log.error('Failed to start server:', error);
+    server.log.error(`Failed to start server: ${(error as Error).message}`);
     process.exit(1);
   }
 };
@@ -155,7 +156,7 @@ export const startRedirectServer = async (server: FastifyInstance, config: AppCo
     server.log.info(`All HTTP traffic will be redirected to HTTPS`);
     
   } catch (error) {
-    server.log.error('Failed to start HTTP redirect server:', error);
+    server.log.error(`Failed to start HTTP redirect server: ${(error as Error).message}`);
     server.log.warn('HTTP to HTTPS redirect will not be available');
   }
 };

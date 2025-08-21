@@ -1,5 +1,5 @@
 import type { FastifyPluginAsync } from 'fastify';
-import { createMatch, listMatches, getDashboard } from '../controllers/matchesController.js';
+import { createMatch, listMatches, getDashboard } from '../controllers/match.controller.js';
 
 
 const matchesRoutes: FastifyPluginAsync = async (fastify: import('fastify').FastifyInstance) => {

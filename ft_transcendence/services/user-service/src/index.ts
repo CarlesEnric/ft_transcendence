@@ -22,10 +22,15 @@ server.register(fastifyCookie);
 
 // --- SQLite DB connection (shared with auth-service) ---
 let db: Database<sqlite3.Database, sqlite3.Statement>;
-const dbPath = process.env.AUTH_DB_PATH || '/app/db/auth.sqlite';
+const dbPath = process.env.AUTH_DB_PATH || '/app/database/auth.sqlite';
 
 // --- JWT authentication middleware ---
 server.addHook('onRequest', async (request, reply) => {
+  // Skip JWT verification for health endpoint
+  if (request.url === '/health') {
+    return;
+  }
+  
   try {
     await request.jwtVerify();
   } catch (err) {
@@ -109,8 +114,8 @@ const start = async () => {
     db = await open({ filename: dbPath, driver: sqlite3.Database });
     // Crea la taula si no existeix (només per a desenvolupament)
     await db.run('CREATE TABLE IF NOT EXISTS users (id INTEGER PRIMARY KEY AUTOINCREMENT, username TEXT, email TEXT)');
-    await server.listen({ port: 443, host: '0.0.0.0' });
-    server.log.info('User service started on https://0.0.0.0:443');
+    await server.listen({ port: 3002, host: '0.0.0.0' });
+    server.log.info('User service started on https://0.0.0.0:3002');
   } catch (err) {
     server.log.error(err);
     process.exit(1);

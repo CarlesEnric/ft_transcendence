@@ -3,7 +3,7 @@
  * Provides health monitoring and system information
  */
 
-import { AppConfig } from '../config/index.js';
+import { AppConfig } from '../config/gateway.config.js';
 import { FastifyInstance } from 'fastify';
 import { FastifyRequest, FastifyReply } from 'fastify';
 

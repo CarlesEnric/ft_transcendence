@@ -39,9 +39,9 @@ export interface AppConfig {
  * Load and validate configuration from environment variables
  */
 export const loadConfig = (): AppConfig => {
-  // Si SSL està activat, port per defecte 443; si no, 80
+  // Si SSL està activat, port per defecte 443; si no, 3000 per desenvolupament
   const sslEnabled = process.env.SSL_ENABLED === 'true';
-  const defaultPort = sslEnabled ? 443 : 80;
+  const defaultPort = sslEnabled ? 443 : 3000;
   return {
     port: parseInt(process.env.PORT || String(defaultPort), 10),
     host: process.env.HOST || '0.0.0.0',
@@ -54,14 +54,14 @@ export const loadConfig = (): AppConfig => {
     },
     
     services: {
-      auth: process.env.AUTH_SERVICE_URL || 'https://auth:443',
-      user: process.env.USER_SERVICE_URL || 'https://user:443',
-      game: process.env.GAME_SERVICE_URL || 'https://game:443',
-      match: process.env.MATCH_SERVICE_URL || 'https://match:443',
+      auth: process.env.AUTH_SERVICE_URL || 'http://auth:3001',
+      user: process.env.USER_SERVICE_URL || 'http://user:3002',
+      game: process.env.GAME_SERVICE_URL || 'http://game:3003',
+      match: process.env.MATCH_SERVICE_URL || 'http://match:3004',
     },
     
     frontend: {
-      url: process.env.FRONTEND_URL || 'https://localhost:443',
+      url: process.env.FRONTEND_URL || 'http://localhost:3000',
       staticPath: '/app/frontend',
     },
     
