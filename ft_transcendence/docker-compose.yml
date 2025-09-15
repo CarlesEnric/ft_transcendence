@@ -27,6 +27,7 @@ services:
       - frontend-static:/app/frontend:ro              # Read-only: static files from frontend build
     env_file:
       - ./services/api-gateway/.env
+      - ./services/api-gateway/.env_host_ip
     depends_on:
       - auth-service
       - user-service
@@ -34,7 +35,7 @@ services:
       - match-service
       - frontend
 
-  # Frontend - React SPA (Static files only)
+  # Frontend - TypeScript SPA with Tailwind CSS (Static files only)
   frontend:
     build:
       context: ./frontend
@@ -43,6 +44,8 @@ services:
     restart: unless-stopped
     networks:
       - transcendence-net
+    env_file:
+      - ./frontend/.env_host_ip
     volumes:
       - frontend-static:/app/dist                     # Share built static files with API Gateway
 
@@ -51,7 +54,6 @@ services:
     build:
       context: ./services/auth-service
       dockerfile: Dockerfile
-    
     container_name: auth
     restart: unless-stopped
     networks:
@@ -61,6 +63,7 @@ services:
       - auth-db:/app/database                         # Read-write: database needs to be writable
     env_file:
       - ./services/auth-service/.env
+      - ./services/auth-service/.env_host_ip
 
   # User Service - Profile management
   user-service:
@@ -77,6 +80,7 @@ services:
       - user-uploads:/app/uploads                     # Read-write: file uploads need to be writable
     env_file:
       - ./services/user-service/.env
+      - ./services/user-service/.env_host_ip
     depends_on:
       - auth-service
 
@@ -94,6 +98,7 @@ services:
       - game-db:/app/database                         # Read-write: database needs to be writable
     env_file:
       - ./services/game-service/.env
+      - ./services/game-service/.env_host_ip
     depends_on:
       - auth-service
       - user-service
@@ -112,6 +117,7 @@ services:
       - match-db:/app/database                        # Read-write: database needs to be writable
     env_file:
       - ./services/match-service/.env
+      - ./services/match-service/.env_host_ip
     depends_on:
       - auth-service
       - user-service

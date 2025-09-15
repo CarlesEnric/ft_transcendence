@@ -26,6 +26,12 @@ export const setupProxyRoute = (server: FastifyInstance, prefix: string, target:
         request.headers['x-forwarded-for'] = request.ip;
         request.headers['x-forwarded-proto'] = 'https';
         request.headers['x-forwarded-host'] = request.headers.host || 'localhost';
+        
+        // Forward JWT token from cookie to Authorization header if available
+        if (request.cookies && request.cookies.jwt) {
+          request.headers['authorization'] = `Bearer ${request.cookies.jwt}`;
+        }
+        
         // Forward user identity if authenticated
         if (
           request.user &&

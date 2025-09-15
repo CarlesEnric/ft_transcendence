@@ -61,7 +61,7 @@ export const loadConfig = (): AppConfig => {
     },
     
     frontend: {
-      url: process.env.FRONTEND_URL || 'http://localhost:3000',
+      url: process.env.FRONTEND_URL || `https://${process.env.HOST_IP || 'localhost'}:3000`,
       staticPath: '/app/frontend',
     },
     

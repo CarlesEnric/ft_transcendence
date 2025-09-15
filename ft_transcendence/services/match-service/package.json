@@ -21,7 +21,9 @@
     "sqlite": "^5.1.1",
     "sqlite3": "^5.1.7",
     "jsonwebtoken": "^9.0.2",
-    "zod": "^4.0.5"
+    "zod": "^4.0.5",
+    "node-fetch": "^3.3.2",
+    "undici": "^7.15.0"
   },
   "devDependencies": {
     "@types/better-sqlite3": "^7.6.13",

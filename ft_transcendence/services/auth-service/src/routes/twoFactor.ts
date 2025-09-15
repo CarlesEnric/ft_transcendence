@@ -154,11 +154,8 @@ export function setup2FARoutes(server: FastifyInstance, db: sqlite3.Database): v
   /**
    * POST /2fa/verify - Verify 2FA token during login
    */
-  server.post('/2fa/verify', {
-    preHandler: authenticate
-  }, async (request: FastifyRequest, reply: FastifyReply) => {
+  server.post('/2fa/verify', async (request: FastifyRequest, reply: FastifyReply) => {
     try {
-      const user = (request as any).user;
       const { token, isBackupCode } = request.body as Verify2FARequestBody;
       
       if (!token) {
@@ -166,6 +163,54 @@ export function setup2FARoutes(server: FastifyInstance, db: sqlite3.Database): v
           success: false,
           error: 'Verification code is required'
         });
+      }
+
+      let user;
+      
+      // Check if this is a pending 2FA verification (OAuth flow)
+      const pendingCookie = request.cookies.pending_2fa;
+      const userIdCookie = request.cookies.pending_user_id;
+      
+      if (pendingCookie === '1' && userIdCookie) {
+        // This is a pending 2FA verification from OAuth
+        const userId = parseInt(userIdCookie);
+        
+        // Get user data for 2FA verification
+        const twoFASettings = await get2FASettings(db, userId);
+        if (!twoFASettings || !twoFASettings.two_factor_enabled) {
+          return reply.code(400).send({
+            success: false,
+            error: '2FA is not enabled for this account'
+          });
+        }
+        
+        user = { userId: userId };
+      } else {
+        // This is a normal authenticated request
+        try {
+          let authToken;
+          const authHeader = request.headers.authorization;
+          if (authHeader && authHeader.startsWith('Bearer ')) {
+            authToken = authHeader.substring(7);
+          } else if (request.cookies && request.cookies.jwt) {
+            authToken = request.cookies.jwt;
+          }
+          
+          if (!authToken) {
+            return reply.code(401).send({
+              success: false,
+              error: 'Authentication required'
+            });
+          }
+          
+          const decoded = verifyJWTToken(authToken, config.jwt.secret);
+          user = decoded;
+        } catch (error) {
+          return reply.code(401).send({
+            success: false,
+            error: 'Invalid or expired token'
+          });
+        }
       }
       
       // Get user's 2FA settings
@@ -200,10 +245,52 @@ export function setup2FARoutes(server: FastifyInstance, db: sqlite3.Database): v
           error: 'Invalid verification code'
         });
       }
-      
+
+      // If this was a pending 2FA verification, complete the login process (OAuth)
+      if (pendingCookie === '1' && userIdCookie) {
+        // ...existing code...
+      }
+
+      // Normal login 2FA: generate JWT, set cookie, return user
+      // Get full user data to generate JWT
+      const fullUser = await new Promise<any>((resolve, reject) => {
+        db.get('SELECT id, username, email FROM users WHERE id = ?', [user.userId], (err, row) => {
+          if (err) reject(err);
+          else resolve(row);
+        });
+      });
+
+      if (!fullUser) {
+        return reply.code(404).send({
+          success: false,
+          error: 'User not found'
+        });
+      }
+
+      // Generate JWT token for the user
+      const { generateJWTToken } = await import('../auth/auth.handlers.js');
+      const jwtToken = generateJWTToken({
+        userId: fullUser.id,
+        username: fullUser.username,
+        email: fullUser.email
+      });
+
+      // Set JWT as HTTP-only cookie
+      reply.setCookie('jwt', jwtToken, {
+        httpOnly: true,
+        secure: true,
+        sameSite: 'lax',
+        path: '/',
+      });
+
       return reply.send({
         success: true,
-        message: '2FA verification successful'
+        message: '2FA verification successful',
+        user: {
+          userId: fullUser.id,
+          username: fullUser.username,
+          email: fullUser.email
+        }
       });
       
     } catch (error) {

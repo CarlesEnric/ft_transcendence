@@ -5,7 +5,7 @@ import 'dotenv/config';
 import fastifyJwt from '@fastify/jwt';
 import fastifyCookie from '@fastify/cookie';
 
-// Create HTTPS server for external access
+// Create HTTPS server for all communication
 const httpsServer = fastify({
   logger: { level: 'info' },
   https: {
@@ -14,24 +14,14 @@ const httpsServer = fastify({
   }
 });
 
-// Create HTTP server for internal service communication
-const httpServer = fastify({
-  logger: { level: 'info' }
-});
-
-// Register JWT and Cookie plugins on both servers
+// Register JWT and Cookie plugins
 if (!process.env.JWT_SECRET) {
   throw new Error('JWT_SECRET is not set');
 }
-
 httpsServer.register(fastifyJwt, { secret: process.env.JWT_SECRET });
 httpsServer.register(fastifyCookie);
-httpServer.register(fastifyJwt, { secret: process.env.JWT_SECRET });
-httpServer.register(fastifyCookie);
-
-// Register WebSocket plugin on both servers
+// Register WebSocket plugin
 httpsServer.register(websocket);
-httpServer.register(websocket);
 
 // Configuration flag - set to true to enforce JWT authentication for WebSocket connections
 const ENFORCE_JWT_AUTH = process.env.ENFORCE_JWT_AUTH === 'true' || false;
@@ -88,7 +78,7 @@ const state: GameState = {
 
 const clients = new Set<any>();
 
-// Setup WebSocket endpoint on both servers
+// Setup WebSocket endpoint
 const setupWebSocketEndpoint = (server: any) => {
   server.get('/ws/game', { websocket: true }, (connection: any, req: any) => {
     const socket = connection.socket;
@@ -169,7 +159,6 @@ const setupWebSocketEndpoint = (server: any) => {
 };
 
 setupWebSocketEndpoint(httpsServer);
-setupWebSocketEndpoint(httpServer);
 
 // Game loop (60 FPS)
 setInterval(() => {
@@ -231,7 +220,7 @@ setInterval(() => {
   }
 }, 1000 / 60);
 
-// Setup health and root endpoints on both servers
+// Setup health and root endpoints
 const setupEndpoints = (server: any) => {
   server.get('/health', async (_req: any, reply: any) => {
     reply.send({ status: 'ok', service: 'game-service' });
@@ -283,18 +272,12 @@ const setupEndpoints = (server: any) => {
 };
 
 setupEndpoints(httpsServer);
-setupEndpoints(httpServer);
 
-// Start both servers
+// Start HTTPS server only
 const start = async () => {
   try {
-    // Start HTTPS server on port 3003 for internal communication
     await httpsServer.listen({ port: 3003, host: '0.0.0.0' });
     httpsServer.log.info('Game service HTTPS started on https://0.0.0.0:3003');
-    
-    // Start HTTP server on port 3000 for legacy compatibility
-    await httpServer.listen({ port: 3000, host: '0.0.0.0' });
-    httpServer.log.info('Game service HTTP started on http://0.0.0.0:3000');
   } catch (err) {
     httpsServer.log.error(err);
     process.exit(1);

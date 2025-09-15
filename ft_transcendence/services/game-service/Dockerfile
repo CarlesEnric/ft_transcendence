@@ -1,4 +1,5 @@
 FROM node:24-alpine
+# FROM nexus.42barcelona.com:5000/node:24-alpine
 
 # Set working directory
 WORKDIR /app

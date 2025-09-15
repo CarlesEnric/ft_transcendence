@@ -2,6 +2,7 @@
  * Formulari de login amb autenticació OAuth2 i 2FA
  * Component principal per la pantalla d'inici de sessió
  */
+import { API_CONFIG } from '../config/api';
 
 interface LoginCredentials {
   username: string;
@@ -342,7 +343,8 @@ async function loginUser(credentials: LoginCredentials): Promise<LoginResponse> 
  * Login amb Google OAuth2
  */
 function loginWithGoogle(): void {
-  window.location.href = '/api/auth/oauth2/google';
+  // Usar la URL completa amb host IP des de API_CONFIG
+  window.location.href = API_CONFIG.AUTH.GOOGLE;
 }
 
 /**
@@ -356,6 +358,7 @@ function loginWithGitHub(): void {
  * Mostrar formulari de registre
  */
 function showRegisterForm(): void {
+  // TODO: Implementar registre real amb crida POST a /api/auth/register
   showToast('Funcionalitat de registre en desenvolupament', 'info');
 }
 

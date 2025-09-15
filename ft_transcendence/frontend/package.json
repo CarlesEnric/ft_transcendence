@@ -17,7 +17,8 @@
     "@babylonjs/materials": "^8.16.1",
     "socket.io-client": "^4.8.1",
     "qrcode": "^1.5.4",
-    "speakeasy": "^2.0.0"
+    "speakeasy": "^2.0.0",
+    "i18next": "^25.5.2"
   },
   "devDependencies": {
     "@types/qrcode": "^1.5.5",

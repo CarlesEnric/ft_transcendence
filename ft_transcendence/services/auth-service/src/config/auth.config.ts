@@ -52,7 +52,7 @@ export const loadConfig = (): AppConfig => {
     },
     
     jwt: {
-      secret: process.env.JWT_SECRET || 'your-secret-key',
+      secret: process.env.JWT_SECRET || 'ft_transcendence_jwt_secret_keep_secure',
       expiresIn: process.env.JWT_EXPIRES_IN || '24h',
     },
     
@@ -64,13 +64,19 @@ export const loadConfig = (): AppConfig => {
       google: {
         clientId: process.env.GOOGLE_CLIENT_ID || '',
         clientSecret: process.env.GOOGLE_CLIENT_SECRET || '',
-        redirectUri: process.env.GOOGLE_REDIRECT_URI || 'https://localhost:3000/api/auth/google/callback',
+        // Handle variable interpolation in .env file
+        redirectUri: process.env.GOOGLE_REDIRECT_URI ? 
+          process.env.GOOGLE_REDIRECT_URI.replace('${HOST_IP}', process.env.HOST_IP || 'localhost') :
+          `https://${process.env.HOST_IP || 'localhost'}:3000/api/auth/google/callback`,
         scope: ['openid', 'profile', 'email'],
       },
     },
 
     frontend: {
-      url: process.env.FRONTEND_URL || 'https://localhost:3000',
+      // Handle variable interpolation in .env file
+      url: process.env.FRONTEND_URL ?
+        process.env.FRONTEND_URL.replace('${HOST_IP}', process.env.HOST_IP || 'localhost') :
+        `https://${process.env.HOST_IP || 'localhost'}:3000`,
     },
   };
 };

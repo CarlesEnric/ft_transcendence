@@ -26,7 +26,7 @@ export const registerSecurity = async (server: FastifyInstance): Promise<void> =
         scriptSrc: ["'self'", "'unsafe-inline'"],
         styleSrc: ["'self'", "'unsafe-inline'"],
         imgSrc: ["'self'", "data:", "https:"],
-        connectSrc: ["'self'", "https://localhost"],
+        connectSrc: ["'self'", "https://*", "wss://*"],
         fontSrc: ["'self'"],
         objectSrc: ["'none'"],
         mediaSrc: ["'self'"],
@@ -51,14 +51,30 @@ export const registerCORS = async (server: FastifyInstance, config: AppConfig): 
         return callback(null, true);
       }
       
-      // In production, only allow specific origins
+      // Allow specific origins and IP addresses on the network
+      const HOST_IP = process.env.HOST_IP || 'localhost';
       const allowedOrigins = [
+        `https://${HOST_IP}`,
+        `https://${HOST_IP}:443`,
+        `https://${HOST_IP}:3000`,
         'https://localhost',
         'https://localhost:443',
+        'https://localhost:3000',
         'https://127.0.0.1',
         'https://127.0.0.1:443',
+        'https://127.0.0.1:3000',
         config.frontend.url
       ];
+      
+      // Parse additional allowed origins from config
+      if (config.cors && config.cors.origin && typeof config.cors.origin === 'string' && config.cors.origin !== '*') {
+        const corsOrigins = config.cors.origin.split(',');
+        corsOrigins.forEach(origin => {
+          if (origin.trim() && !allowedOrigins.includes(origin.trim())) {
+            allowedOrigins.push(origin.trim());
+          }
+        });
+      }
       
       if (allowedOrigins.indexOf(origin) !== -1) {
         callback(null, true);

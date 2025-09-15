@@ -74,14 +74,26 @@ export function setupAuthRoutes(server: FastifyInstance, db: sqlite3.Database): 
       // Generate JWT token
       const token = generateJWTToken(user);
 
-      // Set JWT as HTTP-only cookie
+      // Get request origin domain for cookie
+      const host = request.headers.host || '';
+      const hostname = host.split(':')[0]; // Remove port if exists
+      
+      // Log de la request i headers per debugging
+      server.log.info(`[DEBUG] Host a auth.ts (register): ${host}, hostname: ${hostname}`);
+      server.log.info(`[DEBUG] Headers a auth.ts: ${JSON.stringify(request.headers)}`);
+      server.log.info(`[DEBUG] Origin a auth.ts: ${request.headers.origin || 'no-origin'}`);
+
+      // Set JWT as HTTP-only cookie with strict security settings
       const cookieOptions = {
         httpOnly: true,
-        secure: config.nodeEnv === 'production', // Only secure in production
-        sameSite: config.nodeEnv === 'production' ? 'none' as const : 'lax' as const,
+        secure: true,
+        sameSite: 'none' as const,
         path: '/',
         maxAge: 24 * 60 * 60 * 1000, // 24 hours
       };
+      
+      // Log cookie options
+      server.log.info(`[DEBUG] Setting JWT cookie with options: ${JSON.stringify(cookieOptions)}`);
       
       reply.setCookie('jwt', token, cookieOptions);
 
@@ -140,28 +152,66 @@ export function setupAuthRoutes(server: FastifyInstance, db: sqlite3.Database): 
         });
       }
 
+      // Check if user has 2FA enabled
+      if (user.two_factor_enabled === 1 || user.two_factor_enabled === true) {
+        // Set cookies to indicate pending 2FA with user information
+        reply.setCookie('pending_2fa', '1', {
+          httpOnly: true,
+          secure: true,
+          sameSite: 'none' as const,
+          path: '/',
+          maxAge: 600 // 10 minutes
+        });
+        reply.setCookie('pending_user_id', user.id.toString(), {
+          httpOnly: true,
+          secure: true,
+          sameSite: 'none' as const,
+          path: '/',
+          maxAge: 600 // 10 minutes
+        });
+        
+        // Return response indicating 2FA is required
+        return reply.code(200).send({
+          success: true,
+          message: 'Two-factor authentication required',
+          twoFactorRequired: true
+        });
+      }
+
       // Create user response object
       const userResponse = createUserResponse(user);
 
       // Generate JWT token
       const token = generateJWTToken(user, config.jwt.secret, config.jwt.expiresIn);
 
-      // Set JWT as HTTP-only cookie
+      // Get request origin domain for cookie
+      const host = request.headers.host || '';
+      const hostname = host.split(':')[0]; // Remove port if exists
+      
+      // Log de la request i headers per debugging
+      server.log.info(`[DEBUG] Host a auth.ts (login): ${host}, hostname: ${hostname}`);
+      server.log.info(`[DEBUG] Headers a auth.ts: ${JSON.stringify(request.headers)}`);
+      server.log.info(`[DEBUG] Origin a auth.ts: ${request.headers.origin || "no-origin"}`);
+
+      // Set JWT as HTTP-only cookie with strict security settings
       const cookieOptions = {
         httpOnly: true,
-        secure: config.nodeEnv === 'production', // Only secure in production
-        sameSite: config.nodeEnv === 'production' ? 'none' as const : 'lax' as const,
+        secure: true,
+        sameSite: 'none' as const,
         path: '/',
         maxAge: 24 * 60 * 60 * 1000, // 24 hours
       };
       
+      // Log cookie options
+      server.log.info(`[DEBUG] Setting JWT cookie with options: ${JSON.stringify(cookieOptions)}`);
+      
       reply.setCookie('jwt', token, cookieOptions);
 
+      // Return successful login without 2FA
       return reply.code(200).send({
         success: true,
         message: 'Login successful',
         user: userResponse
-        // No token in body
       });
 
     } catch (error) {
@@ -209,25 +259,38 @@ export function setupAuthRoutes(server: FastifyInstance, db: sqlite3.Database): 
   // User Profile Endpoint
   server.get('/profile', async (request: FastifyRequest, reply: FastifyReply) => {
     try {
+      // Log all request headers and cookies for debugging
+      server.log.info(`[DEBUG] Profile request headers: ${JSON.stringify(request.headers)}`);
+      server.log.info(`[DEBUG] Profile request cookies: ${JSON.stringify(request.cookies)}`);
+      
       // Try to get token from Authorization header, else from cookie
       let token;
       const authHeader = request.headers.authorization;
+      
       if (authHeader && authHeader.startsWith('Bearer ')) {
         token = authHeader.split(' ')[1];
+        server.log.info(`[DEBUG] Found token in Authorization header`);
       } else if (request.cookies && request.cookies.jwt) {
         token = request.cookies.jwt;
+        server.log.info(`[DEBUG] Found token in jwt cookie`);
       }
+      
       if (!token) {
+        server.log.error(`[DEBUG] No token found in request`);
         return reply.code(401).send({
           success: false,
           error: 'Authorization token required'
         });
       }
+      
       // Extract and verify token
       let decodedToken;
       try {
         decodedToken = verifyJWTToken(token, config.jwt.secret);
+        server.log.info(`[DEBUG] Successfully verified JWT token for user ID: ${decodedToken.userId}`);
       } catch (error) {
+        server.log.error(`[DEBUG] JWT token verification failed: ${error instanceof Error ? error.message : 'Unknown error'}`);
+      
         return reply.code(401).send({
           success: false,
           error: 'Invalid or expired token'
@@ -257,7 +320,7 @@ export function setupAuthRoutes(server: FastifyInstance, db: sqlite3.Database): 
       return reply.send({
         success: true,
         user: {
-          userId: user.id,
+          id: user.id,
           username: user.username,
           email: user.email
         }

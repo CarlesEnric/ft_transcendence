@@ -3,8 +3,10 @@
  * Sistema de componentes similar a React pero sin dependencias
  */
 
+import { API_CONFIG } from '../config/api';
+
 export interface User {
-  userId: number;
+  id: number;
   username: string;
   email: string;
 }
@@ -34,6 +36,8 @@ export class TwoFactorComponent {
   private onStateChange?: (state: TwoFactorState) => void;
 
   constructor(user: User, onStateChange?: (state: TwoFactorState) => void) {
+    console.log('🔐 TwoFactorComponent constructor called with user:', user);
+    
     this.user = user;
     this.onStateChange = onStateChange;
     this.state = {
@@ -44,7 +48,11 @@ export class TwoFactorComponent {
       success: null
     };
     
+    console.log('🔐 Creating element...');
     this.container = this.createElement();
+    console.log('🔐 Element created:', this.container);
+    
+    console.log('🔐 Loading initial state...');
     this.loadInitialState();
   }
 
@@ -63,7 +71,9 @@ export class TwoFactorComponent {
    * Render del componente (similar a React render)
    */
   private render(): string {
-    return `
+    console.log('🎨 Rendering 2FA component, state:', this.state);
+    
+    const html = `
       <div class="twofa-card">
         <div class="twofa-header">
           <h3 class="twofa-title">🔐 Two-Factor Authentication</h3>
@@ -78,16 +88,23 @@ export class TwoFactorComponent {
         
         ${this.renderMessages()}
       </div>
-      
-      ${this.renderStyles()}
-    `;
+
+
+    <link rel="stylesheet" href="/styles/2fa.css">
+    `; // Cargar estils dels components 2fa
+    
+    console.log('🎨 Generated HTML length:', html.length);
+    return html;
   }
 
   /**
    * Render del contenido según el estado
    */
   private renderContent(): string {
+    console.log('🎨 renderContent called, loading:', this.state.loading, 'enabled:', this.state.enabled);
+    
     if (this.state.loading) {
+      console.log('🎨 Rendering loading state');
       return `
         <div class="twofa-loading">
           <div class="spinner"></div>
@@ -96,6 +113,7 @@ export class TwoFactorComponent {
       `;
     }
 
+    console.log('🎨 Rendering main content');
     return `
       <div class="twofa-status">
         <div class="status-info">
@@ -126,7 +144,10 @@ export class TwoFactorComponent {
    * Render de las acciones disponibles
    */
   private renderActions(): string {
+    console.log('🎨 renderActions called, enabled:', this.state.enabled);
+    
     if (this.state.enabled) {
+      console.log('🎨 Rendering enabled actions');
       return `
         <button class="btn btn-secondary" data-action="regenerate">
           🔄 Regenerate Codes
@@ -136,6 +157,7 @@ export class TwoFactorComponent {
         </button>
       `;
     } else {
+      console.log('🎨 Rendering disabled actions');
       return `
         <button class="btn btn-primary" data-action="enable">
           🔐 Enable 2FA
@@ -158,203 +180,6 @@ export class TwoFactorComponent {
     `;
   }
 
-  /**
-   * Estilos del componente
-   */
-  private renderStyles(): string {
-    return `
-      <style>
-        .twofa-component {
-          max-width: 500px;
-          margin: 0 auto;
-        }
-        
-        .twofa-card {
-          background: white;
-          border-radius: 12px;
-          padding: 24px;
-          box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-          border: 1px solid #e5e7eb;
-        }
-        
-        .twofa-header {
-          margin-bottom: 20px;
-        }
-        
-        .twofa-title {
-          margin: 0 0 8px 0;
-          color: #1f2937;
-          font-size: 20px;
-          font-weight: 600;
-        }
-        
-        .twofa-description {
-          margin: 0;
-          color: #6b7280;
-          font-size: 14px;
-          line-height: 1.5;
-        }
-        
-        .twofa-loading {
-          display: flex;
-          align-items: center;
-          gap: 12px;
-          padding: 20px 0;
-          justify-content: center;
-          color: #6b7280;
-        }
-        
-        .spinner {
-          width: 20px;
-          height: 20px;
-          border: 2px solid #e5e7eb;
-          border-top: 2px solid #3b82f6;
-          border-radius: 50%;
-          animation: spin 1s linear infinite;
-        }
-        
-        @keyframes spin {
-          0% { transform: rotate(0deg); }
-          100% { transform: rotate(360deg); }
-        }
-        
-        .twofa-status {
-          display: flex;
-          justify-content: space-between;
-          align-items: center;
-          gap: 16px;
-        }
-        
-        .status-info {
-          display: flex;
-          align-items: center;
-          gap: 12px;
-          flex: 1;
-        }
-        
-        .status-indicator {
-          font-size: 24px;
-        }
-        
-        .status-indicator.enabled {
-          color: #059669;
-        }
-        
-        .status-indicator.disabled {
-          color: #ef4444;
-        }
-        
-        .status-title {
-          font-weight: 600;
-          color: #1f2937;
-          font-size: 16px;
-        }
-        
-        .status-subtitle {
-          font-size: 14px;
-          color: #6b7280;
-        }
-        
-        .status-actions {
-          display: flex;
-          gap: 8px;
-          flex-wrap: wrap;
-        }
-        
-        .btn {
-          padding: 8px 16px;
-          border: none;
-          border-radius: 6px;
-          font-size: 14px;
-          font-weight: 500;
-          cursor: pointer;
-          transition: all 0.2s;
-          white-space: nowrap;
-        }
-        
-        .btn:hover {
-          transform: translateY(-1px);
-        }
-        
-        .btn:disabled {
-          opacity: 0.5;
-          cursor: not-allowed;
-          transform: none;
-        }
-        
-        .btn-primary {
-          background: #3b82f6;
-          color: white;
-        }
-        
-        .btn-primary:hover:not(:disabled) {
-          background: #2563eb;
-        }
-        
-        .btn-secondary {
-          background: #6b7280;
-          color: white;
-        }
-        
-        .btn-secondary:hover:not(:disabled) {
-          background: #4b5563;
-        }
-        
-        .btn-danger {
-          background: #ef4444;
-          color: white;
-        }
-        
-        .btn-danger:hover:not(:disabled) {
-          background: #dc2626;
-        }
-        
-        .btn-success {
-          background: #059669;
-          color: white;
-        }
-        
-        .btn-success:hover:not(:disabled) {
-          background: #047857;
-        }
-        
-        .twofa-messages {
-          margin-top: 16px;
-        }
-        
-        .message {
-          padding: 12px;
-          border-radius: 6px;
-          font-size: 14px;
-          font-weight: 500;
-          margin-bottom: 8px;
-        }
-        
-        .message.error {
-          background: #fef2f2;
-          border: 1px solid #fecaca;
-          color: #b91c1c;
-        }
-        
-        .message.success {
-          background: #f0fdf4;
-          border: 1px solid #bbf7d0;
-          color: #166534;
-        }
-        
-        @media (max-width: 480px) {
-          .twofa-status {
-            flex-direction: column;
-            align-items: stretch;
-          }
-          
-          .status-actions {
-            justify-content: center;
-          }
-        }
-      </style>
-    `;
-  }
 
   /**
    * Adjuntar event listeners (similar a useEffect)
@@ -392,14 +217,15 @@ export class TwoFactorComponent {
    */
   private async loadInitialState(): Promise<void> {
     try {
-      const response = await fetch('/api/auth/2fa/status', {
+      const response = await fetch(API_CONFIG.AUTH.TWO_FA.STATUS, {
         credentials: 'include'
       });
       const data = await response.json();
       
       if (data.success) {
+        console.log('🔄 API response data:', data);
         this.setState({
-          enabled: data.enabled,
+          enabled: Boolean(data.enabled), // Convert to boolean explicitly
           backupCodesRemaining: data.backupCodesRemaining || 0,
           loading: false,
           error: null
@@ -423,7 +249,7 @@ export class TwoFactorComponent {
    */
   private async handleEnable2FA(): Promise<void> {
     try {
-      const response = await fetch('/api/auth/2fa/setup', {
+      const response = await fetch(API_CONFIG.AUTH.TWO_FA.SETUP, {
         credentials: 'include'
       });
       const data = await response.json();
@@ -480,7 +306,7 @@ export class TwoFactorComponent {
    */
   private async handleRegenerateBackupCodes(): Promise<void> {
     try {
-      const response = await fetch('/api/auth/2fa/regenerate-backup-codes', {
+      const response = await fetch(API_CONFIG.AUTH.TWO_FA.REGENERATE_BACKUP, {
         method: 'POST',
         credentials: 'include'
       });
@@ -516,7 +342,9 @@ export class TwoFactorComponent {
    * Actualizar estado (similar a setState de React)
    */
   private setState(newState: Partial<TwoFactorState>): void {
+    console.log('🔄 setState called with:', newState);
     this.state = { ...this.state, ...newState };
+    console.log('🔄 New state:', this.state);
     
     // Limpiar mensajes después de 5 segundos
     if (newState.error || newState.success) {
@@ -529,14 +357,28 @@ export class TwoFactorComponent {
     if (this.onStateChange) {
       this.onStateChange(this.state);
     }
+    
+    console.log('🔄 Calling updateComponent...');
+    this.updateComponent();
   }
 
   /**
    * Actualizar el componente en el DOM
    */
   private updateComponent(): void {
-    this.container.innerHTML = this.render();
+    console.log('🔄 updateComponent called');
+    const newHTML = this.render();
+    console.log('🔄 New HTML generated, length:', newHTML.length);
+    this.container.innerHTML = newHTML;
+    console.log('🔄 innerHTML updated');
+    
+    // Re-attach event listeners after updating innerHTML
     this.attachEventListeners(this.container);
+    console.log('🔄 Event listeners re-attached');
+    
+    // Debug: Check if container is actually in DOM
+    console.log('🔄 Container parent:', this.container.parentElement);
+    console.log('🔄 Container visible:', this.container.offsetWidth > 0 && this.container.offsetHeight > 0);
   }
 
   /**

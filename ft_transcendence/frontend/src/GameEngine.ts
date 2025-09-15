@@ -1,31 +1,51 @@
-/**
+/*
  * Main App Class - SPA Router y Estado Global
- */
+*/
 
-import { TwoFactorComponent } from './components/AuthenticationForm.js';
-import TwoFactorSetupModal from './components/SecuritySetupModal.js';
-import TwoFactorDisableModal from './components/SecurityDisableModal.js';
-import TwoFactorBackupCodesModal from './components/BackupCodesModal.js';
+import { renderLoginPage } from './pages/LoginPage';
+import { renderLandingPage } from './pages/LandingPage';
+import { renderHomePage } from './pages/HomePage';
+import { TwoFactorComponent } from './components/AuthenticationForm';
+import TwoFactorSetupModal from './components/SecuritySetupModal';
+import TwoFactorDisableModal from './components/SecurityDisableModal';
+import TwoFactorBackupCodesModal from './components/BackupCodesModal';
+import { API_CONFIG } from './config/api';
 
 export interface User {
-  userId: number;
+  id: number;
   username: string;
   email: string;
 }
 
+/*
+interface User {
+  id: number;
+  username: string;
+  email: string;
+  avatar?: string;
+  stats?: {
+    gamesPlayed: number;
+    gamesWon: number;
+    winRate: number;
+    ranking: number;
+  };
+}
+*/
+
 export interface AppState {
   user: User | null;
   loading: boolean;
-  currentView: 'login' | 'dashboard' | 'pong' | 'matches';
+  currentView: 'landing' | 'login' | '2fa' | 'dashboard' | 'pong' | 'matches';
   showGame: boolean;
   theme: 'dark' | 'light';
+  pendingUser?: User | null;
 }
 
 export class App {
   private state: AppState = {
     user: null,
     loading: true,
-    currentView: 'dashboard',
+    currentView: 'landing',
     showGame: false,
     theme: 'dark'
   };
@@ -33,21 +53,87 @@ export class App {
   private container: HTMLElement | null = null;
 
   constructor() {
-    this.state = {
-      user: null,
-      loading: true,
-      currentView: 'dashboard',
-      showGame: false,
-      theme: 'dark'
-    };
+  }
+
+  /**
+   * Función pública para cambiar la vista actual
+   */
+  public setCurrentView(view: AppState['currentView']): void {
+    this.setState({ currentView: view });
+    
+    // Mantenim sincronitzada la URL amb la vista
+    if (view === 'dashboard') {
+      window.history.pushState({}, '', '/home');
+    } else if (view !== '2fa') { // Evitem canviar la URL per a vistes especials com 2fa
+      window.history.pushState({}, '', '/' + view);
+    }
   }
 
   public mount(container: HTMLElement): void {
     this.container = container;
     this.init();
   }
+  
+  /**
+   * Funció pública per mostrar el modal de configuració de 2FA
+   */
+  public showTwoFactorSetup(): void {
+    // Cridar a l'API per iniciar el procés de configuració
+    fetch(API_CONFIG.AUTH.TWO_FA.SETUP, {
+      method: 'POST',
+      credentials: 'include',
+      headers: {
+        'Content-Type': 'application/json',
+        'Accept': 'application/json'
+      }
+    })
+    .then(response => response.json())
+    .then(data => {
+      if (data.success && data.setup) {
+        // Mostrar modal de configuració
+        const setupModal = new TwoFactorSetupModal(data.setup, this.state.user!);
+        setupModal.show();
+        setupModal.onSuccess = () => {
+          // Actualitzar l'estat global
+          console.log('2FA setup successful');
+          // Recarregar la pàgina per actualitzar l'estat
+          window.location.reload();
+        };
+      } else {
+        console.error('Failed to fetch 2FA setup data');
+        alert(data.error || 'No s\'ha pogut iniciar la configuració 2FA');
+      }
+    })
+    .catch(error => {
+      console.error('Error fetching 2FA setup:', error);
+      alert('Error de connexió. Torneu a intentar-ho més tard.');
+    });
+  }
+  
+  /**
+   * Funció pública per mostrar el modal per desactivar 2FA
+   */
+  public showTwoFactorDisable(): void {
+    // Cridar a l'API per desactivar 2FA
+    const disableModal = new TwoFactorDisableModal();
+    disableModal.show();
+    disableModal.onSuccess = () => {
+      console.log('2FA disabled successfully');
+      // Recarregar la pàgina per actualitzar l'estat
+      window.location.reload();
+    };
+  }
 
   private async init(): Promise<void> {
+    // Detect if redirected from Google OAuth with 2FA required
+    const params = new URLSearchParams(window.location.search);
+    if (params.get('twoFactorRequired') === '1') {
+      // Show 2FA form directly
+      this.setState({ currentView: '2fa', loading: false });
+      // Optionally, clear the param from the URL for cleanliness
+      window.history.replaceState({}, document.title, window.location.pathname);
+      return;
+    }
     await this.checkAuth();
     this.render();
   }
@@ -56,18 +142,54 @@ export class App {
    * Verificar estado de autenticación
    */
   private async checkAuth(): Promise<void> {
+    console.log("Running checkAuth() - Checking authentication status");
+    
+    // Check if we have user data in localStorage
+    const storedUser = localStorage.getItem("user");
+    if (storedUser) {
+      try {
+        const userData = JSON.parse(storedUser);
+        console.log("Found user data in localStorage:", userData);
+        
+        // If we have localStorage user data, we can use it instead of API call
+        this.setState({ user: userData, loading: false, currentView: 'dashboard' });
+        console.log("Set user from localStorage, redirecting to dashboard");
+        return;
+      } catch (e) {
+        console.error("Error parsing stored user:", e);
+        localStorage.removeItem("user");
+      }
+    }
+    
+    // If no localStorage data, try to get profile from API
     try {
-      const response = await fetch('https://localhost:3000/api/auth/profile', { 
-        credentials: 'include' 
+      console.log("Calling profile API:", API_CONFIG.AUTH.PROFILE);
+      
+      const response = await fetch(API_CONFIG.AUTH.PROFILE, { 
+        credentials: 'include',
+        headers: {
+          'Accept': 'application/json'
+        }
       });
+      
+      console.log("Profile API response status:", response.status);
+      
       const data = await response.json();
+      console.log("Profile API response data:", data);
       
       if (response.ok && data.success) {
-        this.setState({ user: data.user, loading: false });
+        // Store user data in localStorage for future use
+        localStorage.setItem("user", JSON.stringify(data.user));
+        console.log("Stored user data in localStorage");
+        
+        this.setState({ user: data.user, loading: false, currentView: 'dashboard' });
+        console.log("Authentication successful, redirecting to dashboard");
       } else {
         this.setState({ user: null, loading: false });
+        console.log("Authentication failed, staying on current view");
       }
-    } catch {
+    } catch (error) {
+      console.error("Error fetching profile:", error);
       this.setState({ user: null, loading: false });
     }
   }
@@ -91,8 +213,21 @@ export class App {
       return;
     }
 
+    // Si estem en vista 2FA, mostrar el formulari 2FA independentment de l'estat d'usuari
+    if (this.state.currentView === '2fa') {
+      this.container.innerHTML = this.renderTwoFactorForm();
+      this.attachEventListeners();
+      return;
+    }
+
     if (!this.state.user) {
-      this.container.innerHTML = this.renderLogin();
+      // Si no hi ha usuari autenticat, comprovar la vista actual
+      if (this.state.currentView === 'landing') {
+        renderLandingPage();
+      } else {
+        // Per a vistes 'login' o qualsevol altra vista quan no hi ha usuari
+        renderLoginPage();
+      }
     } else {
       this.container.innerHTML = this.renderApp();
     }
@@ -115,113 +250,7 @@ export class App {
     `;
   }
 
-  /**
-   * Render login
-   */
-  private renderLogin(): string {
-    return `
-      <div class="min-h-screen bg-gray-900 flex items-center justify-center p-4">
-        <div class="bg-gray-800 p-8 rounded-xl shadow-2xl w-full max-w-md border border-gray-700">
-          <div class="text-center mb-8">
-            <h1 class="text-4xl font-bold text-white mb-2">FT Transcendence</h1>
-            <p class="text-gray-300">Welcome to the ultimate gaming experience</p>
-          </div>
-          
-          <form id="login-form" class="space-y-6">
-            <div>
-              <label class="block text-white text-sm font-medium mb-2">Email</label>
-              <input 
-                type="email" 
-                id="email" 
-                required
-                class="w-full px-4 py-3 bg-gray-700 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                placeholder="your@email.com"
-              >
-            </div>
-            
-            <div>
-              <label class="block text-white text-sm font-medium mb-2">Password</label>
-              <input 
-                type="password" 
-                id="password" 
-                required
-                class="w-full px-4 py-3 bg-gray-700 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                placeholder="••••••••"
-              >
-            </div>
-            
-            <button 
-              type="submit"
-              class="w-full bg-gradient-to-r from-blue-500 to-purple-600 text-white font-semibold py-3 px-6 rounded-lg hover:from-blue-600 hover:to-purple-700 transition duration-300 transform hover:scale-105"
-            >
-            Sign In
-            </button>
-          </form>
-          
-          <!-- Google OAuth Button -->
-          <button 
-            id="google-login"
-            class="w-full mt-4 bg-white text-gray-700 font-semibold py-3 px-6 rounded-lg border border-gray-300 hover:bg-gray-50 transition duration-300 flex items-center justify-center space-x-2"
-          >
-            <svg width="20" height="20" viewBox="0 0 24 24">
-              <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
-              <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
-              <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/>
-              <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>
-            </svg>
-            <span>Continue with Google</span>
-          </button>
-          
-          <div class="mt-6 text-center">
-            <button 
-              id="show-register"
-              class="text-cyan-300 hover:text-cyan-200 text-sm transition-colors"
-            >
-              Don't have an account? <span class="font-semibold">Register here</span>
-            </button>
-          </div>
-          
-          <div id="register-form" class="hidden mt-6 pt-6 border-t border-gray-600">
-            <form id="register-form-actual" class="space-y-4">
-              <div>
-                <input 
-                  type="text" 
-                  id="reg-username" 
-                  required
-                  class="w-full px-4 py-3 bg-gray-700 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent"
-                  placeholder="Username"
-                >
-              </div>
-              <div>
-                <input 
-                  type="email" 
-                  id="reg-email" 
-                  required
-                  class="w-full px-4 py-3 bg-gray-700 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent"
-                  placeholder="Email"
-                >
-              </div>
-              <div>
-                <input 
-                  type="password" 
-                  id="reg-password" 
-                  required
-                  class="w-full px-4 py-3 bg-gray-700 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent"
-                  placeholder="Password"
-                >
-              </div>
-              <button 
-                type="submit"
-                class="w-full bg-gradient-to-r from-green-500 to-green-600 text-white font-semibold py-3 px-6 rounded-lg hover:from-green-600 hover:to-green-700 transition duration-300 transform hover:scale-105"
-              >
-                ✨ Create Account
-              </button>
-            </form>
-          </div>
-        </div>
-      </div>
-    `;
-  }
+  // ...eliminada la funció renderLogin: ara es crida directament renderLoginPage()...
 
   /**
    * Render aplicación principal
@@ -279,14 +308,129 @@ export class App {
    */
   private renderCurrentView(): string {
     switch (this.state.currentView) {
+      case 'landing':
+        renderLandingPage();
+        return '';
+      case 'login':
+        renderLoginPage();
+        return '';
+      case '2fa':
+        return this.renderTwoFactorForm();
       case 'dashboard':
-        return this.renderDashboard();
+        renderHomePage(); // Utilitzem la funció renderHomePage en comptes de renderDashboard
+        return '';
       case 'pong':
         return this.renderPong();
       case 'matches':
         return this.renderMatches();
       default:
-        return this.renderDashboard();
+        renderHomePage(); // Utilitzem la funció renderHomePage en comptes de renderDashboard
+        return '';
+    }
+  }
+
+  /**
+   * Renderitzar formulari de codi 2FA
+   */
+  private renderTwoFactorForm(): string {
+    return `
+      <div class="min-h-screen bg-gray-900 flex items-center justify-center p-4">
+        <div class="bg-gray-800 p-8 rounded-xl shadow-2xl w-full max-w-md border border-gray-700">
+          <div class="text-center mb-8">
+            <div class="text-6xl mb-4">🔐</div>
+            <h1 class="text-3xl font-bold text-white mb-2">Verificació 2FA</h1>
+            <p class="text-gray-300">Introdueix el codi de l'aplicació d'autenticació</p>
+          </div>
+          
+          <form id="twofa-form" class="space-y-6">
+            <div>
+              <label class="block text-white text-sm font-medium mb-2">Codi de verificació</label>
+              <input 
+                type="text" 
+                id="twofa-code" 
+                maxlength="6"
+                pattern="[0-9]{6}"
+                required
+                autocomplete="one-time-code"
+                class="w-full px-4 py-3 bg-gray-700 border border-gray-600 rounded-lg text-white text-center text-2xl font-mono tracking-widest placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                placeholder="000000"
+                autofocus
+              >
+              <p class="text-gray-400 text-xs mt-2">Introdueix el codi de 6 dígits de la teva aplicació d'autenticació</p>
+            </div>
+            
+            <button 
+              type="submit"
+              class="w-full bg-gradient-to-r from-blue-500 to-purple-600 text-white font-semibold py-3 px-6 rounded-lg hover:from-blue-600 hover:to-purple-700 transition duration-300 transform hover:scale-105"
+            >
+              Verificar
+            </button>
+          </form>
+          
+          <div class="mt-6 text-center">
+            <p class="text-gray-400 text-sm">
+              No pots accedir? 
+              <a href="#" class="text-cyan-300 hover:text-cyan-200 transition-colors" onclick="alert('Contacta amb l\'administrador per obtenir ajuda.')">
+                Necessites ajuda?
+              </a>
+            </p>
+          </div>
+        </div>
+      </div>
+    `;
+  }
+
+  /**
+   * Gestionar enviament de codi 2FA
+   */
+  private async handleTwoFactorSubmit(e: Event): Promise<void> {
+    e.preventDefault();
+    const codeInput = document.getElementById('twofa-code') as HTMLInputElement;
+    const code = codeInput.value.trim();
+    
+    if (!code) {
+      alert('Si us plau, introdueix el codi 2FA');
+      return;
+    }
+    
+    try {
+      const response = await fetch(API_CONFIG.AUTH.TWO_FA.VERIFY, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
+        body: JSON.stringify({ token: code })
+      });
+      
+      const data = await response.json();
+      
+      if (data.success) {
+        console.log('2FA verification successful', data);
+        
+        // If the response includes user data, we're now fully authenticated
+        if (data.user) {
+          this.setState({
+            user: data.user,
+            currentView: 'dashboard',
+            loading: false,
+            pendingUser: null
+          });
+        } else {
+          // Check authentication status
+          await this.checkAuth();
+        }
+      } else {
+        console.error('2FA verification failed:', data.error);
+        alert(data.error || 'Codi 2FA incorrecte');
+        // Clear the input for retry
+        codeInput.value = '';
+        codeInput.focus();
+      }
+    } catch (error) {
+      console.error('2FA verification error:', error);
+      alert('Error de xarxa. Si us plau, torna-ho a intentar.');
+      // Clear the input for retry
+      codeInput.value = '';
+      codeInput.focus();
     }
   }
 
@@ -382,7 +526,7 @@ export class App {
             <div class="flex justify-between items-center py-3">
               <div>
                 <label class="block text-sm font-medium text-gray-400">Player ID</label>
-                <p class="text-white font-semibold">#${this.state.user?.userId}</p>
+                <p class="text-white font-semibold">#${this.state.user?.id}</p>
               </div>
               <div class="text-2xl">🆔</div>
             </div>
@@ -538,10 +682,11 @@ export class App {
    * Adjuntar event listeners
    */
   private attachEventListeners(): void {
-    // Login form
-    const loginForm = document.getElementById('login-form');
-    if (loginForm) {
-      loginForm.addEventListener('submit', this.handleLogin.bind(this));
+  // ...eliminat login-form antic: ara la SPA s'encarrega del login...
+    // TwoFactor form
+    const twofaForm = document.getElementById('twofa-form');
+    if (twofaForm) {
+      twofaForm.addEventListener('submit', this.handleTwoFactorSubmit.bind(this));
     }
 
     // Google login
@@ -550,22 +695,7 @@ export class App {
       googleLogin.addEventListener('click', this.handleGoogleLogin.bind(this));
     }
 
-    // Register toggle
-    const showRegister = document.getElementById('show-register');
-    if (showRegister) {
-      showRegister.addEventListener('click', () => {
-        const registerForm = document.getElementById('register-form');
-        if (registerForm) {
-          registerForm.classList.toggle('hidden');
-        }
-      });
-    }
-
-    // Register form
-    const registerForm = document.getElementById('register-form-actual');
-    if (registerForm) {
-      registerForm.addEventListener('submit', this.handleRegister.bind(this));
-    }
+  // ...eliminat registre antic: ara la SPA s'encarrega del registre...
 
     // Navigation
     const navBtns = document.querySelectorAll('.nav-btn-gaming');
@@ -638,10 +768,10 @@ export class App {
   /**
    * Initialize Pong Game
    */
-  private initializePongGame(): void {
+  private async initializePongGame(): Promise<void> {
     const canvas = document.getElementById('pongCanvas');
     if (canvas && !pongGame) {
-      pongGame = new PongGame('pongCanvas');
+      pongGame = await PongGame.create('pongCanvas');
     }
   }
 
@@ -652,39 +782,7 @@ export class App {
     // Los event listeners se configuran en attachEventListeners
   }
 
-  /**
-   * Manejar login
-   */
-  private async handleLogin(e: Event): Promise<void> {
-    e.preventDefault();
-    
-    const email = (document.getElementById('email') as HTMLInputElement).value;
-    const password = (document.getElementById('password') as HTMLInputElement).value;
-
-    try {
-      const response = await fetch('https://localhost:3000/api/auth/login', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        credentials: 'include',
-        body: JSON.stringify({ email, password })
-      });
-
-      const data = await response.json();
-
-      if (data.success) {
-        this.setState({
-          user: data.user,
-          currentView: 'dashboard',
-          loading: false
-        });
-      } else {
-        alert(data.error || 'Login failed');
-      }
-    } catch (error) {
-      console.error('Login error:', error);
-      alert('Network error occurred');
-    }
-  }
+  // ...eliminat handler de login antic: ara la SPA s'encarrega del login...
 
   /**
    * Manejar registro
@@ -694,7 +792,7 @@ export class App {
    */
   private async handleLogout(): Promise<void> {
     try {
-      const response = await fetch('https://localhost:3000/api/auth/logout', {
+      const response = await fetch(API_CONFIG.AUTH.LOGOUT, {
         method: 'POST',
         credentials: 'include'
       });
@@ -702,7 +800,7 @@ export class App {
       // Limpiar estado independientemente de la respuesta
       this.setState({
         user: null,
-        currentView: 'login',
+        currentView: 'landing',
         loading: false
       });
 
@@ -712,7 +810,7 @@ export class App {
       // Aún así limpiar el estado local
       this.setState({
         user: null,
-        currentView: 'login',
+        currentView: 'landing',
         loading: false
       });
     }
@@ -724,56 +822,14 @@ export class App {
   private async handleGoogleLogin(): Promise<void> {
     try {
       // Redirigir a Google OAuth
-      window.location.href = 'https://localhost:3000/api/auth/google';
+      window.location.href = API_CONFIG.AUTH.GOOGLE;
     } catch (error) {
       console.error('Error en Google login:', error);
       this.showToast('Error al conectar con Google', 'error');
     }
   }
 
-  /**
-   * Manejar registro
-   */
-  private async handleRegister(e: Event): Promise<void> {
-    e.preventDefault();
-    
-    const form = e.target as HTMLFormElement;
-    const formData = new FormData(form);
-    
-    const email = formData.get('email') as string;
-    const password = formData.get('password') as string;
-    const confirmPassword = formData.get('confirmPassword') as string;
-    
-    if (password !== confirmPassword) {
-      this.showToast('Las contraseñas no coinciden', 'error');
-      return;
-    }
-    
-    try {
-      const response = await fetch('https://localhost:3000/api/auth/register', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ email, password }),
-      });
-      
-      if (response.ok) {
-        this.showToast('Registro exitoso. Por favor inicia sesión.', 'success');
-        const registerForm = document.getElementById('register-form');
-        if (registerForm) {
-          registerForm.classList.add('hidden');
-        }
-        form.reset();
-      } else {
-        const errorData = await response.json();
-        this.showToast(errorData.message || 'Error en el registro', 'error');
-      }
-    } catch (error) {
-      console.error('Error en registro:', error);
-      this.showToast('Error de conexión', 'error');
-    }
-  }
+  // ...eliminat handler de registre antic: ara la SPA s'encarrega del registre...
 
   /**
    * Mostrar notificación toast
@@ -800,95 +856,50 @@ export class App {
  * Pong Game Class with Babylon.js 3D Rendering
  * Handles WebSocket connection and 3D game rendering
  */
+
+import { PongRenderer } from './components/PongRenderer.js';
+import { RoomManager, Room } from './components/RoomManager.js';
+import { PhysicsEngine, GamePhysicsState } from './components/PhysicsEngine.js';
+
 class PongGame {
   private canvas: HTMLCanvasElement;
-  private engine: any; // BABYLON.Engine
-  private scene: any; // BABYLON.Scene
+  private renderer: PongRenderer | null = null;
   private ws: WebSocket | null = null;
   private gameState: any = null;
   private isRunning = false;
-  private ball: any = null;
-  private paddleLeft: any = null;
-  private paddleRight: any = null;
 
-  constructor(canvasId: string) {
-    this.canvas = document.getElementById(canvasId) as HTMLCanvasElement;
-    this.setupBabylonScene();
-    this.setupEventListeners();
+  // Motor de física modular (preparat per a ús incremental)
+  private physics: PhysicsEngine | null = null;
+
+  private constructor(canvas: HTMLCanvasElement) {
+    this.canvas = canvas;
   }
 
-  private async setupBabylonScene(): Promise<void> {
-    // Dynamically import Babylon.js
-    const BABYLON = await import('@babylonjs/core');
-
-    // 1) Configure Babylon.js engine
-    this.engine = new BABYLON.Engine(this.canvas, true, { 
-      preserveDrawingBuffer: true, 
-      stencil: true 
-    });
-    
-    this.scene = new BABYLON.Scene(this.engine);
-    this.scene.clearColor = new BABYLON.Color4(0.05, 0.05, 0.15, 1);
-
-    // Fixed camera to view the game from above
-    const camera = new BABYLON.FreeCamera("camera", new BABYLON.Vector3(0, 20, 0), this.scene);
-    camera.setTarget(new BABYLON.Vector3(0, 0, 0));
-    camera.rotation.x = Math.PI / 2; // Looking down
-    
-    // Adjust field of view so the field fills the canvas perfectly
-    camera.fov = 0.8; // FOV adjusted to see the entire field
-    
-    // IMPORTANT: Disable camera controls to avoid interference
-    camera.inputs.clear();
-
-    // Lighting
-    const light = new BABYLON.HemisphericLight("light", new BABYLON.Vector3(0, 1, 0), this.scene);
-    light.intensity = 0.8;
-
-    // Game field (ground) - exact game dimensions (16x24)
-    const ground = BABYLON.MeshBuilder.CreateGround("ground", { width: 16, height: 24 }, this.scene);
-    const groundMaterial = new BABYLON.StandardMaterial("groundMat", this.scene);
-    groundMaterial.diffuseColor = new BABYLON.Color3(0.1, 0.3, 0.1);
-    ground.material = groundMaterial;
-
-    // Center line
-    const centerLine = BABYLON.MeshBuilder.CreateBox("centerLine", { width: 0.1, height: 0.1, depth: 24 }, this.scene);
-    const centerMaterial = new BABYLON.StandardMaterial("centerMat", this.scene);
-    centerMaterial.diffuseColor = new BABYLON.Color3(1, 1, 1);
-    centerLine.material = centerMaterial;
-
-    // Ball
-    this.ball = BABYLON.MeshBuilder.CreateSphere("ball", { diameter: 0.5 }, this.scene);
-    const ballMaterial = new BABYLON.StandardMaterial("ballMat", this.scene);
-    ballMaterial.diffuseColor = new BABYLON.Color3(1, 1, 1);
-    ballMaterial.emissiveColor = new BABYLON.Color3(0.2, 0.2, 0.2);
-    this.ball.material = ballMaterial;
-    this.ball.position.y = 0.5;
-
-    // Paddles
-    this.paddleLeft = BABYLON.MeshBuilder.CreateBox("paddleL", { width: 0.3, height: 0.5, depth: 2 }, this.scene);
-    this.paddleRight = BABYLON.MeshBuilder.CreateBox("paddleR", { width: 0.3, height: 0.5, depth: 2 }, this.scene);
-    
-    const paddleMaterial = new BABYLON.StandardMaterial("paddleMat", this.scene);
-    paddleMaterial.diffuseColor = new BABYLON.Color3(0.3, 0.8, 0.3);
-    paddleMaterial.emissiveColor = new BABYLON.Color3(0.1, 0.3, 0.1);
-    
-    this.paddleLeft.material = paddleMaterial;
-    this.paddleRight.material = paddleMaterial;
-    this.paddleLeft.position.x = -7.5;
-    this.paddleLeft.position.y = 0.5;
-    this.paddleRight.position.x = 7.5;
-    this.paddleRight.position.y = 0.5;
-
-    // Start render loop
-    this.engine.runRenderLoop(() => {
-      this.scene.render();
-    });
-
-    // Handle window resize
-    window.addEventListener('resize', () => {
-      this.engine.resize();
-    });
+  public static async create(canvasId: string): Promise<PongGame> {
+    const canvas = document.getElementById(canvasId) as HTMLCanvasElement;
+    const game = new PongGame(canvas);
+    game.renderer = await PongRenderer.create(canvas);
+    game.setupEventListeners();
+    // Inicialització real de la física (sincronitzada amb el renderitzat)
+    // Ajustem el tauler perquè tot sigui visible (marge visual de 40px a dalt/baix)
+    const canvasWidth = 1400;
+    const canvasHeight = 900;
+    const margin = 40;
+    const bounds = { width: canvasWidth, height: canvasHeight - margin * 2 };
+    const initialPhysicsState: GamePhysicsState = {
+      ball: {
+        position: { x: canvasWidth / 2, y: bounds.height / 2 },
+        velocity: { x: 0.2, y: 0.15 },
+        radius: 20,
+      },
+      paddles: {
+        left: { position: bounds.height / 2, height: 180, width: 30 },
+        right: { position: bounds.height / 2, height: 180, width: 30 },
+      },
+      bounds,
+    };
+    game.physics = new PhysicsEngine(initialPhysicsState);
+    return game;
   }
 
   private setupEventListeners(): void {
@@ -959,7 +970,7 @@ class PongGame {
 
   private connectWebSocket(): void {
     try {
-      this.ws = new WebSocket('wss://localhost:3000/ws/game');
+      this.ws = new WebSocket(API_CONFIG.GAME.WS);
 
       this.ws.onopen = () => {
         console.log('🔌 WebSocket connected to game service');
@@ -1010,18 +1021,30 @@ class PongGame {
   }
 
   private updateGameObjects(): void {
-    if (!this.gameState || !this.ball) return;
-
-    const { ball, paddles, score } = this.gameState;
-    
-    // Update 3D object positions
-    this.ball.position.x = ball.x;
-    this.ball.position.z = ball.z;
-    this.paddleLeft.position.z = paddles.left;
-    this.paddleRight.position.z = paddles.right;
-
-    // Update score display
-    this.updateScoreDisplay(score);
+    // Si tenim estat del servidor, prioritzem-lo (multiplayer)
+    if (this.gameState && this.renderer) {
+      const { ball, paddles, score } = this.gameState;
+      if (this.renderer.ball) {
+        this.renderer.ball.position.x = ball.x;
+        this.renderer.ball.position.z = ball.z;
+      }
+      if (this.renderer.paddleLeft) this.renderer.paddleLeft.position.z = paddles.left;
+      if (this.renderer.paddleRight) this.renderer.paddleRight.position.z = paddles.right;
+      this.updateScoreDisplay(score);
+      return;
+    }
+    // Si no, simulem física local (singleplayer/demo)
+    if (this.physics && this.renderer) {
+      this.physics.update(16); // 16 ms ~ 60 FPS
+      const state = this.physics.getState();
+      // Sincronitza el renderitzat amb la física
+      if (this.renderer.ball) {
+        this.renderer.ball.position.x = state.ball.position.x;
+        this.renderer.ball.position.z = state.ball.position.y;
+      }
+      if (this.renderer.paddleLeft) this.renderer.paddleLeft.position.z = state.paddles.left.position;
+      if (this.renderer.paddleRight) this.renderer.paddleRight.position.z = state.paddles.right.position;
+    }
   }
 
   private updateScoreDisplay(score: any): void {
@@ -1034,8 +1057,8 @@ class PongGame {
   }
 
   public dispose(): void {
-    if (this.engine) {
-      this.engine.dispose();
+    if (this.renderer) {
+      this.renderer.dispose();
     }
     if (this.ws) {
       this.ws.close();
@@ -1045,3 +1068,11 @@ class PongGame {
 
 // Global Pong game instance
 let pongGame: PongGame | null = null;
+
+// RoomManager singleton per gestionar sales de joc multiplayer
+export const roomManager = new RoomManager();
+
+// Exemple d'ús bàsic (per a futures funcionalitats):
+// const myRoom = roomManager.createRoom('player1');
+// roomManager.joinRoom(myRoom.id, 'player2');
+// const allRooms = roomManager.listRooms();

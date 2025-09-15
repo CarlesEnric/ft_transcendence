@@ -1,106 +1,41 @@
-// src/controllers/matchesController.ts
+import type { FastifyReply, FastifyRequest } from 'fastify';
+import { getAuthUser } from '../plugins/auth.js';
 
-import type { FastifyRequest, FastifyReply } from 'fastify';
-import { PostMatch } from '../schemas/match.validation.schema.js';
-import type { infer as zInfer } from 'zod';
-
-type MatchBody = zInfer<typeof PostMatch>;
-
-export async function createMatch(
-  request: FastifyRequest<{ Body: MatchBody }>,
-  reply: FastifyReply
-) {
-  const parse = PostMatch.safeParse(request.body);
-  if (!parse.success) {
-    return reply
-      .code(400)
-      .send({ error: 'Datos inválidos', detalles: parse.error.format() });
-  }
-
-  const { player1, player2, score1, score2 } = parse.data;
-  const winner = score1 > score2 ? player1 : player2;
-  const date = new Date().toISOString();
-  // Get userId from x-user-id header (set by API Gateway)
-  const userId = request.headers['x-user-id'] ? String(request.headers['x-user-id']) : undefined;
-
-  let savedInDb = false;
-
-  if (userId) {
-    await request.db.run(
-      `INSERT INTO matches(player1, player2, score1, score2, winner, date) VALUES (?, ?, ?, ?, ?, ?)`,
-      player1, player2, score1, score2, winner, date
-    );
-
-    const existing = await request.db.get(
-      `SELECT 1 FROM dashboard WHERE userId = ?`,
-      userId
-    );
-    if (!existing)
-    {
-      await request.db.run(
-        `INSERT INTO dashboard(userId, games_played, games_won, games_lost) VALUES (?, 1, ?, ?)`,
-        userId, winner === userId ? 1 : 0, winner === userId ? 0 : 1
-      );
-    }
-    else
-    {
-      await request.db.run(
-        `UPDATE dashboard SET games_played = games_played + 1, games_won = games_won + ?, games_lost = games_lost + ? WHERE userId = ?`,
-        winner === userId ? 1 : 0, winner === userId ? 0 : 1, userId
-      );
-    }
-    savedInDb = true;
-  }
-
-  reply.code(201).send({
-    message: 'Partido procesado',
-    savedInDb,
-    match: { player1, player2, score1, score2, winner, date }
-  });
-}
-
-export async function listMatches(
-  request: FastifyRequest,
-  reply: FastifyReply
-) {
-  // Get userId from x-user-id header (set by API Gateway)
-  const userId = request.headers['x-user-id'] ? String(request.headers['x-user-id']) : undefined;
-  if (!userId)
-  {
-    return reply.code(200).send([]); // Sin autenticación, devolvemos array vacío
-  }
-  const rows = await request.db.all(
-    `SELECT * FROM matches WHERE player1 = ? OR player2 = ? ORDER BY date DESC`,
-    userId, userId
+export async function listMatches(req: FastifyRequest, reply: FastifyReply)
+{
+  const me = await getAuthUser(req);
+  if (!me) return reply.code(401).send({ error: 'No autorizado' });
+  const rows = await req.db.all(
+    `SELECT id, player1, player2, username1, username2, score1, score2, winner, date, tournament_id
+     FROM matches WHERE player1 = ? OR player2 = ? ORDER BY date DESC`,
+    me.id, me.id
   );
   reply.code(200).send(rows);
 }
 
-export async function getDashboard(
-  request: FastifyRequest,
-  reply: FastifyReply
-) {
-  console.log('[MATCH-SERVICE] Headers for /dashboard:', request.headers);
-  // Get userId from x-user-id header (set by API Gateway)
-  const userId = request.headers['x-user-id'] ? String(request.headers['x-user-id']) : undefined;
-  if (!userId) {
-    return reply.code(401).send({ error: 'No autorizado' });
-  }
-
-
-  const row = await request.db.get(
+export async function getDashboard(req: FastifyRequest, reply: FastifyReply)
+{
+  const me = await getAuthUser(req);
+  if (!me) return reply.code(401).send({ error: 'No autorizado' });
+  const row = await req.db.get<{ games_played: number; games_won: number; games_lost: number }>(
     `SELECT games_played, games_won, games_lost FROM dashboard WHERE userId = ?`,
-    userId
-  ) as any;
-
-  if (!row) {
-    return reply
-      .code(200)
-      .send({ games_played: 0, games_won: 0, games_lost: 0, win_rate: 0 });
-  }
-
-  const { games_played, games_won, games_lost } = row;
-  return reply.code(200).send({
-    games_played, games_won, games_lost, win_rate: games_played > 0 ? games_won / games_played : 0
+    me.id
+  );
+  const games_played = row?.games_played ?? 0;
+  const games_won = row?.games_won ?? 0;
+  const games_lost = row?.games_lost ?? 0;
+  reply.code(200).send({
+    games_played, games_won, games_lost, win_rate: games_played > 0 ? games_won / games_played : 0,
   });
+}
+
+export async function getLeaderboard(req: FastifyRequest, reply: FastifyReply)
+{
+  const top = Number((req.query as any)?.top ?? 10);
+  const rows = await req.db.all(
+    `SELECT userId, games_played, games_won, games_lost, CASE WHEN games_played>0 THEN 1.0*games_won/games_played ELSE 0 END AS win_rate
+     FROM dashboard ORDER BY games_won DESC, games_played DESC LIMIT ?`,
+    top
+  );
+  reply.code(200).send(rows);
 }

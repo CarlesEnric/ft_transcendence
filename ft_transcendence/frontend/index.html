@@ -2,12 +2,16 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
+    <link rel="icon" type="image/x-icon" href="/assets/favicon.ico" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <!-- Desactivem CSP al nivell client (això és només pel desenvolupament) -->
+    <meta http-equiv="Content-Security-Policy" content="default-src * 'unsafe-inline' 'unsafe-eval'; connect-src * 'unsafe-inline'; img-src * data: blob: 'unsafe-inline'; frame-src *; style-src * 'unsafe-inline';">
     <title>FT Transcendence</title>
   </head>
   <body>
     <div id="root"></div>
+    <!-- Carrega la configuració dinàmica primer -->
+    <script src="/config.js"></script>
     <script type="module" src="/src/MainApp.ts"></script>
   </body>
 </html>

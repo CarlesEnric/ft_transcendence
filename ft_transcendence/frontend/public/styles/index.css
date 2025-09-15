@@ -1,0 +1,145 @@
+@import "tailwindcss";
+.btn-main {
+  @apply w-full h-12 px-6 py-3 rounded-lg flex justify-center items-center transition-colors;
+}
+
+.btn-text {
+  @apply text-center text-base sm:text-lg font-bold font-['Inter'] leading-tight;
+}
+
+/* 🎨 Variantes de color */
+.btn-cyan {
+  @apply bg-cyan-700 hover:bg-cyan-800;
+}
+
+.btn-cyan-light {
+  @apply bg-cyan-200 hover:bg-cyan-300;
+}
+
+/* Texto de color según variante */
+.btn-text-white {
+  @apply text-white;
+}
+.btn-text-teal {
+  @apply text-teal-800;
+}
+
+/* ⚡ Animación eléctrica */
+@keyframes electric-glow {
+  0% {
+    background: linear-gradient(90deg, #00f0ff, #0088ff);
+    box-shadow: 0 0 5px #00f0ff, 0 0 10px #00f0ff;
+  }
+  50% {
+    background: linear-gradient(90deg, #00d4ff, #00f0ff);
+    box-shadow: 0 0 10px #00f0ff, 0 0 20px #00d4ff;
+  }
+  100% {
+    background: linear-gradient(90deg, #00f0ff, #0088ff);
+    box-shadow: 0 0 5px #00f0ff, 0 0 10px #00f0ff;
+  }
+}
+
+/* Clase combinada */
+.btn-electric {
+  @apply relative rounded-lg transition-transform duration-200;
+}
+
+.btn-electric:hover {
+  @apply scale-105; /* agranda un poco */
+  animation: electric-glow 0.7s infinite alternate;
+}
+
+
+/* ✅ Estilos específicos de Figma */
+.global-bg {
+  background: linear-gradient(108deg, rgba(63, 144, 200, 0.26) 0%, rgba(255, 255, 255, 0.07) 100%), #071016;
+}
+
+/* Alternativa usando variables CSS */
+.global-bg-alt {
+  border-radius: 20px;
+  background-color: #071016;
+  background-image: linear-gradient(108deg, rgba(63, 144, 200, 0.26) 0%, rgba(255, 255, 255, 0.07) 100%);
+}
+
+/* index.css */
+
+.avatar-hover {
+  @apply transition-transform duration-300 rounded-full
+         shadow-[0px_2px_8px_0px_rgba(0,240,255,0.20)]
+         hover:scale-120 hover:shadow-[0_0_15px_rgba(0,240,255,0.7)]
+         cursor-pointer;
+}
+
+
+/* Estilos globales */
+body {
+  margin: 0;
+  padding: 0;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
+    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
+    sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+#app {
+  min-height: 100vh;
+}
+
+/*
+{
+  outline: 1px solid red !important;
+}
+*/
+
+
+/* Temas personalizados */
+[data-theme="dark"] {
+  --bg-primary: #111827;
+  --bg-secondary: #1f2937;
+  --text-primary: #ffffff;
+  --text-secondary: #9ca3af;
+}
+
+[data-theme="light"] {
+  --bg-primary: #f9fafb;
+  --bg-secondary: #ffffff;
+  --text-primary: #111827;
+  --text-secondary: #6b7280;
+}
+
+/* Transiciones personalizadas */
+.custom-transition {
+  transition: all 0.2s ease-in-out;
+}
+
+/* Estilos para el canvas de Babylon.js */
+canvas {
+  display: block;
+  outline: none;
+}
+
+/* Estilos para WebSocket status */
+.ws-connected {
+  color: #10b981;
+}
+
+.ws-disconnected {
+  color: #ef4444;
+}
+
+/* Animaciones personalizadas */
+@keyframes pulse-slow {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.5;
+  }
+}
+
+.pulse-slow {
+  animation: pulse-slow 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
