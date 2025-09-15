@@ -30,7 +30,7 @@ WORKDIR /app
 # Copy built React app from builder stage
 COPY --from=builder /app/dist ./dist
 
-# Copy the setup script
+# Copy the setup script and template
 COPY setup_config.sh ./setup_config.sh
 
 # Make the script executable
