@@ -58,6 +58,7 @@ host-ip:
 # Clean host IP environment files
 clean-host-ip:
 	@echo "🧹 Eliminant fitxers .env_host_ip..."
+	@rm -f frontend/.env
 	@rm -f frontend/.env_host_ip
 	@rm -f services/auth-service/.env_host_ip
 	@rm -f services/game-service/.env_host_ip

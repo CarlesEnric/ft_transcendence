@@ -5,12 +5,9 @@ import { renderMatchHistoryCard, initMatchHistoryCard } from '../components/dash
 import { renderDebugPanel, initDebugPanel } from '../components/global/DebugPanel';
 import { API_CONFIG } from '../config/api';
 
-export const renderHomePage = (): void => {
-  const app = document.getElementById('root')!;
-
-  // Utilitzem la configuració API
-
-  app.innerHTML = `
+export const renderHomePage = (): string => {
+  // Retornem l'HTML com a string
+  return `
     <div class="min-h-screen global-bg flex items-center justify-center bg-gradient-to-br from-blue-500/25 to-white/5">
         <div class="w-full min-w-[320px] max-w-[1200px] px-6 py-8 flex flex-col gap-10 items-center justify-center">
             <!-- Debug Info -->
@@ -51,6 +48,27 @@ export const renderHomePage = (): void => {
         ${renderDebugPanel()}
     </div>
   `;
+}
+
+export function initHomePageListeners(): void {
+  initHeaderCard();
+  initRankingCard();
+  initMatchHistoryCard();
+  initDebugPanel();
+  // Inicialitzar el botó del joc Pong
+  document.getElementById('startPongBtn')?.addEventListener('click', () => {
+    const pongContainer = document.getElementById('pongContainer');
+    if (!pongContainer) return;
+    pongContainer.innerHTML = '';
+    pongContainer.style.position = 'relative';
+    const canvas = document.createElement('canvas');
+    canvas.width = pongContainer.clientWidth;
+    canvas.height = pongContainer.clientHeight;
+    canvas.style.display = 'block';
+    pongContainer.appendChild(canvas);
+    initSimplePongGame(canvas);
+  });
+}
 
   // Inicializadores
   initHeaderCard();
@@ -77,10 +95,9 @@ export const renderHomePage = (): void => {
     // Initialize simple Pong game
     initSimplePongGame(canvas);
   });
-};
 
 // Simple Pong implementation
-function initSimplePongGame(canvas: HTMLCanvasElement): void {
+export function initSimplePongGame(canvas: HTMLCanvasElement): void {
   const ctx = canvas.getContext('2d') as CanvasRenderingContext2D;
   
   // Game state

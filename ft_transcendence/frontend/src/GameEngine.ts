@@ -4,7 +4,7 @@
 
 import { renderLoginPage } from './pages/LoginPage';
 import { renderLandingPage } from './pages/LandingPage';
-import { renderHomePage } from './pages/HomePage';
+import { renderHomePage, initHomePageListeners } from './pages/HomePage';
 import { TwoFactorComponent } from './components/AuthenticationForm';
 import TwoFactorSetupModal from './components/SecuritySetupModal';
 import TwoFactorDisableModal from './components/SecurityDisableModal';
@@ -317,8 +317,12 @@ export class App {
       case '2fa':
         return this.renderTwoFactorForm();
       case 'dashboard':
-        renderHomePage(); // Utilitzem la funció renderHomePage en comptes de renderDashboard
-        return '';
+        // Injectem el dashboard HTML i inicialitzem listeners
+        setTimeout(() => {
+          // Esperem que l'HTML s'hagi injectat
+          initHomePageListeners();
+        }, 0);
+        return renderHomePage();
       case 'pong':
         return this.renderPong();
       case 'matches':
@@ -804,6 +808,11 @@ export class App {
         loading: false
       });
 
+      try {
+        localStorage.removeItem('user');
+      } catch (e) {
+        console.warn('No s\'ha pogut esborrar el localStorage user:', e);
+      }
       console.log('Logged out successfully');
     } catch (error) {
       console.error('Logout error:', error);

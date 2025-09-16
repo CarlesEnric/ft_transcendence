@@ -89,3 +89,9 @@ echo -e "${GREEN}✓${NC} Fitxer .env estàndard creat per a Frontend"
 echo -e "\n${GREEN}Configuració completada!${NC}"
 echo -e "La teva aplicació ara es pot accedir a través de: ${GREEN}https://$HOST_IP:3000${NC}"
 echo -e "Si vols aplicar aquests canvis als serveis en execució, executa: ${BLUE}make restart-services${NC}"
+
+# Elimina qualsevol meta anterior de host-ip
+sed -i '/<meta name="host-ip"/d' "$BASE_DIR/frontend/index.html"
+# Afegeix la meta amb la IP actual just després de <head>
+sed -i "/<head>/a <meta name=\"host-ip\" content=\"$HOST_IP\" />" "$BASE_DIR/frontend/index.html"
+echo -e "${GREEN}✓${NC} Meta host-ip actualitzada a index.html amb IP: $HOST_IP"

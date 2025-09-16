@@ -342,9 +342,10 @@ export function setupAuthRoutes(server: FastifyInstance, db: sqlite3.Database): 
       // Cookie options should match exactly those used when setting the cookie
       const cookieOptions = {
         httpOnly: true,
-        secure: config.nodeEnv === 'production', // Only secure in production
+        secure: config.nodeEnv === 'production',
         sameSite: config.nodeEnv === 'production' ? 'none' as const : 'lax' as const,
         path: '/',
+        domain: process.env.HOST_IP // IP del host
       };
 
       // Clear the JWT cookie
