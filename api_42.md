@@ -1,4 +1,5 @@
 Per fer servir la API de 42 School per autenticar-se, primer cal entendre el procés que s'ha de seguir. Aquí t'expliquem els passos bàsics que implica l'autenticació en l'API de 42, segons la documentació:
+https://api.intra.42.fr/apidoc/guides/getting_started
 
 1. Obtenir un Client ID i Client Secret
 
