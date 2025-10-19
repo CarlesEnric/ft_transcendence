@@ -26,18 +26,23 @@ export function generateJWTToken(user: any, secret?: string, expiresIn?: string)
   return jwt.sign(payload, jwtSecret, { expiresIn: jwtExpiresIn } as jwt.SignOptions);
 }
 
-export function verifyJWTToken(token: string, secret: string): any {
+export function createUserResponse(user: any) {
+  return {
+    id: user.id,
+    username: user.username,
+    email: user.email,
+    firstName: user.firstName,
+    lastName: user.lastName,
+    display_name: user.display_name,
+    provider: user.provider,
+    avatar_url: user.avatar_url
+  };
+}
+
+export function verifyJWT(token: string, secret: string): any {
   try {
     return jwt.verify(token, secret);
   } catch (error) {
     throw new Error('Invalid token');
   }
-}
-
-export function createUserResponse(user: any) {
-  return {
-    id: user.id,
-    username: user.username,
-    email: user.email
-  };
 }

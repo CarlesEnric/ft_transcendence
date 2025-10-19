@@ -1,294 +1,643 @@
 import type { FastifyReply, FastifyRequest } from 'fastify';
+import { getAuthUser } from '../plugins/auth.js';
+import { sseBus } from '../utils/sseBus.js';
 import type { Database } from 'sqlite';
-import { z } from 'zod';
-import { PostTournament, JoinTournament } from '../schemas/tournaments.schema.js';
-import { createBracket, resolveParticipants, wirePrevPointers } from '../services/bracket.service.js';
+import type { TournamentStatus, UserEvent } from '../utils/sseBus.js';
 
-function getMe(req: FastifyRequest)
-{
-    const xid = req.headers['x-user-id'];
-    const xname = req.headers['x-username'];
-    const id = typeof xid === 'string' ? Number(xid) : Array.isArray(xid) ? Number(xid[0]) : NaN;
-    const username = typeof xname === 'string' ? xname : Array.isArray(xname) ? xname[0] : undefined;
-    return (Number.isFinite(id) && id > 0 && username) ? { id, username } : null;
+
+type Size = 4 | 8;
+
+interface TournamentRow {
+  id: number;
+  name: string;
+  size: Size;
+  status: TournamentStatus; // 'planned' | 'open' | 'in_progress' | 'finished' | 'cancelled' | 'waiting'
+  creator_id: number;
+  created_at?: string | null;
+  started_at?: string | null;
+  finished_at?: string | null;
+  winner_id?: number | null;
+  winner_username?: string | null;
 }
 
-const ListTournamentsQuery = z.object({
-    status: z.enum(['planned', 'open', 'in_progress', 'finished']).optional(),
-    size: z.union([z.literal(4), z.literal(8)]).optional(),
-    search: z.string().trim().min(1).max(64).optional(),
-    limit: z.coerce.number().int().min(1).max(100).default(20),
-    offset: z.coerce.number().int().min(0).default(0),
-});
-
-// POST /tournaments
-export async function createTournament(req: FastifyRequest, reply: FastifyReply)
-{
-    const me = getMe(req);
-    if (!me) return reply.code(401).send({ error: 'No autorizado' });
-    const parsed = PostTournament.safeParse(req.body ?? {});
-    if (!parsed.success) return reply.code(400).send({ error: 'Datos inválidos', details: parsed.error.issues });
-    const { name, size } = parsed.data;
-    const row = await req.db.get<{ id: number }>(
-        `INSERT INTO tournaments(name, size, status, creator_id) VALUES (?, ?, 'planned', ?) RETURNING id`,
-        name, size, me.id
-    );
-    return reply.code(201).send({ id: row!.id, name, size, status: 'planned' });
+interface ParticipantRow {
+  userId: number;
+  username: string;
+  joinedAt: string;
 }
 
-// POST /tournaments/:id/join
-export async function joinTournament(req: FastifyRequest, reply: FastifyReply) {
-    const me = getMe(req);
-    if (!me) return reply.code(401).send({ error: 'No autorizado' });
-    const id = Number((req.params as any)?.id);
-    if (!id) return reply.code(400).send({ error: 'TournamentId inválido' });
-    const body = JoinTournament.safeParse(req.body ?? {});
-    const userId = body.success ? body.data.userId : me.id;
-    const t = await req.db.get<any>(
-        `SELECT id, size, status FROM tournaments WHERE id=?`, id
-    );
-    if (!t) return reply.code(404).send({ error: 'Torneo no existe' });
-    if (t.status !== 'planned' && t.status !== 'open')
-    {
-        return reply.code(400).send({ error: 'Torneo no admite inscripciones' });
-    }
-    const exists = await req.db.get<any>(
-        `SELECT 1 FROM tournament_participants WHERE tournament_id=? AND user_id=?`,
-        id, userId
-    );
-    if (exists) return reply.code(200).send({ ok: true });
-    const username = (userId === me.id) ? me.username : `user#${userId}`;
-    await req.db.run(
-        `INSERT INTO tournament_participants(tournament_id, user_id, username) VALUES (?,?,?)`,
-        id, userId, username
-    );
-    // si aún estaba "planned", lo pasamos a "open"
-    if (t.status === 'planned')
-    {
-        await req.db.run(`UPDATE tournaments SET status='open' WHERE id=?`, id);
-    }
-    return reply.code(200).send({ ok: true });
+interface SeedRow {
+  seat: number;
+  user_id: number;
+  username: string;
 }
 
-// POST /tournaments/:id/start
-// Requiere: status='open' y nº de participantes == size
-export async function startTournament(req: FastifyRequest, reply: FastifyReply)
-{
-    const me = getMe(req);
-    if (!me) return reply.code(401).send({ error: 'No autorizado' });
-    const id = Number((req.params as any)?.id);
-    if (!id) return reply.code(400).send({ error: 'TournamentId inválido' });
-    const t = await req.db.get<any>(
-        `SELECT id, size, status, creator_id FROM tournaments WHERE id=?`, id
-    );
-    if (!t) return reply.code(404).send({ error: 'Torneo no existe' });
-    if (t.status !== 'open') return reply.code(400).send({ error: 'El torneo no está abierto para arrancar' });
-    const ps = await req.db.all<any[]>(
-        `SELECT user_id, username FROM tournament_participants WHERE tournament_id=? ORDER BY joined_at ASC`,
-        id
-    );
-    if (ps.length !== t.size)
-    {
-        return reply.code(400).send({ error: `Se requieren ${t.size} participantes (hay ${ps.length})` });
-    }
-    await req.db.run('BEGIN');
-    try
-    {
-        // crea seeds aleatorios y árbol (usa tu servicio)
-        await createBracket(req.db, id, t.size, ps);
-        await wirePrevPointers(req.db, id);
-        await req.db.run(
-            `UPDATE tournaments SET status='in_progress', started_at=datetime('now') WHERE id=?`,
-            id
-        );
-        await req.db.run('COMMIT');
-    }
-    catch (e)
-    {
-        await req.db.run('ROLLBACK');
-        req.log.error(e);
-        return reply.code(500).send({ error: 'No se pudo crear el cuadro' });
-    }
-    return reply.code(200).send({ ok: true });
+interface MatchRow {
+  id: number;
+  round: number;
+  slot: number;
+  status: 'pending' | 'in_progress' | 'finished';
+  player1_seat: number | null;
+  player2_seat: number | null;
+  prev_p1_id: number | null;
+  prev_p2_id: number | null;
+  next_match_id: number | null;
+  next_is_p1: 1 | 0 | null;
+  room_code: string | null;
+  score1: number | null;
+  score2: number | null;
+  winner_username: string | null;
 }
 
-// GET /tournaments/:id/bracket
-export async function getBracket(req: FastifyRequest, reply: FastifyReply)
-{
-    const id = Number((req.params as any)?.id);
-    if (!id) return reply.code(400).send({ error: 'TournamentId inválido' });
-    const t = await req.db.get<any>(
-        `SELECT id, name, size, status, winner_id, winner_username FROM tournaments WHERE id=?`,
-        id
+type RunResult = { lastID: number; changes: number };
+
+interface WithDbRequest extends FastifyRequest {
+  db: Database;
+}
+
+async function dbAll<T>(db: Database, sql: string, params: unknown[] = []): Promise<T[]> {
+  return db.all<T[]>(sql, params);
+}
+
+async function dbGet<T>(db: Database, sql: string, params: unknown[] = []): Promise<T | undefined> {
+  return db.get<T>(sql, params);
+}
+
+async function dbRun(db: Database, sql: string, params: unknown[] = []): Promise<RunResult> {
+  const res = await db.run(sql, params);
+  return { lastID: Number(res?.lastID ?? 0), changes: Number(res?.changes ?? 0) };
+}
+
+
+async function loadTournamentPlayers(db: Database, tournamentId: number): Promise<ParticipantRow[]> {
+  return dbAll<ParticipantRow>(
+    db,
+    `SELECT user_id as userId, username, joined_at as joinedAt
+     FROM tournament_participants
+     WHERE tournament_id=?
+     ORDER BY datetime(joined_at) ASC`,
+    [tournamentId]
+  );
+}
+
+async function emitToParticipants(db: Database, tournamentId: number, ev: UserEvent): Promise<void> {
+  const players = await loadTournamentPlayers(db, tournamentId);
+  players.forEach((p) => sseBus.emitUser(p.userId, ev));
+}
+
+function pairingsForSize(size: Size): Array<[number, number]> {
+  return size === 8
+    ? [
+      [1, 8],
+      [4, 5],
+      [3, 6],
+      [2, 7],
+    ]
+    : [
+      [1, 4],
+      [2, 3],
+    ];
+}
+
+async function seedBracket(db: Database, tournamentId: number, size: Size): Promise<void> {
+  const participants = await loadTournamentPlayers(db, tournamentId);
+  const top = participants.slice(0, size);
+
+  await dbRun(db, `DELETE FROM tournament_seeds WHERE tournament_id=?`, [tournamentId]);
+  await dbRun(db, `DELETE FROM tournament_matches WHERE tournament_id=?`, [tournamentId]);
+
+  for (let i = 0; i < top.length; i++) {
+    const seat = i + 1;
+    await dbRun(
+      db,
+      `INSERT INTO tournament_seeds (tournament_id, seat, user_id, username)
+       VALUES (?, ?, ?, ?)`,
+      [tournamentId, seat, top[i].userId, top[i].username]
     );
-    if (!t) return reply.code(404).send({ error: 'Torneo no existe' });
-    const seeds = await req.db.all<any[]>(
-        `SELECT seat, user_id, username
+  }
+
+  const r1Pairs = pairingsForSize(size);
+  const matchIds: { r1: number[]; r2: number[]; r3: number[] } = { r1: [], r2: [], r3: [] };
+
+  for (let i = 0; i < r1Pairs.length; i++) {
+    const [s1, s2] = r1Pairs[i];
+    const res = await dbRun(
+      db,
+      `INSERT INTO tournament_matches
+       (tournament_id, round, slot, status, player1_seat, player2_seat)
+       VALUES (?, 1, ?, 'pending', ?, ?)`,
+      [tournamentId, i + 1, s1, s2]
+    );
+    matchIds.r1.push(res.lastID);
+  }
+
+  if (size === 4) {
+    const f = await dbRun(
+      db,
+      `INSERT INTO tournament_matches (tournament_id, round, slot, status)
+       VALUES (?, 2, 1, 'pending')`,
+      [tournamentId]
+    );
+    matchIds.r2 = [f.lastID];
+
+    await dbRun(db, `UPDATE tournament_matches SET next_match_id=?, next_is_p1=1 WHERE id=?`, [
+      matchIds.r2[0],
+      matchIds.r1[0],
+    ]);
+    await dbRun(db, `UPDATE tournament_matches SET next_match_id=?, next_is_p1=0 WHERE id=?`, [
+      matchIds.r2[0],
+      matchIds.r1[1],
+    ]);
+    await dbRun(db, `UPDATE tournament_matches SET prev_p1_id=?, prev_p2_id=? WHERE id=?`, [
+      matchIds.r1[0],
+      matchIds.r1[1],
+      matchIds.r2[0],
+    ]);
+  } else {
+    const s1 = await dbRun(
+      db,
+      `INSERT INTO tournament_matches (tournament_id, round, slot, status)
+       VALUES (?, 2, 1, 'pending')`,
+      [tournamentId]
+    );
+    const s2 = await dbRun(
+      db,
+      `INSERT INTO tournament_matches (tournament_id, round, slot, status)
+       VALUES (?, 2, 2, 'pending')`,
+      [tournamentId]
+    );
+    matchIds.r2 = [s1.lastID, s2.lastID];
+    const f = await dbRun(
+      db,
+      `INSERT INTO tournament_matches (tournament_id, round, slot, status)
+       VALUES (?, 3, 1, 'pending')`,
+      [tournamentId]
+    );
+    matchIds.r3 = [f.lastID];
+    await dbRun(db, `UPDATE tournament_matches SET next_match_id=?, next_is_p1=1 WHERE id=?`, [
+      matchIds.r2[0],
+      matchIds.r1[0],
+    ]);
+    await dbRun(db, `UPDATE tournament_matches SET next_match_id=?, next_is_p1=0 WHERE id=?`, [
+      matchIds.r2[0],
+      matchIds.r1[1],
+    ]);
+    await dbRun(db, `UPDATE tournament_matches SET next_match_id=?, next_is_p1=1 WHERE id=?`, [
+      matchIds.r2[1],
+      matchIds.r1[2],
+    ]);
+    await dbRun(db, `UPDATE tournament_matches SET next_match_id=?, next_is_p1=0 WHERE id=?`, [
+      matchIds.r2[1],
+      matchIds.r1[3],
+    ]);
+
+    await dbRun(db, `UPDATE tournament_matches SET prev_p1_id=?, prev_p2_id=? WHERE id=?`, [
+      matchIds.r1[0],
+      matchIds.r1[1],
+      matchIds.r2[0],
+    ]);
+    await dbRun(db, `UPDATE tournament_matches SET prev_p1_id=?, prev_p2_id=? WHERE id=?`, [
+      matchIds.r1[2],
+      matchIds.r1[3],
+      matchIds.r2[1],
+    ]);
+    await dbRun(db, `UPDATE tournament_matches SET next_match_id=?, next_is_p1=1 WHERE id=?`, [
+      matchIds.r3[0],
+      matchIds.r2[0],
+    ]);
+    await dbRun(db, `UPDATE tournament_matches SET next_match_id=?, next_is_p1=0 WHERE id=?`, [
+      matchIds.r3[0],
+      matchIds.r2[1],
+    ]);
+    await dbRun(db, `UPDATE tournament_matches SET prev_p1_id=?, prev_p2_id=? WHERE id=?`, [
+      matchIds.r2[0],
+      matchIds.r2[1],
+      matchIds.r3[0],
+    ]);
+  }
+}
+
+export async function createTournament(req: FastifyRequest, reply: FastifyReply): Promise<void> {
+  const me = await getAuthUser(req);
+  if (!me) {
+    reply.code(401).send({ error: 'No autorizado' });
+    return;
+  }
+
+  const db = (req as WithDbRequest).db;
+  const body = (req.body ?? {}) as Partial<{ name: string; size: number }>;
+  const _size: Size = body.size === 8 ? 8 : 4;
+  const _name = typeof body.name === 'string' && body.name.trim() ? body.name.trim() : 'Torneo';
+
+  const res = await dbRun(
+    db,
+    `INSERT INTO tournaments (name, size, status, creator_id) VALUES (?, ?, 'open', ?)`,
+    [_name, _size, me.id]
+  );
+  const id = res.lastID;
+
+  await dbRun(
+    db,
+    `INSERT OR IGNORE INTO tournament_participants (tournament_id, user_id, username)
+     VALUES (?, ?, ?)`,
+    [id, me.id, me.username]
+  );
+
+  sseBus.emitUser(me.id, { type: 'tournament_status', id, status: 'open' });
+  reply.code(201).send({ id });
+}
+
+export async function joinTournament(req: FastifyRequest, reply: FastifyReply): Promise<void> {
+  const me = await getAuthUser(req);
+  if (!me) {
+    reply.code(401).send({ error: 'No autorizado' });
+    return;
+  }
+  const db = (req as WithDbRequest).db;
+  const id = Number((req.params as { id: string }).id);
+
+  const t = await dbGet<TournamentRow>(db, `SELECT * FROM tournaments WHERE id=?`, [id]);
+  if (!t) {
+    reply.code(404).send({ error: 'Torneo no encontrado' });
+    return;
+  }
+  if (t.status !== 'open' && t.status !== 'planned') {
+    reply.code(400).send({ error: 'El torneo no acepta más jugadores' });
+    return;
+  }
+
+  const countRow = await dbGet<{ c: number }>(
+    db,
+    `SELECT COUNT(*) as c FROM tournament_participants WHERE tournament_id=?`,
+    [id]
+  );
+  const current = countRow?.c ?? 0;
+  if (current >= t.size) {
+    reply.code(400).send({ error: 'Torneo lleno' });
+    return;
+  }
+  await dbRun(
+    db,
+    `INSERT OR IGNORE INTO tournament_participants (tournament_id, user_id, username)
+     VALUES (?, ?, ?)`,
+    [id, me.id, me.username]
+  );
+  const countAfter = await dbGet<{ c: number }>(
+    db,
+    `SELECT COUNT(*) as c FROM tournament_participants WHERE tournament_id=?`,
+    [id]
+  );
+  const tNow = await dbGet<{ size: number; status: TournamentStatus }>(db, `SELECT size, status FROM tournaments WHERE id=?`, [id]);
+  await emitToParticipants(db, id, { type: 'tournament_joined', id, userId: me.id });
+  if (tNow && countAfter && countAfter.c >= tNow.size && (tNow.status === 'open' || tNow.status === 'planned')) {
+    await emitToParticipants(db, id, { type: 'tournament_status', id, status: 'waiting' });
+  }
+  reply.send({ ok: true });
+}
+
+export async function startTournament(req: FastifyRequest, reply: FastifyReply): Promise<void> {
+  const me = await getAuthUser(req);
+  if (!me) {
+    reply.code(401).send({ error: 'No autorizado' });
+    return;
+  }
+  const db = (req as WithDbRequest).db;
+  const id = Number((req.params as { id: string }).id);
+
+  const t = await dbGet<TournamentRow>(db, `SELECT * FROM tournaments WHERE id=?`, [id]);
+  if (!t) {
+    reply.code(404).send({ error: 'Torneo no encontrado' });
+    return;
+  }
+  if (t.creator_id !== me.id) {
+    reply.code(403).send({ error: 'Solo el creador puede iniciar' });
+    return;
+  }
+
+  const countRow = await dbGet<{ c: number }>(
+    db,
+    `SELECT COUNT(*) as c FROM tournament_participants WHERE tournament_id=?`,
+    [id]
+  );
+  const current = countRow?.c ?? 0;
+  if (current < t.size) {
+    reply.code(400).send({ error: 'Faltan jugadores' });
+    return;
+  }
+
+  await seedBracket(db, id, t.size as Size);
+  await dbRun(db, `UPDATE tournaments SET status='in_progress', started_at=datetime('now') WHERE id=?`, [id]);
+
+  await emitToParticipants(db, id, { type: 'tournament_status', id, status: 'in_progress' });
+  reply.send({ ok: true });
+}
+
+export async function allocateRoomForTournamentMatch(
+  req: FastifyRequest,
+  reply: FastifyReply
+): Promise<void> {
+  const me = await getAuthUser(req);
+  if (!me) {
+    reply.code(401).send({ error: 'No autorizado' });
+    return;
+  }
+  const db = (req as WithDbRequest).db;
+  const params = req.params as { id: string; matchId: string };
+  const id = Number(params.id);
+  const matchId = Number(params.matchId);
+  const body = (req.body ?? {}) as Partial<{ room_code: string }>;
+
+  if (!body.room_code) {
+    reply.code(400).send({ error: 'room_code requerido' });
+    return;
+  }
+
+  const exists = await dbGet<{ id: number }>(
+    db,
+    `SELECT id FROM tournament_matches WHERE id=? AND tournament_id=?`,
+    [matchId, id]
+  );
+  if (!exists) {
+    reply.code(404).send({ error: 'Match no encontrado' });
+    return;
+  }
+
+  await dbRun(
+    db,
+    `UPDATE tournament_matches
+     SET room_code=?, status=CASE WHEN status='pending' THEN 'in_progress' ELSE status END
+     WHERE id=?`,
+    [body.room_code, matchId]
+  );
+
+  await emitToParticipants(db, id, { type: 'tournament_bracket_update', id, matchId });
+  reply.send({ ok: true });
+}
+
+export async function reportTournamentMatch(req: FastifyRequest, reply: FastifyReply): Promise<void> {
+  const me = await getAuthUser(req);
+  if (!me) {
+    reply.code(401).send({ error: 'No autorizado' });
+    return;
+  }
+  const db = (req as WithDbRequest).db;
+  const params = req.params as { id: string; matchId: string };
+  const id = Number(params.id);
+  const matchId = Number(params.matchId);
+  const body = (req.body ?? {}) as Partial<{
+    score1: number;
+    score2: number;
+    winner_id: number;
+    winner_username: string;
+  }>;
+
+  const m = await dbGet<MatchRow>(
+    db,
+    `SELECT * FROM tournament_matches WHERE id=? AND tournament_id=?`,
+    [matchId, id]
+  );
+  if (!m) {
+    reply.code(404).send({ error: 'Match no encontrado' });
+    return;
+  }
+
+  await dbRun(
+    db,
+    `UPDATE tournament_matches
+     SET status='finished', score1=?, score2=?, winner_id=?, winner_username=?, finished_at=datetime('now')
+     WHERE id=?`,
+    [body.score1 ?? null, body.score2 ?? null, body.winner_id ?? null, body.winner_username ?? null, matchId]
+  );
+
+  await emitToParticipants(db, id, { type: 'tournament_bracket_update', id, matchId });
+  reply.send({ ok: true });
+}
+
+export async function leaveTournament(req: FastifyRequest, reply: FastifyReply): Promise<void> {
+  const me = await getAuthUser(req);
+  if (!me) {
+    reply.code(401).send({ error: 'No autorizado' });
+    return;
+  }
+  const db = (req as WithDbRequest).db;
+  const id = Number((req.params as { id: string }).id);
+
+  await dbRun(db, `DELETE FROM tournament_participants WHERE tournament_id=? AND user_id=?`, [id, me.id]);
+  await emitToParticipants(db, id, { type: 'tournament_left', id, userId: me.id });
+  reply.send({ ok: true });
+}
+
+export async function cancelTournament(req: FastifyRequest, reply: FastifyReply): Promise<void> {
+  const me = await getAuthUser(req);
+  if (!me) {
+    reply.code(401).send({ error: 'No autorizado' });
+    return;
+  }
+  const db = (req as WithDbRequest).db;
+  const id = Number((req.params as { id: string }).id);
+
+  const t = await dbGet<Pick<TournamentRow, 'creator_id'>>(db, `SELECT creator_id FROM tournaments WHERE id=?`, [
+    id,
+  ]);
+  if (!t) {
+    reply.code(404).send({ error: 'Torneo no encontrado' });
+    return;
+  }
+  if (t.creator_id !== me.id) {
+    reply.code(403).send({ error: 'Solo el creador puede cancelar' });
+    return;
+  }
+
+  await dbRun(db, `UPDATE tournaments SET status='cancelled' WHERE id=?`, [id]);
+  await emitToParticipants(db, id, { type: 'tournament_status', id, status: 'cancelled' });
+  reply.send({ ok: true });
+}
+
+export async function getBracket(req: FastifyRequest, reply: FastifyReply): Promise<void> {
+  const db = (req as WithDbRequest).db;
+  const id = Number((req.params as { id: string }).id);
+
+  const t = await dbGet<Pick<TournamentRow, 'id' | 'name' | 'size' | 'status'>>(
+    db,
+    `SELECT id, name, size, status FROM tournaments WHERE id=?`,
+    [id]
+  );
+  if (!t) {
+    reply.code(404).send({ error: 'Torneo no encontrado' });
+    return;
+  }
+
+  const seeds = await dbAll<SeedRow>(
+    db,
+    `SELECT seat, user_id, username
      FROM tournament_seeds
      WHERE tournament_id=?
      ORDER BY seat ASC`,
-        id
-    );
-    const matches = await req.db.all<any[]>(
-        `SELECT id, round, slot, status, player1_seat, player2_seat, winner_id, winner_username,
-        score1, score2, prev_p1_id, prev_p2_id, next_match_id, next_is_p1 FROM tournament_matches WHERE tournament_id=?
-        ORDER BY round ASC, slot ASC`,
-        id
-    );
-    return reply.code(200).send({ tournament: t, seeds, matches });
+    [id]
+  );
+
+  const matches = await dbAll<MatchRow>(
+    db,
+    `SELECT id, round, slot, status,
+            player1_seat, player2_seat,
+            prev_p1_id, prev_p2_id, next_match_id, next_is_p1,
+            room_code, score1, score2, winner_username
+     FROM tournament_matches
+     WHERE tournament_id=?
+     ORDER BY round ASC, slot ASC, id ASC`,
+    [id]
+  );
+
+  reply.send({ tournament: t, seeds, matches });
 }
 
-// POST /tournaments/:id/matches/:matchId/report
-export async function reportTournamentMatch(req: FastifyRequest, reply: FastifyReply)
-{
-    const me = getMe(req);
-    if (!me) return reply.code(401).send({ error: 'No autorizado' });
-    const id = Number((req.params as any)?.id);
-    const matchId = Number((req.params as any)?.matchId);
-    if (!id || !matchId) return reply.code(400).send({ error: 'Ids inválidos' });
-    const { score1, score2 } = (req.body ?? {}) as { score1?: number; score2?: number };
-    if (typeof score1 !== 'number' || typeof score2 !== 'number' || score1 < 0 || score2 < 0)
-    {
-        return reply.code(400).send({ error: 'Marcadores inválidos' });
-    }
-    if (score1 === score2)
-    {
-        return reply.code(400).send({ error: 'No puede haber empate' });
-    }
-    const m = await req.db.get<any>(
-        `SELECT id, tournament_id, round, slot, status, next_match_id, next_is_p1 FROM tournament_matches WHERE id=? AND tournament_id=?`,
-        matchId, id
-    );
-    if (!m) return reply.code(404).send({ error: 'Partido no existe' });
-    if (m.status !== 'pending') return reply.code(400).send({ error: 'Partido ya resuelto' });
-    const { p1, p2 } = await resolveParticipants(req.db, matchId);
-    if (!p1 || !p2) return reply.code(409).send({ error: 'Participantes no resueltos aún' });
-    const winner = (score1 > score2) ? p1 : p2;
-    const loser = (score1 > score2) ? p2 : p1;
-    await req.db.run('BEGIN');
-    try
-    {
-        // cerrar el match con ganador
-        await req.db.run(
-            `UPDATE tournament_matches SET status='finished', score1=?, score2=?, winner_id=?, winner_username=?, finished_at=datetime('now') WHERE id=?`,
-            score1, score2, winner.user_id, winner.username, matchId
-        );
-        // avanzar al siguiente partido si existe
-        if (m.next_match_id)
-        {
-            if (m.next_is_p1 === 1)
-            {
-                await req.db.run(
-                    `UPDATE tournament_matches SET prev_p1_id=? WHERE id=?`,
-                    matchId, m.next_match_id
-                );
-            }
-            else
-            {
-                await req.db.run(
-                    `UPDATE tournament_matches SET prev_p2_id=? WHERE id=?`,
-                    matchId, m.next_match_id
-                );
-            }
-        }
-        else
-        {
-            // si no hay siguiente, era la final: cerramos torneo
-            await req.db.run(
-                `UPDATE tournaments SET status='finished', finished_at=datetime('now'), winner_id=?, winner_username=? WHERE id=?`,
-                winner.user_id, winner.username, id
-            );
-        }
-        // actualizar dashboard global
-        await bumpDashboard(req.db, winner.user_id, loser.user_id);
-        await req.db.run('COMMIT');
-    }
-    catch (e)
-    {
-        await req.db.run('ROLLBACK');
-        req.log.error(e);
-        return reply.code(500).send({ error: 'No se pudo reportar' });
-    }
-    return reply.code(200).send({ ok: true, winner: winner.username });
-}
-// GET /tournaments
-export async function listTournaments(req: FastifyRequest, reply: FastifyReply)
-{
-    const parsed = ListTournamentsQuery.safeParse((req as any).query);
-    if (!parsed.success) return reply.code(400).send({ error: 'Query inválida', details: parsed.error.issues });
-    const { status, size, search, limit, offset } = parsed.data;
-    const conds: string[] = [];
-    const params: any[] = [];
-    if (status) { conds.push('t.status = ?'); params.push(status); }
-    if (size) { conds.push('t.size = ?'); params.push(size); }
-    if (search)
-    {
-        // LIKE parametrizado
-        conds.push(`t.name LIKE '%' || ? || '%'`);
-        params.push(search);
-    }
-    const where = conds.length ? `WHERE ${conds.join(' AND ')}` : '';
-    const rows = await req.db.all(
-        `SELECT t.id, t.name, t.status, t.size, t.created_at, COUNT(tp.user_id) AS participants, (t.size - COUNT(tp.user_id)) 
-        AS seats_left FROM tournaments t LEFT JOIN tournament_participants tp ON tp.tournament_id = t.id 
-        ${where} GROUP BY t.id ORDER BY t.created_at DESC LIMIT ? OFFSET ?;`,
-        ...params, limit, offset
-    );
-    return reply.send({
-        items: rows,
-        pagination: { limit, offset, count: rows.length }
-    });
+export async function getTournamentById(req: FastifyRequest, reply: FastifyReply): Promise<void> {
+  const db = (req as WithDbRequest).db;
+  const id = Number((req.params as { id: string }).id);
+
+  const t = await dbGet<TournamentRow>(
+    db,
+    `SELECT id, name, size, status, creator_id, created_at, started_at, finished_at, winner_username
+     FROM tournaments WHERE id=?`,
+    [id]
+  );
+  if (!t) {
+    reply.code(404).send({ error: 'Torneo no encontrado' });
+    return;
+  }
+
+  const participants = await dbAll<ParticipantRow>(
+    db,
+    `SELECT user_id as userId, username, joined_at as joinedAt
+     FROM tournament_participants WHERE tournament_id=?
+     ORDER BY datetime(joined_at) ASC`,
+    [id]
+  );
+
+  reply.send({
+    id: t.id,
+    name: t.name,
+    size: t.size,
+    status: t.status,
+    creator_id: t.creator_id,
+    created_at: t.created_at,
+    started_at: t.started_at,
+    finished_at: t.finished_at,
+    winner_username: t.winner_username,
+    participants,
+  });
 }
 
-//GET /tournaments/:id
-export async function getTournamentById(req: FastifyRequest, reply: FastifyReply)
-{
-    const id = Number((req.params as any)?.id);
-    if (!id) return reply.code(400).send({ error: 'id inválido' });
-    const t = await req.db.get(
-        `SELECT id, name, status, size, creator_id, created_at, started_at, finished_at, winner_id, winner_username
-     FROM tournaments WHERE id = ?`,
-        id
-    );
-    if (!t) return reply.code(404).send({ error: 'Torneo no existe' });
-    const participants = await req.db.all(
-        `SELECT user_id AS userId, username, joined_at FROM tournament_participants WHERE tournament_id = ? ORDER BY joined_at ASC`,
-        id
-    );
-    return reply.send({ ...t, participants });
+export async function listTournaments(req: FastifyRequest, reply: FastifyReply): Promise<void> {
+  const me = await getAuthUser(req);
+  const db = (req as WithDbRequest).db;
+
+  const rows = await dbAll<
+    Pick<TournamentRow, 'id' | 'name' | 'size' | 'status' | 'creator_id' | 'created_at'> & {
+      participants: number;
+    }
+  >(
+    db,
+    `SELECT
+        t.id, t.name, t.size, t.status, t.creator_id, t.created_at,
+        (SELECT COUNT(*) FROM tournament_participants tp WHERE tp.tournament_id=t.id) AS participants
+     FROM tournaments t
+     ORDER BY datetime(t.created_at) DESC`
+  );
+
+  const items = await Promise.all(
+    rows.map(async (t) => {
+      const seats_left = Math.max(0, (t.size as number) - (t.participants as number));
+      let is_participant = false;
+
+      if (me) {
+        const r = await dbGet<{ ok: number }>(
+          db,
+          `SELECT 1 as ok FROM tournament_participants WHERE tournament_id=? AND user_id=?`,
+          [t.id, me.id]
+        );
+        is_participant = !!r;
+      }
+
+      return {
+        id: t.id,
+        name: t.name,
+        status: t.status,
+        size: t.size,
+        created_at: t.created_at,
+        participants: t.participants,
+        seats_left,
+        creator_id: t.creator_id,
+        is_participant,
+      };
+    })
+  );
+
+  reply.send({ items });
 }
-async function bumpDashboard(db: Database, winnerId: number, loserId: number)
-{
-    // winner
-    const d1 = await db.get(`SELECT 1 FROM dashboard WHERE userId=?`, winnerId);
-    if (!d1)
-    {
-        await db.run(
-            `INSERT INTO dashboard(userId, games_played, games_won, games_lost) VALUES (?,?,?,?)`,
-            winnerId, 1, 1, 0
-        );
+
+export async function seedInlineTournament(req: FastifyRequest, reply: FastifyReply): Promise<void> {
+  const me = await getAuthUser(req);
+  if (!me) {
+    reply.code(401).send({ error: 'No autorizado' });
+    return;
+  }
+  const db = (req as WithDbRequest).db;
+  const id = Number((req.params as { id: string }).id);
+  const body = (req.body ?? {}) as Partial<{ participants: number[] }>;
+
+  if (!Array.isArray(body.participants) || (body.participants.length !== 4 && body.participants.length !== 8)) {
+    reply.code(400).send({ error: 'participants debe ser un array de 4 u 8 userIds' });
+    return;
+  }
+  const t = await dbGet<TournamentRow>(db, `SELECT * FROM tournaments WHERE id=?`, [id]);
+  if (!t) {
+    reply.code(404).send({ error: 'Torneo no encontrado' });
+    return;
+  }
+  if (t.creator_id !== me.id) {
+    reply.code(403).send({ error: 'Solo el creador puede sembrar participantes' });
+    return;
+  }
+  if (t.status !== 'open' && t.status !== 'planned' && t.status !== 'waiting') {
+    reply.code(400).send({ error: `Estado ${t.status} no permite seeding` });
+    return;
+  }
+  const currentCountRow = await dbGet<{ c: number }>(
+    db,
+    `SELECT COUNT(*) as c FROM tournament_participants WHERE tournament_id=?`,
+    [id]
+  );
+  const currentCount = currentCountRow?.c ?? 0;
+  const size = t.size as 4 | 8;
+  const slotsLeft = Math.max(0, size - currentCount);
+  if (slotsLeft <= 0) {
+    reply.send({ ok: true, count: 0 });
+    return;
+  }
+  const current = await dbAll<{ user_id: number }>(
+    db,
+    `SELECT user_id FROM tournament_participants WHERE tournament_id=?`,
+    [id]
+  );
+  const currentIds = new Set(current.map(r => r.user_id));
+  const toInsert = body.participants.filter(uid => !currentIds.has(uid)).slice(0, slotsLeft);
+  for (const uid of toInsert) {
+    let username = `user_${uid}`;
+    try {
+      const u = await dbGet<{ username: string }>(db, `SELECT username FROM users WHERE id=?`, [uid]);
+      if (u?.username) username = u.username;
+    } catch {
     }
-    else
-    {
-        await db.run(
-            `UPDATE dashboard SET games_played = games_played + 1, games_won = games_won + 1 WHERE userId=?`,
-            winnerId
-        );
-    }
-    // loser
-    const d2 = await db.get(`SELECT 1 FROM dashboard WHERE userId=?`, loserId);
-    if (!d2)
-    {
-        await db.run(
-            `INSERT INTO dashboard(userId, games_played, games_won, games_lost) VALUES (?,?,?,?)`,
-            loserId, 1, 0, 1
-        );
-    }
-    else
-    {
-        await db.run(
-            `UPDATE dashboard SET games_played = games_played + 1, games_lost = games_lost + 1 WHERE userId=?`,
-            loserId
-        );
-    }
+
+    await dbRun(
+      db,
+      `INSERT OR IGNORE INTO tournament_participants (tournament_id, user_id, username)
+       VALUES (?, ?, ?)`,
+      [id, uid, username]
+    );
+  }
+  await emitToParticipants(db, id, { type: 'tournament_joined', id, userId: me.id });
+
+  reply.send({ ok: true, count: toInsert.length });
 }

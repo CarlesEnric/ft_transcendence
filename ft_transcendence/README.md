@@ -637,3 +637,53 @@ match-service/db/    → matches_history.db   (history, statistics)
 │Match Service│    │  Frontend   │
 │   (SSL)     │    │  (No SSL)   │
 └─────────────┘    └─────────────┘
+
+
+### Useful docker commands for development (no problems with dockerhub maintenance)
+
+- **Download images on your host to don't need dockerhub:**
+```bash
+docker pull node:24-alpine
+docker pull alpine:latest
+```
+
+- **Save images to local computer:**
+```bash
+docker save -o node_24_alpine.tar node:24-alpine
+docker save -o alpine_latest.tar alpine:latest
+```
+
+- **Load images when you need them:**
+```bash
+docker load -i node_24_alpine.tar
+docker load -i alpine_latest.tar
+```
+
+- **Comment this line and ignore typescript**
+```js
+// @ts-ignore
+const file = request.file;
+```
+
+
+```sql
+SQLite version 3.49.2 2025-05-07 10:39:52
+Enter ".help" for usage hints.
+sqlite> select * from users;
+1|user|user@hotmail.com|$2b$12$qXkWGq7mpD6yz.HoKKFZie2o9fMdyQisOe.FSBsLdP1aFBxxBF7/i|||userf|userl|||0||2025-09-28 01:31:38|2025-09-28 01:32:23
+sqlite> PRAGMA table_info(users);
+0|id|INTEGER|0||1
+1|username|TEXT|1||0
+2|email|TEXT|1||0
+3|password_hash|TEXT|0||0
+4|provider|TEXT|0||0
+5|provider_id|TEXT|0||0
+6|firstName|TEXT|0||0
+7|lastName|TEXT|0||0
+8|display_name|TEXT|0||0
+9|avatar_url|TEXT|0||0
+10|two_factor_enabled|BOOLEAN|0|0|0
+11|two_factor_secret|TEXT|0||0
+12|created_at|DATETIME|0|CURRENT_TIMESTAMP|0
+13|updated_at|DATETIME|0|CURRENT_TIMESTAMP|0
+```

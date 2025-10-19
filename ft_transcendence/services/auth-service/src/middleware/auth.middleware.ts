@@ -42,5 +42,4 @@ export async function registerAllMiddleware(server: FastifyInstance): Promise<vo
     scope: ['profile', 'email']
   });
 
-  console.log('Middleware registered successfully');
 }

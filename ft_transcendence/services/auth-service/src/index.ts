@@ -1,14 +1,14 @@
 
-import 'dotenv/config';
 /**
  * Auth Service Main Entry Point
  * Modular architecture with separated concerns
  */
-
+import sqlite3 from 'sqlite3';
+import 'dotenv/config';
 import { createServer, createDatabase, startServer } from './server.js';
 import { registerAllMiddleware } from './middleware/auth.middleware.js';
 import { setupHealthRoutes } from './routes/health.js';
-import { setupAuthRoutes } from './routes/auth.js';
+import { setupAuthRoutes } from './routes/auth-routes.js';
 import { registerOAuthRoutes } from './routes/oauth2.js';
 import { setup2FARoutes } from './routes/twoFactor.js';
 
@@ -39,21 +39,18 @@ const main = async (): Promise<void> => {
 /**
  * Setup graceful shutdown handlers
  */
-function setupGracefulShutdown(server: any, db: any): void {
+function setupGracefulShutdown(server: any, db: sqlite3.Database): void {
   const gracefulShutdown = async (signal: string) => {
-    console.log(`Received ${signal}, shutting down gracefully...`);
     
     try {
       // Close server
       if (server) {
         await server.close();
-        console.log('Server closed');
       }
       
       // Close database
       if (db) {
         db.close();
-        console.log('Database closed');
       }
     } catch (error) {
       console.error('Error during shutdown:', error);

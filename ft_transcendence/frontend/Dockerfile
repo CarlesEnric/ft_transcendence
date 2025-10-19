@@ -30,53 +30,46 @@ WORKDIR /app
 # Copy built React app from builder stage
 COPY --from=builder /app/dist ./dist
 
-# Copy the setup script and template
-COPY setup_config.sh ./setup_config.sh
-
-# Make the script executable
-RUN chmod +x ./setup_config.sh
-
-# Run the setup script and then start the container
-CMD ["sh", "-c", "./setup_config.sh && tail -f /dev/null"]
+# This container only serves as a volume for static files
+CMD ["tail", "-f", "/dev/null"]
 
 
-# # Alternative Dockerfile using MIRROR RED HAT
+## Alternative Dockerfile using MIRROR RED HAT
 # FROM registry.access.redhat.com/ubi9/nodejs-20
 
-# # Set working directory
+## Set working directory
 # WORKDIR /app
 
-# # 👇 Assegura't que ets root abans de qualsevol instal·lació
+## Assegura't que ets root abans de qualsevol instal·lació
 # USER root
 
-# # Install system dependencies
+## Install system dependencies
 # RUN dnf install -y python3 gcc gcc-c++ sqlite openssl && dnf clean all
 
 # COPY --from=builder /app/dist ./dist
 
-# # Copy package files
+## Copy package files
 # COPY package*.json ./
 
-# # Install all dependencies (including dev dependencies for build)
+## Install all dependencies (including dev dependencies for build)
 # RUN npm install
 
-# # Copy source code
+## Copy source code
 # COPY . .
 
-# # Build TypeScript
+## Build TypeScript
 # RUN npm run build
 
-# # Copy SSL script and make executable
+## Copy SSL script and make executable
 # COPY ssl/ssl.sh ./ssl/ssl.sh
 # RUN chmod +x ssl/ssl.sh
 
-# # ✅ Torna a un usuari no root per seguretat
+## Torna a un usuari no root per seguretat
 # USER 1001
 
-# # Remove dev dependencies to keep image size small
+## Remove dev dependencies to keep image size small
 # RUN npm prune --production
 
-# # Entrypoint
+## Entrypoint
 # ENTRYPOINT ["./ssl/ssl.sh"]
 # CMD ["node", "dist/index.js"]
-

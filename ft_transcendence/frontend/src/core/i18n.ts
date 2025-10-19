@@ -12,12 +12,14 @@ const resources = {
 
       // Landing Page
       "landing.title": "Welcome to the most EPIC Pong Game",
-      "demo.title": "🏓 Try Pong Demo",
+      "demo.title": "Try Pong Demo",
       "demo.subtitle": "Play for 2 minutes free!",
-      "demo.playButton": "🎮 Play Demo (2 min)",
+      "demo.playButtonInline": "Play Demo Inline",
+      "demo.playButtonTournament": "Play Demo Tournament",
       "auth.login": "Login or Register",
 
-      // ✅ Game interface
+
+      // Game interface
       'game.player1': 'Player 1',
       'game.demoLevel': 'Demo Level',
       'game.timeLeft': 'Time left',
@@ -28,19 +30,19 @@ const resources = {
       'game.easyLevel': 'Easy Level',
       'game.restartConfirm': 'Are you sure you want to restart the game?',
       
-      // ✅ Demo expired screen
+      // Demo expired screen
       'demo.expired': 'Demo Time Expired!',
       'demo.expiredMessage': 'Hope you enjoyed the Pong demo! To continue playing and access all features, register for a free account or log in.',
-      'demo.playAgain': '🎮 Play Again',
+      'demo.playAgain': 'Play Again',
       'demo.twoMinutes': '(2 min)',
-      'demo.registerFree': '🚀 Register Free',
+      'demo.registerFree': 'Register Free',
       'demo.unlimited': '(Unlimited)',
-      'demo.login': '🔑 Login',
+      'demo.login': 'Login',
       'demo.existingUser': '(Existing User)',
-      'demo.backToHome': '← Back to Home',
+      'demo.backToHome': 'Back to Home',
       'demo.endConfirm': 'Are you sure you want to end the demo?',
 
-      // ✅ Authentication messages
+      // Authentication messages
       'auth.welcome': 'Welcome!',
       'auth.pleaseLogin': 'Please log in to continue.',
       'auth.email': 'Email',
@@ -52,15 +54,20 @@ const resources = {
       'auth.googleLogin': 'Sign in with Google',
       'auth.noAccount': "Don't have an account?",
       'auth.registerFree': 'Register for free',
+      'auth.twofa': 'Two-Factor Authentication',
       
-      // ✅ Common messages
+      // Common messages
       'common.backToHome': 'Back to Home',
 
-      // ✅ Register specific messages
+      // Register specific messages
       'auth.createAccount': 'Create Account',
       'auth.joinUs': 'Join us and start playing!',
       'auth.username': 'Username',
       'auth.usernamePlaceholder': 'Enter your username',
+      'auth.firstName': 'First Name',
+      'auth.firstNamePlaceholder': 'Enter your first name',
+      'auth.lastName': 'Last Name',
+      'auth.lastNamePlaceholder': 'Enter your last name',
       'auth.confirmPassword': 'Confirm Password',
       'auth.confirmPasswordPlaceholder': 'Confirm your password',
       'auth.registerButton': 'REGISTER',
@@ -68,9 +75,9 @@ const resources = {
       'auth.haveAccount': 'Already have an account?',
       'auth.signInHere': 'Sign in here',
       
-      // ✅ Validation messages
+      // Validation messages
       'auth.passwordMismatch': 'Passwords do not match!',
-      'auth.passwordTooShort': 'Password must be at least 6 characters long!',
+      'auth.passwordTooShort': 'Password must be at least 9 characters long!',
       'auth.registerSuccess': 'Registration successful! Welcome aboard!',
       'auth.registerError': 'Registration failed. Please try again.',
     
@@ -94,11 +101,11 @@ const resources = {
       "ranking.tied": "Tied",
       "ranking.win": "Win", 
       "ranking.lose": "Lose",
-      "ranking.inviteFriends": "INVITE FRIENDS",
       "ranking.findMatch": "FIND MATCH",
 
       // Match History Component
       "history.players": "Players",
+      "history.opponents": "Opponents",
       "history.date": "Date",
       "history.results": "Results", 
       "history.status": "Status",
@@ -106,22 +113,49 @@ const resources = {
       "history.defeated": "Defeated",
 
       // Dashboard
-      "dashboard.welcome": "Welcome back, {{username}}! 🎮",
+      "dashboard.welcome": "Welcome back, {{username}}!",
+
+      // Para añadir en i18n.ts resources.en.translation:
+
+      // Edit Profile Modal
+      "editProfile.title": "Edit Profile",
+      "editProfile.subtitle": "Update your photo and information here.",
+      "editProfile.username": "Username",
+      "editProfile.name": "Name", 
+      "editProfile.lastname": "Last Name",
+      "editProfile.email": "Email",
+      "editProfile.password": "Password",
+      "editProfile.save": "SAVE",
+      "editProfile.deleteAccount": "Delete Account",
+      "editProfile.enable2FA": "Enable 2FA",
+      "editProfile.disable2FA": "Disable 2FA",
+      "editProfile.dangerZone": "Danger Zone",
+      "editProfile.twoFactorAuth": "Two-Factor Authentication",
+      "editProfile.twoFactorDesc": "Add an additional layer of security to your account",
+      "editProfile.twoFAEnabled": "Two-Factor Authentication is enabled",
+      "editProfile.twoFADisabled": "Two-Factor Authentication is disabled",
+      "editProfile.deleteAccountTitle": "Delete Account",
+      "editProfile.deleteAccountDesc": "This action cannot be undone. This will permanently delete your account and all associated data.",
+      "editProfile.invalidImageType": "Invalid image format. Please select a JPG, PNG, GIF or WebP file.",
+      "editProfile.imageTooLarge": "Image size too large. Maximum allowed size is 5MB.",
+      "editProfile.profileUpdated": "Profile updated successfully",
+      "editProfile.deleteConfirm": "Are you sure you want to delete your account? This action cannot be undone.",
+      "editProfile.accountDeleted": "Your account has been deleted successfully.",
       
       // Game Room
-      "game.title": "🕹️ Pong Game",
-      "game.backToDashboard": "← Back to Dashboard",
-      "game.controls": "🕹️ Controls:",
+      "game.title": "Pong Game",
+      "game.backToDashboard": "Back to Dashboard",
+      "game.controls": "Controls:",
       "game.leftPlayer": "Left Player: ↑↓ Arrow Keys",
       "game.rightPlayer": "Right Player: W/S Keys",
       
       // Demo Expired
       "demo.expired.title": "Demo Time Expired!",
       "demo.expired.message": "Hope you enjoyed the Pong demo! To continue playing and access all features, register for a free account or log in.",
-      "demo.expired.playAgain": "🎮 Play Again",
-      "demo.expired.register": "🚀 Register Free",
-      "demo.expired.login": "🔑 Login",
-      "demo.expired.backHome": "← Back to Home",
+      "demo.expired.playAgain": "Play Again",
+      "demo.expired.register": "Register Free",
+      "demo.expired.login": "Login",
+      "demo.expired.backHome": "Back to Home",
       
       // Login Page
       "login.title": "Login",
@@ -132,11 +166,332 @@ const resources = {
       "login.registerLink": "Register here",
       
       // Language Selector
-      "language.title": "Idioma",
+      "language.title": "Language",
       "language.english": "English",
       "language.spanish": "Español",
       "language.french": "Français",
-      "language.catalan": "Català"
+      "language.catalan": "Català",
+
+      // Sidebar Navigation
+      "sidebar.profile": "Profile",
+      "sidebar.friends": "Friends", 
+      "sidebar.language": "Language",
+      "sidebar.theme": "Theme",
+      "sidebar.logout": "Logout",
+
+      // Theme Modal
+      "theme.title": "Theme",
+      "theme.subtitle": "Select the theme you want",
+      "theme.selectPlaceholder": "Select a theme",
+      "theme.dark": "Dark",
+      "theme.light": "Light",
+      "theme.cancel": "Cancel",
+      "theme.save": "Save",
+
+      // Language Modal
+      "language.modalTitle": "Language",
+      "language.modalSubtitle": "Select the language you want",
+      "language.selectPlaceholder": "Select your language",
+      "language.cancel": "Cancel",
+      "language.save": "Save",
+      "language.notChosen": "Language not chosen",
+
+      // Common UI Elements
+      "Profile": "Profile",
+      "Language": "Language",
+      "Theme": "Theme",
+      "Dark": "Dark",
+      "Light": "Light",
+      "Catalan": "Catalan",
+      "Spanish": "Spanish",
+      "English": "English", 
+      "French": "French",
+      "Cancel": "Cancel",
+      "Save": "Save",
+      "Select a theme": "Select a theme",
+      "Select the theme what you want": "Select the theme you want",
+      "Select your language": "Select your language",
+      "Select the language you want": "Select the language you want",
+
+      // Tournament
+      "tournament.comingSoon": "🏆 Tournaments are coming soon!",
+      "tournament.createTitle": "Create Tournament",
+      "tournament.createDesc": "Configure your custom tournament",
+      "tournament.nameLabel": "Tournament Name",
+      "tournament.namePlaceholder": "My Epic Tournament",
+      "tournament.nameHint": "Maximum 50 characters",
+      "tournament.playersLabel": "Number of Players",
+      "tournament.minPlayers": "Minimum",
+      "tournament.maxPlayers": "Maximum",
+      "tournament.playersHint": "Tournament will start when minimum players is reached",
+      "tournament.bracketLabel": "Bracket Type",
+      "tournament.knockout": "Knockout",
+      "tournament.knockoutDesc": "Single elimination",
+      "tournament.knockoutDetail": "Lose one match and you're out. Fast and exciting.",
+      "tournament.roundRobin": "Round Robin",
+      "tournament.roundRobinDesc": "Everyone vs everyone",
+      "tournament.roundRobinDetail": "Each player faces all others. More fair and balanced.",
+      "tournament.timeLimitLabel": "Time Limit per Match",
+      "tournament.blitz": "Blitz",
+      "tournament.standard": "Standard",
+      "tournament.extended": "Extended",
+      "tournament.unlimited": "Unlimited",
+      "tournament.timeLimitHint": "Maximum time per individual match",
+      "tournament.optional": "Optional",
+      "tournament.online": "Online",
+      "tournament.offline": "Offline",
+      "tournament.cancel": "Cancel",
+      "tournament.create": "Create Tournament",
+      "tournament.nameRequired": "Tournament name is required",
+      "tournament.invalidPlayerLimits": "Maximum players must be greater than or equal to minimum",
+      "tournament.confirmCreate": "Create tournament with this configuration?",
+      "tournament.name": "Name",
+      "tournament.players": "Players",
+      "tournament.bracket": "Bracket",
+      "tournament.timePerMatch": "Time per match",
+      "tournament.created": "Tournament created successfully!",
+      "tournament.redirecting": "Redirecting to waiting room...",
+      "tournament.createError": "Error creating tournament. Please try again.",
+      "tournament.editTitle": "Edit Tournament",
+      "tournament.updated": "Tournament updated successfully!",
+      "common.save": "Save",
+      "common.cancel": "Cancel",
+      "tournament.tournamentCancelled": "Tournament Cancelled",
+      "tournament.cancelledBy": "Cancelled by",
+      "tournament.cancelledMessage": "This tournament has been cancelled by the organizer. All participants have been notified.",
+      "tournament.backToDashboard": "Back to Dashboard",
+
+      // Tournament Browser Component
+      "tournament.availableTitle": "Available Tournaments",
+      "tournament.availableSubtitle": "Join a tournament or create a new one",
+      "tournament.refresh": "Refresh",
+      "tournament.createNew": "Create Tournament",
+      "tournament.view": "View",
+      "tournament.join": "Join",
+      "tournament.seatsLeft": "Seats left",
+      "tournament.none": "No tournaments available",
+      "tournament.joinError": "Could not join tournament",
+      "tournament.status.planned": "Planned",
+      "tournament.status.open": "Open",
+      "tournament.status.playing": "In Progress",
+      "tournament.status.finished": "Finished",
+
+      // Common
+      "common.refresh": "Refresh",
+      "common.loading": "Loading...",
+      "common.close": "Close",
+      "errors.fetch": "Could not fetch the list.",
+
+      // Waiting Room - ParticipantsGrid Component
+      "waitingRoom.participants": "Participants",
+      "waitingRoom.playersConnected": "Players Connected",
+      "waitingRoom.waitingForPlayer": "Waiting for player...",
+      "waitingRoom.slot": "Slot",
+      "waitingRoom.joinedAt": "Joined",
+      "waitingRoom.ready": "Ready",
+      "waitingRoom.gameProgress": "Game Progress",
+      "waitingRoom.readyToStart": "Ready to start!",
+      "waitingRoom.needMorePlayers": "Need {{count}} more player(s)",
+      "waitingRoom.minimum": "Minimum",
+      "waitingRoom.newPlayerJoined": "New player joined!",
+      "waitingRoom.hasJoined": "has joined!",
+      "waitingRoom.justNow": "Just now",
+
+      // Waiting Room - OwnerControls Component
+      "waitingRoom.ownerControls": "Owner Controls",
+      "waitingRoom.startTournament": "Start Tournament",
+      "waitingRoom.settings": "Settings",
+      "waitingRoom.cancelTournament": "Cancel Tournament",
+      "waitingRoom.playersStatus": "Players Status",
+
+      // Waiting Room - TournamentInfo Component
+      "waitingRoom.tournamentInfo": "Tournament Information",
+      "waitingRoom.format": "Format",
+      "waitingRoom.knockout": "Knockout",
+      "waitingRoom.timeLimit": "Time per match",
+      "waitingRoom.noTimeLimit": "No limit",
+      "waitingRoom.maxPlayers": "Max players",
+      "waitingRoom.status": "Status",
+      "waitingRoom.created": "Created",
+      "waitingRoom.progress": "Progress",
+      "waitingRoom.statusPlanned": "Planned",
+      "waitingRoom.statusOpen": "Open",
+      "waitingRoom.statusInProgress": "In Progress",
+      "waitingRoom.statusFinished": "Finished",
+      "waitingRoom.statusCancelled": "Cancelled",
+      "waitingRoom.statusUnknown": "Unknown",
+
+      // Leaderboard Component
+      "leaderboard.title": "Leaderboard",
+      "leaderboard.empty": "The leaderboard will appear here",
+      "leaderboard.afterMatches": "after the first matches",
+      "leaderboard.updated": "Updated",
+      "leaderboard.live": "Live",
+      "leaderboard.player": "Player",
+      "leaderboard.points": "points",
+
+      // Bracket Component
+      "bracket.title": "Matchups",
+      "bracket.round": "Round",
+      "bracket.format": "Format",
+      "bracket.players": "players",
+      "bracket.quarterfinals": "Quarterfinals",
+      "bracket.semifinals": "Semifinals",
+      "bracket.final": "Final",
+      "bracket.pending": "Pending",
+      "bracket.inProgress": "In Progress", 
+      "bracket.finished": "Finished",
+      "bracket.join": "Play Match",
+      "bracket.waiting": "Waiting",
+      "bracket.waitingPlayer": "Waiting for player",
+      "bracket.backToLobby": "Back to Lobby",
+      "bracket.tournament": "Tournament",
+      "bracket.tournamentInProgress": "Tournament in Progress",
+      "bracket.participants": "participants",
+
+      "privacy.title": "Privacy Policy",
+      "privacy.back": "Back to Dashboard",
+      "terms.title": "Terms of Service",
+      "terms.back": "Back to Dashboard",
+      "about.title": "About Our Platform",
+      "about.back": "Back to Dashboard",
+
+            // HOW TO PLAY
+      "howto.title": "HOW TO PLAY",
+      "howto.goal": "Goal: Score points by sending the ball past your opponent.",
+      "howto.controls": "Controls: ↑ / ↓ arrows, W / S, or mouse to move the paddle.",
+      "howto.win": "First to 5 points wins!",
+
+      // PRIVACY PAGE
+      "privacy.intro": "Your privacy is important to us. This Privacy Policy explains how we collect, use, disclose, and safeguard your information when you use our gaming platform.",
+      "privacy.collect.title": "Information We Collect",
+      "privacy.collect.personal": "Personal Information",
+      "privacy.collect.personal.list": [
+        "Username and email address when you register",
+        "Profile information you choose to provide",
+        "Communication preferences"
+      ],
+      "privacy.collect.game": "Game Data",
+      "privacy.collect.game.list": [
+        "Game statistics and match history",
+        "Rankings and achievements",
+        "In-game preferences and settings"
+      ],
+      "privacy.collect.tech": "Technical Information",
+      "privacy.collect.tech.list": [
+        "IP address and browser information",
+        "Device type and operating system",
+        "Game performance metrics"
+      ],
+      "privacy.use.title": "How We Use Your Information",
+      "privacy.use.list": [
+        "Provide and maintain our gaming services",
+        "Match you with appropriate opponents",
+        "Track your progress and maintain leaderboards",
+        "Communicate with you about updates and tournaments",
+        "Improve our platform and develop new features",
+        "Prevent cheating and ensure fair play"
+      ],
+      "privacy.share.title": "Data Sharing and Disclosure",
+      "privacy.share.text": "We do not sell, trade, or rent your personal information to third parties. We may share your information only in the following situations:",
+      "privacy.share.list": [
+        "With your consent",
+        "To comply with legal obligations",
+        "To protect our rights and prevent fraud",
+        "With service providers who assist in operating our platform"
+      ],
+      "privacy.security.title": "Data Security",
+      "privacy.security.text": "We implement appropriate technical and organizational measures to protect your information. However, no method of transmission or storage is 100% secure.",
+      "privacy.rights.title": "Your Rights and Choices",
+      "privacy.rights.list": [
+        "Access and receive a copy of your personal data",
+        "Correct inaccurate or incomplete information",
+        "Request deletion of your account and associated data",
+        "Opt-out of promotional communications",
+        "Export your game statistics and match history"
+      ],
+      "privacy.cookies.title": "Cookies and Tracking",
+      "privacy.cookies.text": "We use cookies and tracking technologies to enhance your experience. You can control cookie preferences through your browser settings.",
+      "privacy.children.title": "Children's Privacy",
+      "privacy.children.text": "Our service is not directed to children under 13. If you believe your child has provided personal information, please contact us.",
+      "privacy.updates.title": "Updates to This Policy",
+      "privacy.updates.text": "We may update this policy from time to time and post the new version here.",
+      "privacy.contact.title": "Contact Us",
+      "privacy.contact.text": "If you have questions about this Privacy Policy or our data practices, please contact us at:",
+      "privacy.lastUpdated": "Last updated:",
+
+      // ABOUT PAGE
+      "about.intro": "Welcome to the ultimate competitive gaming platform where strategy meets excitement! Our platform brings together players from around the world.",
+      "about.mission.title": "Our Mission",
+      "about.mission.text": "We aim to create the most engaging and fair competitive gaming experience where players of all skill levels can enjoy and grow.",
+      "about.features.title": "Platform Features",
+      "about.features.modes": "Multiple Game Modes",
+      "about.features.modes.desc": "Play against AI, challenge friends, compete online or join tournaments.",
+      "about.features.rank": "Ranking System",
+      "about.features.rank.desc": "Track your progress with rankings and statistics.",
+      "about.features.community": "Global Community",
+      "about.features.community.desc": "Connect and compete with players from around the world.",
+      "about.features.realtime": "Real-time Gameplay",
+      "about.features.realtime.desc": "Enjoy smooth and lag-free matches with optimized servers.",
+      "about.team.title": "The Team",
+      "about.team.text": "Our platform was created by passionate developers who believe in the power of competitive gaming.",
+      "about.tech.title": "Built with Modern Technology",
+      "about.tech.text": "We leverage cutting-edge web technologies to deliver a seamless gaming experience:",
+      "about.community.title": "Join Our Community",
+      "about.community.text": "Be part of a growing community of competitive gamers.",
+      "about.contact.title": "Get in Touch",
+      "about.contact.text": "Have questions or feedback? We'd love to hear from you!",
+      "about.version": "Platform Version: 2.0.1 | © 2025 Gaming Platform. All rights reserved.",
+
+      // TERMS PAGE
+      "terms.1.title": "1. Acceptance of Terms",
+      "terms.1.text": "By accessing this platform, you agree to be bound by these terms.",
+      "terms.2.title": "2. Use License",
+      "terms.2.text": "Permission is granted to temporarily access the platform for personal, non-commercial use. You may not:",
+      "terms.2.list": [
+        "Modify or copy materials",
+        "Use for commercial purposes",
+        "Reverse engineer any software",
+        "Remove copyright notices"
+      ],
+      "terms.3.title": "3. User Accounts",
+      "terms.3.text": "You must provide accurate information and keep your account secure.",
+      "terms.4.title": "4. Fair Play",
+      "terms.4.text": "Cheating or exploiting bugs leads to suspension or termination.",
+      "terms.5.title": "5. Privacy",
+      "terms.5.text": "Your use of the platform is governed by our Privacy Policy.",
+      "terms.6.title": "6. Limitations",
+      "terms.6.text": "We are not liable for damages resulting from the use or inability to use the platform.",
+      "terms.7.title": "7. Modifications",
+      "terms.7.text": "We may revise terms at any time. By using this platform, you agree to the latest version.",
+      "terms.8.title": "8. Contact",
+      "terms.8.text": "If you have any questions about these terms, contact us at support@gameplatform.com.",
+      "terms.lastUpdated": "Last updated:",
+      "history.empty": "No match history available",
+      "game.firstTo": "First to {{count}} goals wins!",
+      "game.goals": "goals",
+      "game.playing": "Playing...",
+      "game.player1Wins": "Player 1 wins!",
+      "game.player2Wins": "Player 2 wins!",
+      "game.player": "Player",
+      "demo.namePlaceholder": "Player Name",
+      "common.continue": "Continue",
+      "general.back": "Back",
+      "header.howToPlay": "How to Play",
+      "waitingRoom.tournament": "Tournament",
+      "tournament.lobby": "Lobby",
+      "waitingRoom.waitingForPlayers": "Waiting for players",
+      "tournament.participants": "Participants",
+
+      "common.backToDashboard": "Back to Dashboard",
+      "game.selectSecondPlayer": "Select Second Player",
+      "game.selectUser": "Select a user",
+      "errors.noOtherUsers": "No other users available to play.",
+      "game.start": "Start Game",
+
+      "tournament.joined": "Joined",
+      "tournament.manage": "Manage",
+
     }
   },
   es: {
@@ -149,12 +504,14 @@ const resources = {
 
       // Landing Page
       "landing.title": "Bienvenido al juego de Pong más ÉPICO",
-      "demo.title": "🏓 Prueba la Demo de Pong",
+      "demo.title": "Prueba la Demo de Pong",
       "demo.subtitle": "¡Juega gratis por 2 minutos!",
-      "demo.playButton": "🎮 Jugar Demo (2 min)",
+      "demo.playButtonInline": "Jugar Demo Inline",
+      "demo.playButtonTournament": "Jugar Demo Tournament",
       "auth.login": "Iniciar Sesión o Registrarse",
 
-      // ✅ Game interface
+
+      // Game interface
       'game.player1': 'Jugador 1',
       'game.demoLevel': 'Nivel Demo',
       'game.timeLeft': 'Tiempo restante',
@@ -165,19 +522,19 @@ const resources = {
       'game.easyLevel': 'Nivel Fácil',
       'game.restartConfirm': '¿Estás seguro de que quieres reiniciar el juego?',
 
-      // ✅ Demo expired screen
+      // Demo expired screen
       'demo.expired': '¡Tiempo de Demo Expirado!',
       'demo.expiredMessage': '¡Esperamos que hayas disfrutado la demo de Pong! Para continuar jugando y acceder a todas las funciones, regístrate para una cuenta gratuita o inicia sesión.',
-      'demo.playAgain': '🎮 Jugar de Nuevo',
+      'demo.playAgain': 'Jugar de Nuevo',
       'demo.twoMinutes': '(2 min)',
-      'demo.registerFree': '🚀 Registrarse Gratis',
+      'demo.registerFree': 'Registrarse Gratis',
       'demo.unlimited': '(Ilimitado)',
-      'demo.login': '🔑 Iniciar Sesión',
+      'demo.login': 'Iniciar Sesión',
       'demo.existingUser': '(Usuario Existente)',
-      'demo.backToHome': '← Volver al Inicio',
+      'demo.backToHome': 'Volver al Inicio',
       'demo.endConfirm': '¿Estás seguro de que quieres finalizar la demo?',
       
-      // ✅ Mensajes de autenticación
+      // Mensajes de autenticación
       'auth.welcome': '¡Bienvenido!',
       'auth.pleaseLogin': 'Por favor, inicia sesión para continuar.',
       'auth.email': 'Correo Electrónico',
@@ -189,24 +546,29 @@ const resources = {
       'auth.googleLogin': 'Iniciar sesión con Google',
       'auth.noAccount': '¿No tienes una cuenta?',
       'auth.registerFree': 'Regístrate gratis',
+      'auth.twofa': 'Autenticación de Dos Factores',
 
-      // ✅ Mensajes comunes
+      // Mensajes comunes
       'common.backToHome': 'Volver al Inicio',
 
-      // ✅ Mensajes específicos de registro
+      // Mensajes específicos de registro
       'auth.createAccount': 'Crear Cuenta',
       'auth.joinUs': '¡Únete a nosotros y comienza a jugar!',
       'auth.username': 'Nombre de Usuario',
       'auth.usernamePlaceholder': 'Ingresa tu nombre de usuario',
+      'auth.firstName': 'Nombre',
+      'auth.firstNamePlaceholder': 'Ingresa tu nombre',
+      'auth.lastName': 'Apellido',
+      'auth.lastNamePlaceholder': 'Ingresa tu apellido',
       'auth.confirmPassword': 'Confirmar Contraseña',
       'auth.confirmPasswordPlaceholder': 'Confirma tu contraseña',
       'auth.registerButton': 'REGISTRARSE',
       'auth.googleRegister': 'Registrarse con Google',
       'auth.haveAccount': '¿Ya tienes una cuenta?',
       'auth.signInHere': 'Inicia sesión aquí',
-      // ✅ Mensajes de validación
+      // Mensajes de validación
       'auth.passwordMismatch': '¡Las contraseñas no coinciden!',
-      'auth.passwordTooShort': '¡La contraseña debe tener al menos 6 caracteres!',
+      'auth.passwordTooShort': '¡La contraseña debe tener al menos 9 caracteres!',
       'auth.registerSuccess': '¡Registro exitoso! ¡Bienvenido a bordo!',
       'auth.registerError': 'Error al registrarse. Por favor, inténtalo de nuevo.',
 
@@ -230,11 +592,11 @@ const resources = {
       "ranking.tied": "Empatado",
       "ranking.win": "Victoria", 
       "ranking.lose": "Derrota",
-      "ranking.inviteFriends": "INVITAR AMIGOS",
       "ranking.findMatch": "ENCONTRAR PARTIDO",
 
       // Match History Component
       "history.players": "Jugadores",
+      "history.opponents": "Oponentes",
       "history.date": "Fecha",
       "history.results": "Resultados", 
       "history.status": "Estado",
@@ -242,22 +604,22 @@ const resources = {
       "history.defeated": "Derrota",
 
       // Dashboard
-      "dashboard.welcome": "¡Bienvenido de nuevo, {{username}}! 🎮",
+      "dashboard.welcome": "¡Bienvenido de nuevo, {{username}}!",
 
       // Game Room
-      "game.title": "🕹️ Juego Pong",
-      "game.backToDashboard": "← Volver al Dashboard",
-      "game.controls": "🕹️ Controles:",
+      "game.title": "Juego Pong",
+      "game.backToDashboard": "Volver al Dashboard",
+      "game.controls": "Controles:",
       "game.leftPlayer": "Jugador Izquierdo: Flechas ↑↓",
       "game.rightPlayer": "Jugador Derecho: Teclas W/S",
       
       // Demo Expired
       "demo.expired.title": "¡Demo Expirada!",
       "demo.expired.message": "¡Esperamos que hayas disfrutado la demo de Pong! Para seguir jugando y acceder a todas las funciones, regístrate gratis o inicia sesión.",
-      "demo.expired.playAgain": "🎮 Jugar de Nuevo",
-      "demo.expired.register": "🚀 Registro Gratis",
-      "demo.expired.login": "🔑 Iniciar Sesión",
-      "demo.expired.backHome": "← Volver al Inicio",
+      "demo.expired.playAgain": "Jugar de Nuevo",
+      "demo.expired.register": "Registro Gratis",
+      "demo.expired.login": "Iniciar Sesión",
+      "demo.expired.backHome": "Volver al Inicio",
       
       // Login Page
       "login.title": "Iniciar Sesión",
@@ -272,7 +634,354 @@ const resources = {
       "language.english": "English",
       "language.spanish": "Español",
       "language.french": "Français",
-      "language.catalan": "Català"
+      "language.catalan": "Català",
+
+      // Sidebar Navigation
+      "sidebar.profile": "Perfil",
+      "sidebar.language": "Idioma",
+      "sidebar.theme": "Tema",
+      "sidebar.logout": "Cerrar Sesión",
+
+      // Theme Modal
+      "theme.title": "Tema",
+      "theme.subtitle": "Selecciona el tema que deseas",
+      "theme.selectPlaceholder": "Selecciona un tema",
+      "theme.dark": "Oscuro",
+      "theme.light": "Claro",
+      "theme.cancel": "Cancelar",
+      "theme.save": "Guardar",
+
+      // Language Modal
+      "language.modalTitle": "Idioma",
+      "language.modalSubtitle": "Selecciona el idioma que deseas",
+      "language.selectPlaceholder": "Selecciona tu idioma",
+      "language.cancel": "Cancelar",
+      "language.save": "Guardar",
+      "language.notChosen": "Idioma no seleccionado",
+
+      // Common UI Elements
+      "Profile": "Perfil",
+      "Language": "Idioma",
+      "Theme": "Tema",
+      "Dark": "Oscuro",
+      "Light": "Claro",
+      "Catalan": "Catalán",
+      "Spanish": "Español",
+      "English": "Inglés", 
+      "French": "Francés",
+      "Cancel": "Cancelar",
+      "Save": "Guardar",
+      "Select a theme": "Selecciona un tema",
+      "Select the theme what you want": "Selecciona el tema que deseas",
+      "Select your language": "Selecciona tu idioma",
+      "Select the language you want": "Selecciona el idioma que deseas",
+
+      // Tournament
+      "tournament.comingSoon": "🏆 ¡Los torneos llegan pronto!",
+      "tournament.createTitle": "Crear Torneo",
+      "tournament.createDesc": "Configura tu torneo personalizado",
+      "tournament.nameLabel": "Nombre del Torneo",
+      "tournament.namePlaceholder": "Mi Torneo Épico",
+      "tournament.nameHint": "Máximo 50 caracteres",
+      "tournament.playersLabel": "Número de Jugadores",
+      "tournament.minPlayers": "Mínimo",
+      "tournament.maxPlayers": "Máximo",
+      "tournament.playersHint": "El torneo se iniciará cuando se alcance el mínimo de jugadores",
+      "tournament.bracketLabel": "Tipo de Bracket",
+      "tournament.knockout": "Knockout",
+      "tournament.knockoutDesc": "Eliminación directa",
+      "tournament.knockoutDetail": "Pierdes un partido y quedas eliminado. Rápido y emocionante.",
+      "tournament.roundRobin": "Round Robin",
+      "tournament.roundRobinDesc": "Todos contra todos",
+      "tournament.roundRobinDetail": "Cada jugador se enfrenta a todos los demás. Más justo y equilibrado.",
+      "tournament.timeLimitLabel": "Tiempo Límite por Partido",
+      "tournament.blitz": "Blitz",
+      "tournament.standard": "Estándar",
+      "tournament.extended": "Extendido",
+      "tournament.unlimited": "Sin límite",
+      "tournament.timeLimitHint": "Tiempo máximo por partido individual",
+      "tournament.optional": "Opcional",
+      "tournament.online": "En línea",
+      "tournament.offline": "Desconectado",
+      "tournament.cancel": "Cancelar",
+      "tournament.create": "Crear Torneo",
+      "tournament.nameRequired": "El nombre del torneo es obligatorio",
+      "tournament.invalidPlayerLimits": "El máximo de jugadores debe ser mayor o igual al mínimo",
+      "tournament.confirmCreate": "¿Crear torneo con esta configuración?",
+      "tournament.name": "Nombre",
+      "tournament.players": "Jugadores",
+      "tournament.bracket": "Bracket",
+      "tournament.timePerMatch": "Tiempo por partido",
+      "tournament.created": "Torneo creado exitosamente!",
+      "tournament.redirecting": "Redirigiendo a la sala de espera...",
+      "tournament.createError": "Error al crear el torneo. Inténtalo de nuevo.",
+      "tournament.editTitle": "Editar Torneo",
+      "tournament.updated": "Torneo actualizado exitosamente!",
+      "common.save": "Guardar",
+      "common.cancel": "Cancelar",
+      "tournament.tournamentCancelled": "Torneo Cancelado",
+      "tournament.cancelledBy": "Cancelado por",
+      "tournament.cancelledMessage": "Este torneo ha sido cancelado por el organizador. Todos los participantes han sido notificados.",
+      "tournament.backToDashboard": "Volver al Dashboard",
+
+      // Tournament Browser Component
+      "tournament.availableTitle": "Torneos Disponibles",
+      "tournament.availableSubtitle": "Únete a un torneo o crea uno nuevo",
+      "tournament.refresh": "Actualizar",
+      "tournament.createNew": "Crear Torneo",
+      "tournament.view": "Ver",
+      "tournament.join": "Unirse",
+      "tournament.seatsLeft": "Plazas libres",
+      "tournament.none": "No hay torneos disponibles",
+      "tournament.joinError": "No se pudo unir al torneo",
+      "tournament.status.planned": "Planificado",
+      "tournament.status.open": "Abierto",
+      "tournament.status.playing": "En Progreso",
+      "tournament.status.finished": "Finalizado",
+
+      // Common
+      "common.refresh": "Actualizar",
+      "common.loading": "Cargando...",
+      "common.close": "Cerrar",
+      "errors.fetch": "No se pudo obtener el listado.",
+
+      // Waiting Room - ParticipantsGrid Component
+      "waitingRoom.participants": "Participantes",
+      "waitingRoom.playersConnected": "Jugadores Conectados",
+      "waitingRoom.waitingForPlayer": "Esperando jugador...",
+      "waitingRoom.slot": "Slot",
+      "waitingRoom.joinedAt": "Se unió",
+      "waitingRoom.ready": "Listo",
+      "waitingRoom.gameProgress": "Progreso del juego",
+      "waitingRoom.readyToStart": "¡Listo para empezar!",
+      "waitingRoom.needMorePlayers": "Necesitas {{count}} jugador(es) más",
+      "waitingRoom.minimum": "Mínimo",
+      "waitingRoom.newPlayerJoined": "¡Nuevo jugador se unió!",
+      "waitingRoom.hasJoined": "se ha unido!",
+      "waitingRoom.justNow": "Ahora mismo",
+
+      // Waiting Room - OwnerControls Component
+      "waitingRoom.ownerControls": "Controles del Organizador",
+      "waitingRoom.startTournament": "Iniciar Torneo",
+      "waitingRoom.settings": "Configuración",
+      "waitingRoom.cancelTournament": "Cancelar Torneo",
+      "waitingRoom.playersStatus": "Estado de Jugadores",
+
+      // Waiting Room - TournamentInfo Component
+      "waitingRoom.tournamentInfo": "Información del Torneo",
+      "waitingRoom.format": "Formato",
+      "waitingRoom.knockout": "Eliminatoria",
+      "waitingRoom.timeLimit": "Tiempo por partido",
+      "waitingRoom.noTimeLimit": "Sin límite",
+      "waitingRoom.maxPlayers": "Máximo jugadores",
+      "waitingRoom.status": "Estado",
+      "waitingRoom.created": "Creado",
+      "waitingRoom.progress": "Progreso",
+      "waitingRoom.statusPlanned": "Planeado",
+      "waitingRoom.statusOpen": "Abierto",
+      "waitingRoom.statusInProgress": "En Progreso",
+      "waitingRoom.statusFinished": "Finalizado",
+      "waitingRoom.statusCancelled": "Cancelado",
+      "waitingRoom.statusUnknown": "Desconocido",
+
+      // Leaderboard Component
+      "leaderboard.title": "Clasificación",
+      "leaderboard.empty": "La clasificación aparecerá aquí",
+      "leaderboard.afterMatches": "después de los primeros partidos",
+      "leaderboard.updated": "Actualizado",
+      "leaderboard.live": "En vivo",
+      "leaderboard.player": "Jugador",
+      "leaderboard.points": "puntos",
+
+      // Bracket Component
+      "bracket.title": "Enfrentamientos",
+      "bracket.round": "Ronda",
+      "bracket.format": "Formato",
+      "bracket.players": "jugadores",
+      "bracket.quarterfinals": "Cuartos de Final",
+      "bracket.semifinals": "Semifinales",
+      "bracket.final": "Final",
+      "bracket.pending": "Pendiente",
+      "bracket.inProgress": "En Progreso",
+      "bracket.finished": "Finalizado",
+      "bracket.join": "Jugar Partido",
+      "bracket.waiting": "Esperando",
+      "bracket.waitingPlayer": "Esperando jugador",
+      "bracket.backToLobby": "Volver al Lobby",
+      "bracket.tournament": "Torneo",
+      "bracket.tournamentInProgress": "Torneo en Progreso",
+      "bracket.participants": "participantes",
+
+      // Edit Profile Modal
+      "editProfile.title": "Editar Perfil",
+      "editProfile.subtitle": "Actualiza tu foto e información aquí.",
+      "editProfile.username": "Nombre de Usuario",
+      "editProfile.name": "Nombre", 
+      "editProfile.lastname": "Apellido",
+      "editProfile.email": "Correo Electrónico",
+      "editProfile.password": "Contraseña",
+      "editProfile.save": "GUARDAR",
+      "editProfile.deleteAccount": "Eliminar Cuenta",
+      "editProfile.enable2FA": "Activar 2FA",
+      "editProfile.disable2FA": "Desactivar 2FA",
+      "editProfile.dangerZone": "Zona de Peligro",
+      "editProfile.twoFactorAuth": "Autenticación de Dos Factores",
+      "editProfile.twoFactorDesc": "Añade una capa adicional de seguridad a tu cuenta",
+      "editProfile.twoFAEnabled": "La Autenticación de Dos Factores está activada",
+      "editProfile.twoFADisabled": "La Autenticación de Dos Factores está desactivada",
+      "editProfile.deleteAccountTitle": "Eliminar Cuenta",
+      "editProfile.deleteAccountDesc": "Esta acción no se puede deshacer. Esto eliminará permanentemente tu cuenta y todos los datos asociados.",
+      "editProfile.invalidImageType": "Formato de imagen inválido. Por favor selecciona un archivo JPG, PNG, GIF o WebP.",
+      "editProfile.imageTooLarge": "El tamaño de la imagen es muy grande. El tamaño máximo permitido es 5MB.",
+      "editProfile.profileUpdated": "Perfil actualizado correctamente",
+      "editProfile.deleteConfirm": "¿Estás seguro de que quieres eliminar tu cuenta? Esta acción no se puede deshacer.",
+      "editProfile.accountDeleted": "Tu cuenta ha sido eliminada correctamente.",
+
+      "privacy.title": "Política de Privacidad",
+      "privacy.back": "Volver al Panel",
+      "terms.title": "Términos del Servicio",
+      "terms.back": "Volver al Panel",
+      "about.title": "Sobre Nuestra Plataforma",
+      "about.back": "Volver al Panel",
+
+      // HOW TO PLAY
+      "howto.title": "CÓMO JUGAR",
+      "howto.goal": "Objetivo: Consigue puntos enviando la pelota más allá de tu oponente.",
+      "howto.controls": "Controles: Flechas ↑ / ↓, W / S o el ratón para mover la paleta.",
+      "howto.win": "¡El primero en llegar a 5 puntos gana!",
+
+      // PRIVACY PAGE
+      "privacy.intro": "Tu privacidad es importante para nosotros. Esta Política de Privacidad explica cómo recopilamos, usamos, divulgamos y protegemos tu información cuando utilizas nuestra plataforma de juegos.",
+      "privacy.collect.title": "Información que Recopilamos",
+      "privacy.collect.personal": "Información Personal",
+      "privacy.collect.personal.list": [
+        "Nombre de usuario y correo electrónico al registrarte",
+        "Información de perfil que elijas proporcionar",
+        "Preferencias de comunicación"
+      ],
+      "privacy.collect.game": "Datos del Juego",
+      "privacy.collect.game.list": [
+        "Estadísticas de juego e historial de partidas",
+        "Clasificaciones y logros",
+        "Preferencias y configuraciones dentro del juego"
+      ],
+      "privacy.collect.tech": "Información Técnica",
+      "privacy.collect.tech.list": [
+        "Dirección IP e información del navegador",
+        "Tipo de dispositivo y sistema operativo",
+        "Métricas de rendimiento del juego"
+      ],
+      "privacy.use.title": "Cómo Usamos tu Información",
+      "privacy.use.list": [
+        "Proporcionar y mantener nuestros servicios de juego",
+        "Emparejarte con oponentes adecuados",
+        "Rastrear tu progreso y mantener clasificaciones",
+        "Comunicarnos contigo sobre actualizaciones y torneos",
+        "Mejorar nuestra plataforma y desarrollar nuevas funciones",
+        "Prevenir trampas y asegurar un juego justo"
+      ],
+      "privacy.share.title": "Intercambio y Divulgación de Datos",
+      "privacy.share.text": "No vendemos ni alquilamos tu información personal a terceros. Solo la compartimos en las siguientes situaciones:",
+      "privacy.share.list": [
+        "Con tu consentimiento",
+        "Para cumplir con obligaciones legales",
+        "Para proteger nuestros derechos y prevenir fraudes",
+        "Con proveedores de servicios que ayudan a operar la plataforma"
+      ],
+      "privacy.security.title": "Seguridad de los Datos",
+      "privacy.security.text": "Implementamos medidas técnicas y organizativas para proteger tu información. Sin embargo, ningún método de transmisión o almacenamiento es 100% seguro.",
+      "privacy.rights.title": "Tus Derechos y Opciones",
+      "privacy.rights.list": [
+        "Acceder y recibir una copia de tus datos personales",
+        "Corregir información inexacta o incompleta",
+        "Solicitar la eliminación de tu cuenta y datos asociados",
+        "Rechazar comunicaciones promocionales",
+        "Exportar tus estadísticas e historial de partidas"
+      ],
+      "privacy.cookies.title": "Cookies y Seguimiento",
+      "privacy.cookies.text": "Usamos cookies y tecnologías de seguimiento para mejorar tu experiencia. Puedes gestionarlas desde la configuración del navegador.",
+      "privacy.children.title": "Privacidad Infantil",
+      "privacy.children.text": "Nuestro servicio no está dirigido a menores de 13 años. Si crees que tu hijo nos ha proporcionado información personal, contáctanos.",
+      "privacy.updates.title": "Actualizaciones de esta Política",
+      "privacy.updates.text": "Podemos actualizar esta política ocasionalmente y publicaremos la nueva versión en esta página.",
+      "privacy.contact.title": "Contáctanos",
+      "privacy.contact.text": "Si tienes preguntas sobre esta política o el uso de tus datos, contáctanos en:",
+      "privacy.lastUpdated": "Última actualización:",
+
+      // ABOUT PAGE
+      "about.intro": "Bienvenido a la plataforma de juegos competitivos definitiva donde la estrategia se une a la emoción. Aquí jugadores de todo el mundo compiten en partidas y torneos.",
+      "about.mission.title": "Nuestra Misión",
+      "about.mission.text": "Crear la experiencia de juego competitivo más atractiva y justa posible, fomentando una comunidad inclusiva y respetuosa.",
+      "about.features.title": "Características de la Plataforma",
+      "about.features.modes": "Múltiples Modos de Juego",
+      "about.features.modes.desc": "Juega contra la IA, desafía amigos, compite en línea o participa en torneos.",
+      "about.features.rank": "Sistema de Clasificación",
+      "about.features.rank.desc": "Sigue tu progreso con un sistema completo de estadísticas y posiciones.",
+      "about.features.community": "Comunidad Global",
+      "about.features.community.desc": "Conecta y compite con jugadores de todo el mundo.",
+      "about.features.realtime": "Juego en Tiempo Real",
+      "about.features.realtime.desc": "Disfruta de partidas fluidas y sin retrasos gracias a nuestra infraestructura optimizada.",
+      "about.team.title": "El Equipo",
+      "about.team.text": "Nuestra plataforma fue creada por un equipo apasionado de desarrolladores y amantes de los videojuegos competitivos.",
+      "about.tech.title": "Desarrollado con Tecnología Moderna",
+      "about.tech.text": "Usamos tecnologías web de vanguardia para ofrecer una experiencia de juego impecable:",
+      "about.community.title": "Únete a Nuestra Comunidad",
+      "about.community.text": "Sé parte de una comunidad en crecimiento de jugadores competitivos.",
+      "about.contact.title": "Ponte en Contacto",
+      "about.contact.text": "¿Tienes preguntas o sugerencias? ¡Nos encantaría escucharte!",
+      "about.version": "Versión de la Plataforma: 2.0.1 | © 2025 Plataforma de Juegos. Todos los derechos reservados.",
+
+      // TERMS PAGE
+      "terms.1.title": "1. Aceptación de los Términos",
+      "terms.1.text": "Al acceder a esta plataforma, aceptas las condiciones descritas en este acuerdo.",
+      "terms.2.title": "2. Licencia de Uso",
+      "terms.2.text": "Se te concede permiso temporal para usar la plataforma de forma personal y no comercial. No puedes:",
+      "terms.2.list": [
+        "Modificar o copiar materiales",
+        "Usarlos con fines comerciales o públicos",
+        "Ingeniería inversa del software",
+        "Eliminar avisos de derechos de autor"
+      ],
+      "terms.3.title": "3. Cuentas de Usuario",
+      "terms.3.text": "Debes proporcionar información precisa y mantener la seguridad de tu cuenta.",
+      "terms.4.title": "4. Reglas de Juego Justo",
+      "terms.4.text": "Hacer trampas o explotar errores resultará en la suspensión o eliminación de la cuenta.",
+      "terms.5.title": "5. Privacidad",
+      "terms.5.text": "El uso de la plataforma está sujeto a nuestra Política de Privacidad.",
+      "terms.6.title": "6. Limitaciones",
+      "terms.6.text": "No somos responsables de los daños derivados del uso o incapacidad de uso de la plataforma.",
+      "terms.7.title": "7. Modificaciones",
+      "terms.7.text": "Podemos actualizar estos términos en cualquier momento. El uso continuado implica aceptación.",
+      "terms.8.title": "8. Contacto",
+      "terms.8.text": "Si tienes preguntas sobre estos términos, contáctanos en support@gameplatform.com.",
+      "terms.lastUpdated": "Última actualización:",
+      "history.empty": "No hay historial de partidas disponible",
+      "game.firstTo": "El primero en llegar a {{count}} goles gana!",
+      "game.goals": "goles",
+      "game.playing": "Jugando...",
+      "game.player1Wins": "¡El Jugador 1 gana!",
+      "game.player2Wins": "¡El Jugador 2 gana!",
+      "game.player": "Jugador",
+      "demo.namePlaceholder": "Nombre del Jugador",
+      "common.continue": "Continuar",
+      "general.back": "Atrás",
+      "header.howToPlay": "Cómo Jugar",
+      "waitingRoom.tournament": "Torneo",
+      "tournament.lobby": "Lobby",
+      "waitingRoom.waitingForPlayers": "Esperando jugadores",
+      "tournament.participants": "Participantes",
+
+      "common.backToDashboard": "Volver al Panel",
+      "game.selectSecondPlayer": "Seleccionar Segundo Jugador",
+      "game.selectUser": "Selecciona un usuario",
+      "errors.noOtherUsers": "No hay otros usuarios disponibles para jugar.",
+      "game.start": "Iniciar Juego",
+
+      "tournament.joined": "Unido",
+      "tournament.manage": "Gestionar"
+
+
+
     }
   },
   fr: {
@@ -285,12 +994,14 @@ const resources = {
 
       // Landing Page
       "landing.title": "Bienvenue dans le jeu de Pong le plus ÉPIQUE",
-      "demo.title": "🏓 Essayez la Démo Pong",
+      "demo.title": "Essayez la Démo Pong",
       "demo.subtitle": "Jouez gratuitement pendant 2 minutes !",
-      "demo.playButton": "🎮 Jouer Démo (2 min)",
+      "demo.playButtonInline": "Jouer Démo Inline",
+      "demo.playButtonTournament": "Jouer Démo Tournament",
       "auth.login": "Connexion ou Inscription",
 
-      // ✅ Game interface
+
+      // Game interface
       'game.player1': 'Joueur 1',
       'game.demoLevel': 'Niveau Démo',
       'game.timeLeft': 'Temps restant',
@@ -301,19 +1012,19 @@ const resources = {
       'game.easyLevel': 'Niveau Facile',
       'game.restartConfirm': 'Êtes-vous sûr de vouloir redémarrer le jeu ?', 
 
-      // ✅ Demo expired screen
+      // Demo expired screen
       'demo.expired': 'Temps de Démo Expiré !',
       'demo.expiredMessage': 'J’espère que vous avez apprécié la démo de Pong ! Pour continuer à jouer et accéder à toutes les fonctionnalités, inscrivez-vous pour un compte gratuit ou connectez-vous.',
-      'demo.playAgain': '🎮 Jouer à Nouveau',
+      'demo.playAgain': 'Jouer à Nouveau',
       'demo.twoMinutes': '(2 min)',
-      'demo.registerFree': '🚀 Inscription Gratuite',
+      'demo.registerFree': 'Inscription Gratuite',
       'demo.unlimited': '(Illimité)',
-      'demo.login': '🔑 Connexion',
+      'demo.login': 'Connexion',
       'demo.existingUser': '(Utilisateur Existant)',
-      'demo.backToHome': '← Retour à l\'Accueil',
+      'demo.backHome': 'Retour à l\'Accueil',
       'demo.endConfirm': 'Êtes-vous sûr de vouloir terminer la démo ?',
 
-      // ✅ Messages d'authentification
+      // Messages d'authentification
       'auth.welcome': 'Bienvenue !',
       'auth.pleaseLogin': 'Veuillez vous connecter pour continuer.',
       'auth.email': 'E-mail',
@@ -325,23 +1036,29 @@ const resources = {
       'auth.googleLogin': 'Se connecter avec Google',
       'auth.noAccount': "Vous n'avez pas de compte ?",
       'auth.registerFree': 'Inscrivez-vous gratuitement',
-      // ✅ Messages communs
+      'auth.twofa': 'Authentification à Deux Facteurs',
+
+      // Messages communs
       'common.backToHome': 'Retour à l\'Accueil',
 
-      // ✅ Messages spécifiques à l'inscription
+      // Messages spécifiques à l'inscription
       'auth.createAccount': 'Créer un Compte',
       'auth.joinUs': 'Rejoignez-nous et commencez à jouer !',
       'auth.username': 'Nom d\'utilisateur',
       'auth.usernamePlaceholder': 'Entrez votre nom d\'utilisateur',
+      'auth.firstName': 'Prénom',
+      'auth.firstNamePlaceholder': 'Entrez votre prénom',
+      'auth.lastName': 'Nom de famille',
+      'auth.lastNamePlaceholder': 'Entrez votre nom de famille',
       'auth.confirmPassword': 'Confirmer le Mot de Passe',
       'auth.confirmPasswordPlaceholder': 'Confirmez votre mot de passe',
       'auth.registerButton': 'S\'INSCRIRE',
       'auth.googleRegister': 'S\'inscrire avec Google',
       'auth.haveAccount': 'Vous avez déjà un compte ?',
       'auth.signInHere': 'Connectez-vous ici',
-      // ✅ Messages de validation
+      // Messages de validation
       'auth.passwordMismatch': 'Les mots de passe ne correspondent pas !',
-      'auth.passwordTooShort': 'Le mot de passe doit comporter au moins 6 caractères !',
+      'auth.passwordTooShort': 'Le mot de passe doit comporter au moins 9 caractères !',
       'auth.registerSuccess': 'Inscription réussie ! Bienvenue à bord !',
       'auth.registerError': 'Échec de l\'inscription. Veuillez réessayer.',
       
@@ -365,11 +1082,11 @@ const resources = {
       "ranking.tied": "Égalité",
       "ranking.win": "Victoire", 
       "ranking.lose": "Défaite",
-      "ranking.inviteFriends": "INVITER DES AMIS",
       "ranking.findMatch": "TROUVER UN MATCH",
 
       // Match History Component
       "history.players": "Joueurs",
+      "history.opponents": "Adversaires",
       "history.date": "Date",
       "history.results": "Résultats", 
       "history.status": "Statut",
@@ -377,22 +1094,22 @@ const resources = {
       "history.defeated": "Défaite",
 
       // Dashboard
-      "dashboard.welcome": "Bon retour, {{username}} ! 🎮",
+      "dashboard.welcome": "Bon retour, {{username}} !",
       
       // Game Room
-      "game.title": "🕹️ Jeu Pong",
-      "game.backToDashboard": "← Retour au Tableau de Bord",
-      "game.controls": "🕹️ Contrôles :",
+      "game.title": "Jeu Pong",
+      "game.backToDashboard": "Retour au Tableau de Bord",
+      "game.controls": "Contrôles :",
       "game.leftPlayer": "Joueur Gauche : Flèches ↑↓",
       "game.rightPlayer": "Joueur Droit : Touches W/S",
       
       // Demo Expired
       "demo.expired.title": "Démo Expirée !",
       "demo.expired.message": "J'espère que vous avez apprécié la démo Pong ! Pour continuer à jouer et accéder à toutes les fonctionnalités, inscrivez-vous gratuitement ou connectez-vous.",
-      "demo.expired.playAgain": "🎮 Rejouer",
-      "demo.expired.register": "🚀 Inscription Gratuite",
-      "demo.expired.login": "🔑 Connexion",
-      "demo.expired.backHome": "← Retour à l'Accueil",
+      "demo.expired.playAgain": "Rejouer",
+      "demo.expired.register": "Inscription Gratuite",
+      "demo.expired.login": "Connexion",
+      "demo.expired.backHome": "Retour à l'Accueil",
       
       // Login Page
       "login.title": "Connexion",
@@ -403,11 +1120,334 @@ const resources = {
       "login.registerLink": "Inscrivez-vous ici",
       
       // Language Selector
-      "language.title": "Idioma",
+      "language.title": "Langue",
       "language.english": "English",
       "language.spanish": "Español",
       "language.french": "Français",
-      "language.catalan": "Català"
+      "language.catalan": "Català",
+
+      // Sidebar Navigation
+      "sidebar.profile": "Profil",
+      "sidebar.language": "Langue",
+      "sidebar.theme": "Thème",
+      "sidebar.logout": "Déconnexion",
+
+      // Theme Modal
+      "theme.title": "Thème",
+      "theme.subtitle": "Sélectionnez le thème que vous voulez",
+      "theme.selectPlaceholder": "Sélectionnez un thème",
+      "theme.dark": "Sombre",
+      "theme.light": "Clair",
+      "theme.cancel": "Annuler",
+      "theme.save": "Sauvegarder",
+
+      // Language Modal
+      "language.modalTitle": "Langue",
+      "language.modalSubtitle": "Sélectionnez la langue que vous voulez",
+      "language.selectPlaceholder": "Sélectionnez votre langue",
+      "language.cancel": "Annuler",
+      "language.save": "Sauvegarder",
+      "language.notChosen": "Langue non choisie",
+
+      // Common UI Elements
+      "Profile": "Profil",
+      "Language": "Langue",
+      "Theme": "Thème",
+      "Dark": "Sombre",
+      "Light": "Clair",
+      "Catalan": "Catalan",
+      "Spanish": "Espagnol",
+      "English": "Anglais", 
+      "French": "Français",
+      "Cancel": "Annuler",
+      "Save": "Sauvegarder",
+      "Select a theme": "Sélectionnez un thème",
+      "Select the theme what you want": "Sélectionnez le thème que vous voulez",
+      "Select your language": "Sélectionnez votre langue",
+      "Select the language you want": "Sélectionnez la langue que vous voulez",
+
+      // Tournament
+      "tournament.comingSoon": "🏆 Les tournois arrivent bientôt !",
+      "tournament.createTitle": "Créer un Tournoi",
+      "tournament.createDesc": "Configure ton tournoi personnalisé",
+      "tournament.nameLabel": "Nom du Tournoi",
+      "tournament.namePlaceholder": "Mon Tournoi Épique",
+      "tournament.nameHint": "Maximum 50 caractères",
+      "tournament.playersLabel": "Nombre de Joueurs",
+      "tournament.minPlayers": "Minimum",
+      "tournament.maxPlayers": "Maximum",
+      "tournament.playersHint": "Le tournoi commencera lorsque le nombre minimum de joueurs sera atteint",
+      "tournament.bracketLabel": "Type de Bracket",
+      "tournament.knockout": "Élimination directe",
+      "tournament.knockoutDesc": "Élimination directe",
+      "tournament.knockoutDetail": "Tu perds un match et tu es éliminé. Rapide et excitant.",
+      "tournament.roundRobin": "Round Robin",
+      "tournament.roundRobinDesc": "Tous contre tous",
+      "tournament.roundRobinDetail": "Chaque joueur affronte tous les autres. Plus juste et équilibré.",
+      "tournament.timeLimitLabel": "Limite de Temps par Match",
+      "tournament.blitz": "Blitz",
+      "tournament.standard": "Standard",
+      "tournament.extended": "Étendu",
+      "tournament.unlimited": "Sans limite",
+      "tournament.timeLimitHint": "Temps maximum pour un match individuel",
+      "tournament.optional": "Optionnel",
+      "tournament.online": "En ligne",
+      "tournament.offline": "Déconnecté",
+      "tournament.cancel": "Annuler",
+      "tournament.create": "Créer un Tournoi",
+      "tournament.nameRequired": "Le nom du tournoi est obligatoire",
+      "tournament.invalidPlayerLimits": "Le maximum de joueurs doit être supérieur ou égal au minimum",
+      "tournament.confirmCreate": "Créer le tournoi avec cette configuration ?",
+      "tournament.name": "Nom",
+      "tournament.players": "Joueurs",
+      "tournament.bracket": "Bracket",
+      "tournament.timePerMatch": "Temps par match",
+      "tournament.created": "Tournoi créé avec succès !",
+      "tournament.redirecting": "Redirection vers la salle d’attente...",
+      "tournament.createError": "Erreur lors de la création du tournoi. Réessaie.",
+      "tournament.tournamentCancelled": "Tournoi Annulé",
+      "tournament.cancelledBy": "Annulé par",
+      "tournament.cancelledMessage": "Ce tournoi a été annulé par l'organisateur. Tous les participants ont été notifiés.",
+      "tournament.backToDashboard": "Retour au Dashboard",
+
+      // Waiting Room - ParticipantsGrid Component
+      "waitingRoom.participants": "Participants",
+      "waitingRoom.playersConnected": "Joueurs Connectés",
+      "waitingRoom.waitingForPlayer": "En attente d'un joueur...",
+      "waitingRoom.slot": "Slot",
+      "waitingRoom.joinedAt": "Rejoint",
+      "waitingRoom.ready": "Prêt",
+      "waitingRoom.gameProgress": "Progression du jeu",
+      "waitingRoom.readyToStart": "Prêt à commencer !",
+      "waitingRoom.needMorePlayers": "Besoin de {{count}} joueur(s) de plus",
+      "waitingRoom.minimum": "Minimum",
+      "waitingRoom.newPlayerJoined": "Nouveau joueur rejoint !",
+      "waitingRoom.hasJoined": "a rejoint !",
+      "waitingRoom.justNow": "À l'instant",
+
+      // Waiting Room - OwnerControls Component
+      "waitingRoom.ownerControls": "Contrôles du Propriétaire",
+      "waitingRoom.startTournament": "Démarrer le Tournoi",
+      "waitingRoom.settings": "Paramètres",
+      "waitingRoom.cancelTournament": "Annuler le Tournoi",
+      "waitingRoom.playersStatus": "Statut des Joueurs",
+
+      // Waiting Room - TournamentInfo Component
+      "waitingRoom.tournamentInfo": "Informations du Tournoi",
+      "waitingRoom.format": "Format",
+      "waitingRoom.knockout": "Élimination",
+      "waitingRoom.timeLimit": "Temps par match",
+      "waitingRoom.noTimeLimit": "Sans limite",
+      "waitingRoom.maxPlayers": "Joueurs max",
+      "waitingRoom.status": "Statut",
+      "waitingRoom.created": "Créé",
+      "waitingRoom.progress": "Progression",
+      "waitingRoom.statusPlanned": "Planifié",
+      "waitingRoom.statusOpen": "Ouvert",
+      "waitingRoom.statusInProgress": "En Cours",
+      "waitingRoom.statusFinished": "Terminé",
+      "waitingRoom.statusCancelled": "Annulé",
+      "waitingRoom.statusUnknown": "Inconnu",
+
+      // Leaderboard Component
+      "leaderboard.title": "Classement",
+      "leaderboard.empty": "Le classement apparaîtra ici",
+      "leaderboard.afterMatches": "après les premiers matchs",
+      "leaderboard.updated": "Mis à jour",
+      "leaderboard.live": "En direct",
+      "leaderboard.player": "Joueur",
+      "leaderboard.points": "points",
+
+      // Bracket Component
+      "bracket.title": "Confrontations",
+      "bracket.round": "Tour",
+      "bracket.format": "Format",
+      "bracket.players": "joueurs",
+      "bracket.quarterfinals": "Quarts de finale",
+      "bracket.semifinals": "Demi-finales",
+      "bracket.final": "Finale",
+      "bracket.pending": "En attente",
+      "bracket.inProgress": "En cours",
+      "bracket.finished": "Terminé",
+      "bracket.join": "Jouer le Match",
+      "bracket.waiting": "En attente",
+      "bracket.waitingPlayer": "En attente d'un joueur",
+      "bracket.backToLobby": "Retour au Lobby",
+      "bracket.tournament": "Tournoi",
+      "bracket.tournamentInProgress": "Tournoi en Cours",
+      "bracket.participants": "participants",
+
+      // Edit Profile Modal
+      "editProfile.title": "Modifier le Profil",
+      "editProfile.subtitle": "Mettez à jour votre photo et vos informations ici.",
+      "editProfile.username": "Nom d'utilisateur",
+      "editProfile.name": "Prénom", 
+      "editProfile.lastname": "Nom de famille",
+      "editProfile.email": "Adresse e-mail",
+      "editProfile.password": "Mot de passe",
+      "editProfile.save": "SAUVEGARDER",
+      "editProfile.deleteAccount": "Supprimer le Compte",
+      "editProfile.enable2FA": "Activer 2FA",
+      "editProfile.disable2FA": "Désactiver 2FA",
+      "editProfile.dangerZone": "Zone de Danger",
+      "editProfile.twoFactorAuth": "Authentification à Deux Facteurs",
+      "editProfile.twoFactorDesc": "Ajoutez une couche de sécurité supplémentaire à votre compte",
+      "editProfile.twoFAEnabled": "L'Authentification à Deux Facteurs est activée",
+      "editProfile.twoFADisabled": "L'Authentification à Deux Facteurs est désactivée",
+      "editProfile.deleteAccountTitle": "Supprimer le Compte",
+      "editProfile.deleteAccountDesc": "Cette action ne peut pas être annulée. Cela supprimera définitivement votre compte et toutes les données associées.",
+      "editProfile.invalidImageType": "Format d'image invalide. Veuillez sélectionner un fichier JPG, PNG, GIF ou WebP.",
+      "editProfile.imageTooLarge": "La taille de l'image est trop grande. La taille maximale autorisée est de 5MB.",
+      "editProfile.profileUpdated": "Profil mis à jour avec succès",
+      "editProfile.deleteConfirm": "Êtes-vous sûr de vouloir supprimer votre compte ? Cette action ne peut pas être annulée.",
+      "editProfile.accountDeleted": "Votre compte a été supprimé avec succès.",
+
+      "privacy.title": "Politique de Confidentialité",
+      "privacy.back": "Retour au Tableau de Bord",
+      "terms.title": "Conditions d'Utilisation",
+      "terms.back": "Retour au Tableau de Bord",
+      "about.title": "À propos de Notre Plateforme",
+      "about.back": "Retour au Tableau de Bord",
+
+      // HOW TO PLAY
+      "howto.title": "COMMENT JOUER",
+      "howto.goal": "Objectif : Marquez des points en envoyant la balle derrière votre adversaire.",
+      "howto.controls": "Contrôles : Flèches ↑ / ↓, W / S ou la souris pour déplacer la raquette.",
+      "howto.win": "Le premier à atteindre 5 points gagne !",
+
+      // PRIVACY PAGE
+      "privacy.intro": "Votre vie privée est importante pour nous. Cette politique explique comment nous collectons, utilisons et protégeons vos informations.",
+      "privacy.collect.title": "Informations que Nous Collectons",
+      "privacy.collect.personal": "Informations Personnelles",
+      "privacy.collect.personal.list": [
+        "Nom d'utilisateur et adresse e-mail lors de l'inscription",
+        "Informations de profil que vous fournissez",
+        "Préférences de communication"
+      ],
+      "privacy.collect.game": "Données de Jeu",
+      "privacy.collect.game.list": [
+        "Statistiques et historique des matchs",
+        "Classements et réalisations",
+        "Préférences et paramètres du jeu"
+      ],
+      "privacy.collect.tech": "Informations Techniques",
+      "privacy.collect.tech.list": [
+        "Adresse IP et informations du navigateur",
+        "Type d’appareil et système d’exploitation",
+        "Performances du jeu"
+      ],
+      "privacy.use.title": "Comment Nous Utilisons vos Informations",
+      "privacy.use.list": [
+        "Fournir et maintenir nos services de jeu",
+        "Vous associer à des adversaires appropriés",
+        "Suivre vos progrès et maintenir les classements",
+        "Communiquer sur les mises à jour et tournois",
+        "Améliorer la plateforme et développer de nouvelles fonctionnalités",
+        "Prévenir la triche et assurer un jeu équitable"
+      ],
+      "privacy.share.title": "Partage et Divulgation des Données",
+      "privacy.share.text": "Nous ne vendons ni ne louons vos données personnelles. Nous pouvons les partager uniquement dans les cas suivants :",
+      "privacy.share.list": [
+        "Avec votre consentement",
+        "Pour respecter les obligations légales",
+        "Pour protéger nos droits et prévenir les fraudes",
+        "Avec les prestataires de services techniques"
+      ],
+      "privacy.security.title": "Sécurité des Données",
+      "privacy.security.text": "Nous mettons en œuvre des mesures pour protéger vos informations, mais aucune méthode n’est totalement sécurisée.",
+      "privacy.rights.title": "Vos Droits et Choix",
+      "privacy.rights.list": [
+        "Accéder à vos données personnelles",
+        "Corriger des informations inexactes",
+        "Demander la suppression de votre compte",
+        "Refuser les communications promotionnelles",
+        "Exporter vos statistiques et historique"
+      ],
+      "privacy.cookies.title": "Cookies et Suivi",
+      "privacy.cookies.text": "Nous utilisons des cookies pour améliorer votre expérience. Vous pouvez les gérer via les paramètres du navigateur.",
+      "privacy.children.title": "Confidentialité des Enfants",
+      "privacy.children.text": "Notre service ne s’adresse pas aux enfants de moins de 13 ans.",
+      "privacy.updates.title": "Mises à Jour de cette Politique",
+      "privacy.updates.text": "Nous pouvons la mettre à jour périodiquement et publier la nouvelle version ici.",
+      "privacy.contact.title": "Nous Contacter",
+      "privacy.contact.text": "Pour toute question, contactez-nous à :",
+      "privacy.lastUpdated": "Dernière mise à jour :",
+
+      // ABOUT PAGE
+      "about.intro": "Bienvenue sur la plateforme de jeux compétitifs où stratégie et excitation se rencontrent.",
+      "about.mission.title": "Notre Mission",
+      "about.mission.text": "Offrir l’expérience de jeu compétitive la plus engageante et équitable possible.",
+      "about.features.title": "Fonctionnalités",
+      "about.features.modes": "Modes de Jeu Multiples",
+      "about.features.modes.desc": "Jouez contre l'IA, défiez vos amis ou participez à des tournois.",
+      "about.features.rank": "Système de Classement",
+      "about.features.rank.desc": "Suivez vos progrès grâce à un système de statistiques complet.",
+      "about.features.community": "Communauté Mondiale",
+      "about.features.community.desc": "Connectez-vous avec des joueurs du monde entier.",
+      "about.features.realtime": "Jeu en Temps Réel",
+      "about.features.realtime.desc": "Profitez d’une expérience fluide grâce à notre infrastructure optimisée.",
+      "about.team.title": "L’Équipe",
+      "about.team.text": "Notre équipe est composée de développeurs passionnés par le jeu compétitif.",
+      "about.tech.title": "Construit avec des Technologies Modernes",
+      "about.tech.text": "Nous utilisons des technologies web avancées pour offrir une expérience optimale :",
+      "about.community.title": "Rejoignez Notre Communauté",
+      "about.community.text": "Faites partie d’une communauté en pleine croissance.",
+      "about.contact.title": "Contactez-Nous",
+      "about.contact.text": "Des questions ou suggestions ? Écrivez-nous !",
+      "about.version": "Version de la Plateforme : 2.0.1 | © 2025 Plateforme de Jeu. Tous droits réservés.",
+
+      // TERMS PAGE
+      "terms.1.title": "1. Acceptation des Conditions",
+      "terms.1.text": "En utilisant cette plateforme, vous acceptez ces conditions.",
+      "terms.2.title": "2. Licence d’Utilisation",
+      "terms.2.text": "Autorisation temporaire pour un usage personnel. Vous ne pouvez pas :",
+      "terms.2.list": [
+        "Modifier ou copier les contenus",
+        "Utiliser à des fins commerciales",
+        "Faire de l’ingénierie inverse",
+        "Supprimer les mentions de droits d’auteur"
+      ],
+      "terms.3.title": "3. Comptes Utilisateur",
+      "terms.3.text": "Vous devez fournir des informations exactes et protéger votre mot de passe.",
+      "terms.4.title": "4. Jeu Loyal",
+      "terms.4.text": "Toute triche ou exploitation de bugs entraînera la suspension du compte.",
+      "terms.5.title": "5. Confidentialité",
+      "terms.5.text": "L’utilisation de la plateforme est régie par notre politique de confidentialité.",
+      "terms.6.title": "6. Limitations",
+      "terms.6.text": "Nous ne sommes pas responsables des dommages liés à l’utilisation de la plateforme.",
+      "terms.7.title": "7. Modifications",
+      "terms.7.text": "Les conditions peuvent être modifiées à tout moment.",
+      "terms.8.title": "8. Contact",
+      "terms.8.text": "Pour toute question, contactez support@gameplatform.com.",
+      "terms.lastUpdated": "Dernière mise à jour :",
+
+      "history.empty": "Aucun historique de matchs disponible",
+      "game.firstTo": "Le premier à atteindre {{count}} buts gagne !",
+      "game.goals": "buts",
+      "game.playing": "En cours...",
+      "game.player1Wins": "Le Joueur 1 gagne !",
+      "game.player2Wins": "Le Joueur 2 gagne !",
+      "game.player": "Joueur",
+      "demo.namePlaceholder": "Nom du Joueur",
+      "common.continue": "Continuer",
+      "general.back": "Retour",
+      "header.howToPlay": "Comment Jouer",
+      "waitingRoom.tournament": "Tournoi",
+      "tournament.lobby": "Lobby",
+      "waitingRoom.waitingForPlayers": "En attente de joueurs",
+      "tournament.participants": "Participants",
+
+      "common.backToDashboard": "Retour au Tableau de Bord",
+      "game.selectSecondPlayer": "Sélectionner le Deuxième Joueur",
+      "game.selectUser": "Sélectionnez un utilisateur",
+      "errors.noOtherUsers": "Aucun autre utilisateur disponible pour jouer.",
+      "game.start": "Démarrer le Jeu",    
+
+
+      "tournament.joined": "Rejoint",
+      "tournament.manage": "Gérer"
+
+
     }
   },
   ca: {
@@ -420,12 +1460,14 @@ const resources = {
 
       // Landing Page
       "landing.title": "Benvingut al joc de Pong més ÈPIC",
-      "demo.title": "🏓 Prova la Demo de Pong",
+      "demo.title": "Prova la Demo de Pong",
       "demo.subtitle": "Juga gratis durant 2 minuts!",
-      "demo.playButton": "🎮 Jugar Demo (2 min)",
+      "demo.playButtonInline": "Jugar Demo inline",
+      "demo.playButtonTournament": "Jugar Demo Tournament",
       "auth.login": "Iniciar Sessió o Registrar-se",
 
-      // ✅ Game interface
+
+      // Game interface
       'game.player1': 'Jugador 1',
       'game.demoLevel': 'Nivell Demo',
       'game.timeLeft': 'Temps restant',
@@ -436,19 +1478,19 @@ const resources = {
       'game.easyLevel': 'Nivell Fàcil',
       'game.restartConfirm': 'Esteu segur que voleu reiniciar el joc?',
 
-      // ✅ Demo expired screen
+      // Demo expired screen
       'demo.expired': 'Temps de Demo Expirat!',
       'demo.expiredMessage': 'Esperem que hagis gaudit de la demo de Pong! Per continuar jugant i accedir a totes les funcions, registra\'t per a un compte gratuït o inicia sessió.',
-      'demo.playAgain': '🎮 Jugar de Nou',
+      'demo.playAgain': 'Jugar de Nou',
       'demo.twoMinutes': '(2 min)',
-      'demo.registerFree': '🚀 Registrar-se Gratuïtament',
+      'demo.registerFree': 'Registrar-se Gratuïtament',
       'demo.unlimited': '(Ilimitat)',
-      'demo.login': '🔑 Iniciar Sessió',
+      'demo.login': 'Iniciar Sessió',
       'demo.existingUser': '(Usuari Existente)',
-      'demo.backToHome': '← Tornar a l\'Inici',
+      'demo.backToHome': 'Tornar a l\'Inici',
       'demo.endConfirm': 'Esteu segur que voleu finalitzar la demo?',
 
-      // ✅ Missatges d'autenticació
+      // Missatges d'autenticació
       "auth.welcome": "Benvingut!",
       "auth.pleaseLogin": "Si us plau, inicia sessió per continuar.",
       "auth.email": "Correu Electrònic",
@@ -460,23 +1502,30 @@ const resources = {
       "auth.googleLogin": "Iniciar sessió amb Google",
       "auth.noAccount": "No tens un compte?",
       "auth.registerFree": "Registra't gratuïtament",
-      // ✅ Missatges comuns
+      'auth.twofa': 'Autenticació de Dos Factors',
+
+      // Missatges comuns
       "common.backToHome": "Tornar a l'Inici",
       
-      // ✅ Missatges específics de registre
+      // Missatges específics de registre
       "auth.createAccount": "Crear Compte",
       "auth.joinUs": "Uneix-te a nosaltres i comença a jugar!",
       "auth.username": "Nom d'Usuari",
       "auth.usernamePlaceholder": "Introdueix el teu nom d'usuari",
+      "auth.firstName": "Nom",
+      "auth.firstNamePlaceholder": "Introdueix el teu nom",
+      "auth.lastName": "Cognom",
+      "auth.lastNamePlaceholder": "Introdueix el teu cognom",
       "auth.confirmPassword": "Confirmar Contrasenya",
       "auth.confirmPasswordPlaceholder": "Confirma la teva contrasenya",
       "auth.registerButton": "REGISTRAR-SE",
       "auth.googleRegister": "Registrar-se amb Google",
       "auth.haveAccount": "Ja tens un compte?",
       "auth.signInHere": "Inicia sessió aquí",
-      // ✅ Missatges de validació
+
+      // Missatges de validació
       "auth.passwordMismatch": "Les contrasenyes no coincideixen!",
-      "auth.passwordTooShort": "La contrasenya ha de tenir almenys 6 caràcters!",
+      "auth.passwordTooShort": "La contrasenya ha de tenir almenys 9 caràcters!",
       "auth.registerSuccess": "Registre exitós! Benvingut a bord!",
       "auth.registerError": "Error en el registre. Si us plau, intenta-ho de nou.",
       
@@ -500,11 +1549,11 @@ const resources = {
       "ranking.tied": "Empatat",
       "ranking.win": "Victòria", 
       "ranking.lose": "Derrota",
-      "ranking.inviteFriends": "INVITAR AMICS",
       "ranking.findMatch": "TROBAR PARTIT",
 
       // Match History Component
       "history.players": "Jugadors",
+      "history.opponents": "Oponents",
       "history.date": "Data",
       "history.results": "Resultats", 
       "history.status": "Estat",
@@ -512,22 +1561,22 @@ const resources = {
       "history.defeated": "Derrota",
 
       // Dashboard
-      "dashboard.welcome": "Benvingut de nou, {{username}}! 🎮",
+      "dashboard.welcome": "Benvingut de nou, {{username}}!",
       
       // Game Room
-      "game.title": "🕹️ Joc Pong",
-      "game.backToDashboard": "← Tornar al Tauler",
-      "game.controls": "🕹️ Controls:",
+      "game.title": "Joc Pong",
+      "game.backToDashboard": "Tornar al Tauler",
+      "game.controls": "Controls:",
       "game.leftPlayer": "Jugador Esquerre: Fletxes ↑↓",
       "game.rightPlayer": "Jugador Dret: Tecles W/S",
       
       // Demo Expired
       "demo.expired.title": "Demo Expirada!",
       "demo.expired.message": "Espero que hagis gaudit de la demo de Pong! Per continuar jugant i accedir a totes les funcions, registra't gratuïtament o inicia sessió.",
-      "demo.expired.playAgain": "🎮 Jugar de Nou",
-      "demo.expired.register": "🚀 Registre Gratuït",
-      "demo.expired.login": "🔑 Iniciar Sessió",
-      "demo.expired.backHome": "← Tornar a l'Inici",
+      "demo.expired.playAgain": "Jugar de Nou",
+      "demo.expired.register": "Registre Gratuït",
+      "demo.expired.login": "Iniciar Sessió",
+      "demo.expired.backHome": "Tornar a l'Inici",
       
       // Login Page
       "login.title": "Iniciar Sessió",
@@ -542,7 +1591,325 @@ const resources = {
       "language.english": "English",
       "language.spanish": "Español",
       "language.french": "Français",
-      "language.catalan": "Català"
+      "language.catalan": "Català",
+
+      // Sidebar Navigation
+      "sidebar.profile": "Perfil",
+      "sidebar.language": "Idioma",
+      "sidebar.theme": "Tema",
+      "sidebar.logout": "Tancar Sessió",
+
+      // Theme Modal
+      "theme.title": "Tema",
+      "theme.subtitle": "Selecciona el tema que vols",
+      "theme.selectPlaceholder": "Selecciona un tema",
+      "theme.dark": "Fosc",
+      "theme.light": "Clar",
+      "theme.cancel": "Cancel·lar",
+      "theme.save": "Guardar",
+
+      // Language Modal
+      "language.modalTitle": "Idioma",
+      "language.modalSubtitle": "Selecciona l'idioma que vols",
+      "language.selectPlaceholder": "Selecciona el teu idioma",
+      "language.cancel": "Cancel·lar",
+      "language.save": "Guardar",
+      "language.notChosen": "Idioma no escollit",
+
+      // Common UI Elements
+      "Profile": "Perfil",
+      "Language": "Idioma",
+      "Theme": "Tema",
+      "Dark": "Fosc",
+      "Light": "Clar",
+      "Catalan": "Català",
+      "Spanish": "Espanyol",
+      "English": "Anglès", 
+      "French": "Francès",
+      "Cancel": "Cancel·lar",
+      "Save": "Guardar",
+      "Select a theme": "Selecciona un tema",
+      "Select the theme what you want": "Selecciona el tema que vols",
+      "Select your language": "Selecciona el teu idioma",
+      "Select the language you want": "Selecciona l'idioma que vols",
+
+      // Tournament
+      "tournament.comingSoon": "🏆 Els tornejos arribaran aviat!",
+      "tournament.createTitle": "Crear Torneig",
+      "tournament.createDesc": "Configura el teu torneig personalitzat",
+      "tournament.nameLabel": "Nom del Torneig",
+      "tournament.namePlaceholder": "El Meu Torneig Èpic",
+      "tournament.nameHint": "Màxim 50 caràcters",
+      "tournament.playersLabel": "Nombre de Jugadors",
+      "tournament.minPlayers": "Mínim",
+      "tournament.maxPlayers": "Màxim",
+      "tournament.playersHint": "El torneig començarà quan s’assoleixi el mínim de jugadors",
+      "tournament.bracketLabel": "Tipus de Bracket",
+      "tournament.knockout": "Eliminació directa",
+      "tournament.knockoutDesc": "Eliminació directa",
+      "tournament.knockoutDetail": "Perds un partit i quedes eliminat. Ràpid i emocionant.",
+      "tournament.roundRobin": "Lliga",
+      "tournament.roundRobinDesc": "Tots contra tots",
+      "tournament.roundRobinDetail": "Cada jugador s’enfronta a tots els altres. Més just i equilibrat.",
+      "tournament.timeLimitLabel": "Temps Límit per Partit",
+      "tournament.blitz": "Blitz",
+      "tournament.standard": "Estàndard",
+      "tournament.extended": "Estès",
+      "tournament.unlimited": "Sense límit",
+      "tournament.timeLimitHint": "Temps màxim per partit individual",
+      "tournament.optional": "Opcional",
+      "tournament.online": "En línia",
+      "tournament.offline": "Desconectat",
+      "tournament.cancel": "Cancel·lar",
+      "tournament.create": "Crear Torneig",
+      "tournament.nameRequired": "El nom del torneig és obligatori",
+      "tournament.invalidPlayerLimits": "El màxim de jugadors ha de ser més gran o igual al mínim",
+      "tournament.confirmCreate": "Vols crear el torneig amb aquesta configuració?",
+      "tournament.name": "Nom",
+      "tournament.players": "Jugadors",
+      "tournament.bracket": "Bracket",
+      "tournament.timePerMatch": "Temps per partit",
+      "tournament.created": "Torneig creat amb èxit!",
+      "tournament.redirecting": "Redirigint a la sala d’espera...",
+      "tournament.createError": "Error en crear el torneig. Torna-ho a provar.",
+      "tournament.tournamentCancelled": "Torneig Cancel·lat",
+      "tournament.cancelledBy": "Cancel·lat per",
+      "tournament.cancelledMessage": "Aquest torneig ha estat cancel·lat per l'organitzador. Tots els participants han estat notificats.",
+      "tournament.backToDashboard": "Tornar al Dashboard",
+
+      // Waiting Room - ParticipantsGrid Component
+      "waitingRoom.participants": "Participants",
+      "waitingRoom.playersConnected": "Jugadors Connectats",
+      "waitingRoom.waitingForPlayer": "Esperant jugador...",
+      "waitingRoom.slot": "Slot",
+      "waitingRoom.joinedAt": "S'ha unit",
+      "waitingRoom.ready": "Llest",
+      "waitingRoom.gameProgress": "Progrés del joc",
+      "waitingRoom.readyToStart": "Llest per començar!",
+      "waitingRoom.needMorePlayers": "Necessites {{count}} jugador(s) més",
+      "waitingRoom.minimum": "Mínim",
+      "waitingRoom.newPlayerJoined": "Nou jugador s'ha unit!",
+      "waitingRoom.hasJoined": "s'ha unit!",
+      "waitingRoom.justNow": "Ara mateix",
+
+      // Waiting Room - OwnerControls Component
+      "waitingRoom.ownerControls": "Controls del Propietari",
+      "waitingRoom.startTournament": "Iniciar Torneig",
+      "waitingRoom.settings": "Configuració",
+      "waitingRoom.cancelTournament": "Cancel·lar Torneig",
+      "waitingRoom.playersStatus": "Estat dels Jugadors",
+
+      // Waiting Room - TournamentInfo Component
+      "waitingRoom.tournamentInfo": "Informació del Torneig",
+      "waitingRoom.format": "Format",
+      "waitingRoom.knockout": "Eliminació",
+      "waitingRoom.timeLimit": "Temps per partit",
+      "waitingRoom.noTimeLimit": "Sense límit",
+      "waitingRoom.maxPlayers": "Jugadors màxim",
+      "waitingRoom.status": "Estat",
+      "waitingRoom.created": "Creat",
+      "waitingRoom.progress": "Progrés",
+      "waitingRoom.statusPlanned": "Planejat",
+      "waitingRoom.statusOpen": "Obert",
+      "waitingRoom.statusInProgress": "En Curs",
+      "waitingRoom.statusFinished": "Finalitzat",
+      "waitingRoom.statusCancelled": "Cancel·lat",
+      "waitingRoom.statusUnknown": "Desconegut",
+
+      // Leaderboard Component
+      "leaderboard.title": "Classificació",
+      "leaderboard.empty": "La classificació apareixerà aquí",
+      "leaderboard.afterMatches": "després dels primers partits",
+      "leaderboard.updated": "Actualitzat",
+      "leaderboard.live": "En directe",
+      "leaderboard.player": "Jugador",
+      "leaderboard.points": "punts",
+
+      // Bracket Component
+      "bracket.title": "Enfrontaments",
+      "bracket.round": "Ronda",
+      "bracket.format": "Format",
+      "bracket.players": "jugadors",
+      "bracket.quarterfinals": "Quarts de Final",
+      "bracket.semifinals": "Semifinals",
+      "bracket.final": "Final",
+      "bracket.pending": "Pendent",
+      "bracket.inProgress": "En Curs",
+      "bracket.finished": "Finalitzat",
+      "bracket.join": "Jugar Partit",
+      "bracket.waiting": "Esperant",
+      "bracket.waitingPlayer": "Esperant jugador",
+      "bracket.backToLobby": "Tornar al Lobby",
+      "bracket.tournament": "Torneig",
+      "bracket.tournamentInProgress": "Torneig en Curs",
+      "bracket.participants": "participants",
+
+      // Edit Profile Modal
+      "editProfile.title": "Editar Perfil",
+      "editProfile.subtitle": "Actualitza la teva foto i informació aquí.",
+      "editProfile.username": "Nom d'usuari",
+      "editProfile.name": "Nom", 
+      "editProfile.lastname": "Cognom",
+      "editProfile.email": "Correu electrònic",
+      "editProfile.password": "Contrasenya",
+      "editProfile.save": "DESAR",
+      "editProfile.deleteAccount": "Eliminar Compte",
+      "editProfile.enable2FA": "Activar 2FA",
+      "editProfile.disable2FA": "Desactivar 2FA",
+      "editProfile.dangerZone": "Zona de Perill",
+      "editProfile.twoFactorAuth": "Autenticació de Dos Factors",
+      "editProfile.twoFactorDesc": "Afegeix una capa addicional de seguretat al teu compte",
+      "editProfile.twoFAEnabled": "L'Autenticació de Dos Factors està activada",
+      "editProfile.twoFADisabled": "L'Autenticació de Dos Factors està desactivada",
+      "editProfile.deleteAccountTitle": "Eliminar Compte",
+      "editProfile.deleteAccountDesc": "Aquesta acció no es pot desfer. Això eliminarà permanentment el teu compte i totes les dades associades.",
+      "editProfile.invalidImageType": "Format d'imatge invàlid. Si us plau selecciona un arxiu JPG, PNG, GIF o WebP.",
+      "editProfile.imageTooLarge": "La mida de la imatge és massa gran. La mida màxima permesa és de 5MB.",
+      "editProfile.profileUpdated": "Perfil actualitzat correctament",
+      "editProfile.deleteConfirm": "Estàs segur que vols eliminar el teu compte? Aquesta acció no es pot desfer.",
+      "editProfile.accountDeleted": "El teu compte ha estat eliminat correctament.",
+
+      "privacy.title": "Política de Privacitat",
+      "privacy.back": "Tornar al Tauler",
+      "terms.title": "Termes del Servei",
+      "terms.back": "Tornar al Tauler",
+      "about.title": "Sobre la nostra plataforma",
+      "about.back": "Tornar al Tauler",
+
+      // HOW TO PLAY
+      "howto.title": "COM JUGAR",
+      "howto.goal": "Objectiu: Marca punts enviant la pilota més enllà del teu oponent.",
+      "howto.controls": "Controls: Fletxes ↑ / ↓, W / S o el ratolí per moure la pala.",
+      "howto.win": "El primer a arribar a 5 punts guanya!",
+
+      // PRIVACY PAGE
+      "privacy.intro": "La teva privacitat és important per a nosaltres. Aquesta política explica com recollim, fem servir i protegim la teva informació.",
+      "privacy.collect.title": "Informació que Recollim",
+      "privacy.collect.personal": "Informació Personal",
+      "privacy.collect.personal.list": [
+        "Nom d'usuari i correu electrònic en registrar-te",
+        "Informació de perfil que decideixis aportar",
+        "Preferències de comunicació"
+      ],
+      "privacy.collect.game": "Dades del Joc",
+      "privacy.collect.game.list": [
+        "Estadístiques i historial de partides",
+        "Classificacions i assoliments",
+        "Preferències i configuracions del joc"
+      ],
+      "privacy.collect.tech": "Informació Tècnica",
+      "privacy.collect.tech.list": [
+        "Adreça IP i informació del navegador",
+        "Tipus de dispositiu i sistema operatiu",
+        "Mètriques de rendiment del joc"
+      ],
+      "privacy.use.title": "Com Fem Servir la teva Informació",
+      "privacy.use.list": [
+        "Proporcionar i mantenir els serveis de joc",
+        "Assignar oponents adequats",
+        "Fer seguiment del progrés i mantenir classificacions",
+        "Comunicar actualitzacions i tornejos",
+        "Millorar la plataforma i desenvolupar noves funcions",
+        "Prevenir trampes i garantir un joc just"
+      ],
+      "privacy.share.title": "Compartició i Divulgació de Dades",
+      "privacy.share.text": "No venem ni cedim les teves dades personals a tercers. Només les compartim en els casos següents:",
+      "privacy.share.list": [
+        "Amb el teu consentiment",
+        "Per complir obligacions legals",
+        "Per protegir els nostres drets i evitar fraus",
+        "Amb proveïdors de serveis tècnics"
+      ],
+      "privacy.security.title": "Seguretat de les Dades",
+      "privacy.security.text": "Implementem mesures tècniques per protegir la teva informació, però cap mètode és 100% segur.",
+      "privacy.rights.title": "Els teus Drets i Opcions",
+      "privacy.rights.list": [
+        "Accedir a les teves dades personals",
+        "Corregir informació incorrecta",
+        "Sol·licitar l’eliminació del compte",
+        "Rebutjar comunicacions comercials",
+        "Exportar estadístiques i historial"
+      ],
+      "privacy.cookies.title": "Cookies i Seguiment",
+      "privacy.cookies.text": "Fem servir cookies per millorar l’experiència. Pots gestionar-les des del navegador.",
+      "privacy.children.title": "Privacitat Infantil",
+      "privacy.children.text": "El nostre servei no està dirigit a menors de 13 anys.",
+      "privacy.updates.title": "Actualitzacions d’aquesta Política",
+      "privacy.updates.text": "Podem actualitzar-la periòdicament i publicar la nova versió aquí.",
+      "privacy.contact.title": "Contacta amb Nosaltres",
+      "privacy.contact.text": "Si tens dubtes, contacta amb nosaltres a:",
+      "privacy.lastUpdated": "Darrera actualització:",
+
+      // ABOUT PAGE
+      "about.intro": "Benvingut a la plataforma de jocs competitius on l’estratègia es troba amb l’emoció.",
+      "about.mission.title": "La Nostra Missió",
+      "about.mission.text": "Oferir l’experiència de joc més atractiva i justa, fomentant una comunitat inclusiva.",
+      "about.features.title": "Característiques de la Plataforma",
+      "about.features.modes": "Múltiples Modes de Joc",
+
+      "about.features.modes.desc": "Juga contra la IA, desafia amics, competeix en línia o participa en tornejos.",
+      "about.features.rank": "Sistema de Classificació",
+      "about.features.rank.desc": "Fes seguiment del teu progrés amb estadístiques i classificacions.",
+      "about.features.community": "Comunitat Global",
+      "about.features.community.desc": "Connecta i competeix amb jugadors d’arreu del món.",
+      "about.features.realtime": "Joc en Temps Real",
+      "about.features.realtime.desc": "Gaudeix de partides fluïdes i sense retard amb servidors optimitzats.",
+      "about.team.title": "L’Equip",
+      "about.team.text": "La nostra plataforma ha estat creada per desenvolupadors apassionats que creuen en el poder del joc competitiu.",
+      "about.tech.title": "Construït amb Tecnologia Moderna",
+      "about.tech.text": "Fem servir tecnologies web d’avantguarda per oferir una experiència de joc impecable:",
+      "about.community.title": "Uneix-te a la Nostra Comunitat",
+      "about.community.text": "Forma part d’una comunitat creixent de jugadors competitius.",
+      "about.contact.title": "Posa’t en Contacte",
+      "about.contact.text": "Tens preguntes o suggeriments? Ens encantaria escoltar-te!",
+      "about.version": "Versió de la Plataforma: 2.0.1 | © 2025 Plataforma de Jocs. Tots els drets reservats.",
+
+      "terms.1.title": "1. Acceptació dels Termes",
+      "terms.1.text": "En accedir a aquesta plataforma, acceptes estar subjecte a aquests termes.",
+      "terms.2.title": "2. Llicència d’Ús",
+      "terms.2.text": "Es concedeix permís per accedir temporalment a la plataforma per a ús personal i no comercial. No pots:",
+      "terms.2.list": [
+        "Modificar o copiar materials",
+        "Fer-ne ús amb finalitats comercials",
+        "Fer enginyeria inversa del programari",
+        "Eliminar avisos de drets d'autor"
+      ],
+      "terms.3.title": "3. Comptes d’Usuari",
+      "terms.3.text": "Has de proporcionar informació precisa i mantenir la seguretat del teu compte.",
+      "terms.4.title": "4. Joc Just",
+      "terms.4.text": "Fer trampes o explotar errors comportarà la suspensió o eliminació del compte.",
+      "terms.5.title": "5. Privacitat",
+      "terms.5.text": "L’ús de la plataforma està subjecte a la nostra Política de Privacitat.",
+      "terms.6.title": "6. Limitacions",
+      "terms.6.text": "No som responsables dels danys derivats de l’ús o incapacitat d’ús de la plataforma.",
+      "terms.7.title": "7. Modificacions",
+      "terms.7.text": "Podem actualitzar aquests termes en qualsevol moment. L’ús continuat implica acceptació.",
+      "terms.8.title": "8. Contacte",
+      "terms.8.text": "Si tens preguntes sobre aquests termes, contacta amb nosaltres a support@gameplatform.com.",
+      "terms.lastUpdated": "Darrera actualització:",
+
+      "history.empty": "No hi ha historial de partides disponible",
+      "game.firstTo": "Primer a {{count}} gols guanya!",
+      "game.goals": "gols",
+      "game.playing": "Jugant...",
+      "game.player1Wins": "El Jugador 1 guanya!",
+      "game.player2Wins": "El Jugador 2 guanya!",
+      "demo.player": "Jugador",
+      "demo.namePlaceholder": "Nom del Jugador",
+      "common.continue": "Continuar",
+      "general.back": "Tornar",
+      "header.howToPlay": "Com Jugar",
+      "waitingRoom.tournament": "Torneig",
+      "tournament.lobby": "Lobby",
+      "waitingRoom.waitingForPlayers": "Esperant jugadors",
+      "tournament.participants": "Participants",
+
+      "common.backToDashboard": "Tornar al Tauler",
+      "game.selectSecondPlayer": "Seleccionar Segon Jugador",
+      "game.selectUser": "Selecciona un usuari",
+      "errors.noOtherUsers": "No hi ha altres usuaris disponibles per jugar.",
+      "game.start": "Iniciar Joc"
+
     }
   }
 };

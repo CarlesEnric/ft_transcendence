@@ -1,11 +1,12 @@
-import { navigateTo } from '../core/router';
-import { setUser } from '../core/state';
-import { renderLanguageSelector, initLanguageSelector } from '../components/global/LanguageSelector(A)';
-import { renderFooter, initFooter } from '../components/global/Footer(A)';
+import { navigateTo, navigateToView } from '../core/router';
+import { setUser, User } from '../core/state';
+import { renderLanguageSelector, initLanguageSelector } from '../components/global/LanguageSelector';
+import { renderFooter, initFooter } from '../components/global/Footer';
 import i18n from '../core/i18n';
-import { API_CONFIG } from '../config/api';
+import { setupSpaCleanupListeners } from '../utils/spaCleanupListeners';
 
 export const renderLoginPage = (): void => {
+  
   // --- Detecta si ve de Google OAuth amb 2FA ---
   const params = new URLSearchParams(window.location.search);
   let pending2FA = false;
@@ -26,35 +27,35 @@ export const renderLoginPage = (): void => {
       if (passwordInput) passwordInput.disabled = true;
     }, 100);
   }
-  const root = document.getElementById('root');
-  if (!root) {
-    console.error("No s'ha trobat l'element #root per renderLoginPage");
+  const app = document.getElementById('app');
+  if (!app) {
+    console.error("No s'ha trobat l'element #app per renderLoginPage");
     return;
   }
-  root.innerHTML = `
-    <!-- ✅ Background usando la clase global-bg -->
+  app.innerHTML = `
+    <!--  Background usando la clase global-bg -->
     <div class="min-h-screen global-bg p-1/2 relative">
       
-      <!-- ✅ Language Selector -->
+      <!--  Language Selector -->
       <div class="absolute top-4 right-4 z-10">
         ${renderLanguageSelector()}
       </div>
 
-      <!-- ✅ Contenido principal centrado -->
+      <!--  Contenido principal centrado -->
       <div class="min-h-screen flex items-center justify-center overflow-hidden">
         <div class="w-full min-w-[320px] max-w-[1000px] px-6 py-4 flex flex-col justify-between items-center">
           
-          <!-- ✅ Contenido principal -->
+          <!--  Contenido principal -->
           <div class="w-full flex-1 py-7 flex flex-col justify-center items-center gap-10">
             <div class="flex-1 flex justify-center items-center">
-              <!-- ✅ Login Card con estilo Figma -->
+              <!--  Login Card con estilo Figma -->
               <div class="w-full max-w-sm sm:max-w-md md:max-w-lg lg:max-w-xl p-6 sm:p-7 bg-gray-900 rounded-[20px] shadow-[2px_2px_10px_0px_rgba(0,240,255,0.20)] outline outline-2 outline-offset-[-2px] outline-blue-300 flex flex-col justify-start items-start gap-2.5 overflow-hidden">
 
                 
-                <!-- ✅ Header Section -->
+                <!--  Header Section -->
                 <div class="self-stretch flex flex-col justify-start items-center gap-8">
                   
-                  <!-- ✅ Welcome Text -->
+                  <!--  Welcome Text -->
                   <div class="flex flex-col justify-start items-center gap-3">
                     <div class="flex justify-center items-center gap-2">
                       <div class="text-center text-white text-4xl font-semibold font-['Inter'] leading-loose">
@@ -68,16 +69,16 @@ export const renderLoginPage = (): void => {
                     </div>
                   </div>
                   
-                  <!-- ✅ Form Section -->
+                  <!--  Form Section -->
                   <form id="loginForm" class="self-stretch flex flex-col justify-start items-start gap-7">
                     <!-- Missatge d'error -->
                     <div id="login-error" class="w-full text-red-400 text-sm font-medium mb-2" style="display:none;"></div>
                     
-                    <!-- ✅ Input Fields -->
+                    <!--  Input Fields -->
                     <div class="self-stretch flex flex-col justify-start items-start gap-6">
                       <div class="self-stretch flex flex-col justify-start items-start gap-3">
                         
-                        <!-- ✅ Email Field -->
+                        <!--  Email Field -->
                         <div class="self-stretch flex flex-col justify-start items-start gap-1">
                           <div class="flex justify-start items-center gap-2">
                             <div class="text-center text-white text-sm font-medium font-['Inter'] leading-tight">
@@ -96,7 +97,7 @@ export const renderLoginPage = (): void => {
                           </div>
                         </div>
                         
-                        <!-- ✅ Password Field -->
+                        <!--  Password Field -->
                         <div class="self-stretch flex flex-col justify-start items-start gap-1">
                           <div class="flex justify-start items-center gap-2">
                             <div class="text-center text-white text-sm font-medium font-['Inter'] leading-tight">
@@ -128,13 +129,13 @@ export const renderLoginPage = (): void => {
                               name="twofa-code"
                               maxlength="6"
                               class="w-full bg-transparent text-white text-sm font-normal font-['Inter'] leading-tight placeholder-gray-400 focus:outline-none"
-                              placeholder="123456"
+                              placeholder=" • • • • • • "
                             />
                           </div>
                         </div>
                       </div>
                       
-                      <!-- ✅ Login Button -->
+                      <!--  Login Button -->
                       <button 
                         type="submit"
                         class="self-stretch h-11 px-6 py-3 bg-cyan-200 hover:bg-cyan-300 rounded-lg flex justify-center items-center gap-1.5 transition-colors"
@@ -145,7 +146,7 @@ export const renderLoginPage = (): void => {
                       </button>
                     </div>
                     
-                    <!-- ✅ Divider OR -->
+                    <!--  Divider OR -->
                     <div class="self-stretch flex justify-center items-center gap-6">
                       <div class="flex-1 h-0.5 bg-white opacity-50"></div>
                       <div class="text-white text-base font-light font-['Inter'] leading-loose tracking-widest">
@@ -154,7 +155,7 @@ export const renderLoginPage = (): void => {
                       <div class="flex-1 h-0.5 bg-white opacity-50"></div>
                     </div>
                     
-                    <!-- ✅ Google Login Button -->
+                    <!--  Google Login Button -->
                     <button 
                       type="button"
                       id="googleLogin"
@@ -174,7 +175,7 @@ export const renderLoginPage = (): void => {
                     </button>
                   </form>
                   
-                  <!-- ✅ Register Link -->
+                  <!--  Register Link -->
                   <div class="flex flex-col justify-start items-center gap-3">
                     <div class="self-stretch flex justify-center items-center gap-2">
                       <div class="text-center text-white text-base font-light font-['Inter'] leading-loose">
@@ -190,7 +191,7 @@ export const renderLoginPage = (): void => {
             </div>
           </div>
           
-          <!-- ✅ Footer -->
+          <!--  Footer -->
            <div class="w-full flex justify-center">
             ${renderFooter()}
           </div>
@@ -199,7 +200,7 @@ export const renderLoginPage = (): void => {
         </div>
       </div>
       
-      <!-- ✅ Back to Home Button -->
+      <!--  Back to Home Button -->
       <button id="backToHome" class="absolute top-4 left-4 text-cyan-400 hover:text-cyan-300 flex items-center gap-2 transition-colors">
         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
@@ -210,11 +211,11 @@ export const renderLoginPage = (): void => {
     </div>
   `;
 
-  // ✅ Initialize components
+  //  Initialize components
   initLanguageSelector();
   initFooter();
 
-  // ✅ Event listeners
+  //  Event listeners
 
   // --- LOGIN LOGIC MIGRADA DE LoginForm.ts ---
   const loginForm = document.getElementById('loginForm') as HTMLFormElement;
@@ -224,16 +225,6 @@ export const renderLoginPage = (): void => {
   const twofaGroup = document.getElementById('twofa-group') as HTMLElement;
   const errorDiv = document.getElementById('login-error') as HTMLElement;
   const loginBtn = loginForm.querySelector('button[type="submit"]') as HTMLButtonElement;
-  const googleBtn = document.getElementById('google-login-btn') as HTMLButtonElement;
-  
-  // Google OAuth login
-  const googleLoginBtn = document.getElementById('googleLogin');
-  if (googleLoginBtn) {
-    googleLoginBtn.addEventListener('click', () => {
-      console.log('🔐 Redirigint a Google OAuth:', API_CONFIG.AUTH.GOOGLE);
-      window.location.href = API_CONFIG.AUTH.GOOGLE;
-    });
-  }
   const btnText = loginBtn.querySelector('div');
   let btnLoading: HTMLSpanElement | null = loginBtn.querySelector('.btn-loading');
   // Si no existeix, el creem (per compatibilitat)
@@ -283,13 +274,21 @@ export const renderLoginPage = (): void => {
         }
         lastCredentials = credentials;
         const response = await loginUser(credentials);
+        
         if (response && (response.requiresTwoFactor || response.twoFactorRequired)) {
-          // Si es requereix 2FA, redirigeix a la pàgina de 2FA
-          window.location.href = '/?twoFactorRequired=1';
+          // Si es requereix 2FA, mostra el camp 2FA
+          pending2FA = true;
+          twofaGroup.style.display = 'block';
+          twofaInput.focus();
+          showToast('🔒 Introdueix el codi 2FA', 'info');
           return;
         } else if (response && response.success && !response.requiresTwoFactor && !response.twoFactorRequired) {
-          showToast('✅ Login exitós!', 'success');
-          window.location.href = '/home';
+          //  Després de login, fem fetch del perfil complet (inclou avatar_url)
+          const { checkAuth } = await import('../core/state');
+          await checkAuth();
+          showToast(' Login correcte!', 'success');
+          //  FIXAT: Utilitzar el mateix sistema que Google OAuth per consistència
+          navigateToView('dashboard');
         } else {
           showToast((response && response.message) || "Error d'autenticació", 'error');
         }
@@ -309,8 +308,12 @@ export const renderLoginPage = (): void => {
         });
         const verifyData = await verifyRes.json();
         if (verifyData && verifyData.success) {
-          showToast('✅ 2FA verificat!', 'success');
-          window.location.href = '/home';
+          //  Després de 2FA, fem fetch del perfil complet (inclou avatar_url)
+          const { checkAuth } = await import('../core/state');
+          await checkAuth();
+          showToast(' 2FA verificat!', 'success');
+          //  FIXAT: Utilitzar el mateix sistema que Google OAuth per consistència
+          navigateToView('dashboard');
         } else {
           showToast((verifyData && verifyData.message) || 'Codi 2FA incorrecte', 'error');
           pending2FA = false;
@@ -382,7 +385,8 @@ export const renderLoginPage = (): void => {
       credentials: 'include',
       body: JSON.stringify(credentials)
     });
-    return await response.json();
+    const result = await response.json();
+    return result;
   }
 
   document.getElementById('registerLink')?.addEventListener('click', () => {
@@ -391,14 +395,14 @@ export const renderLoginPage = (): void => {
   });
 
   document.getElementById('backToHome')?.addEventListener('click', () => {
-    // Utilizar la función pública de la App para cambiar vista
-    if ((window as any).app) {
-      (window as any).app.setCurrentView('landing');
-    } else {
-      // Fallback al router si la app no está disponible
-      navigateTo('/');
-    }
+    //  MIGRAT: Utilitzar navegació centralitzada del router
+    navigateTo('/');
   });
+
+  // Utilitza la utilitat centralitzada per listeners SPA (fletxes externes)
+  const cleanup = () => {};
+  const rerenderLogin = () => { renderLoginPage(); };
+  setupSpaCleanupListeners(cleanup, rerenderLogin);
 
 };
 

@@ -51,16 +51,63 @@
 }
 
 
-/* ✅ Estilos específicos de Figma */
+/* ✅ Estilos específicos de Figma con soporte para temas */
 .global-bg {
+  border-radius: 20px;
+  transition: background 0.3s ease;
+}
+
+/* ✅ Diferentes gradientes según el tema */
+[data-theme="dark"] .global-bg {
   background: linear-gradient(108deg, rgba(63, 144, 200, 0.26) 0%, rgba(255, 255, 255, 0.07) 100%), #071016;
+}
+
+[data-theme="light"] .global-bg {
+  background: linear-gradient(108deg, rgba(63, 144, 200, 0.15) 0%, rgba(0, 0, 0, 0.05) 100%), #f8fafc;
+  border: 1px solid rgba(0, 0, 0, 0.1);
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
 }
 
 /* Alternativa usando variables CSS */
 .global-bg-alt {
   border-radius: 20px;
-  background-color: #071016;
+  background-color: var(--bg-primary);
   background-image: linear-gradient(108deg, rgba(63, 144, 200, 0.26) 0%, rgba(255, 255, 255, 0.07) 100%);
+  transition: background-color 0.3s ease;
+}
+
+/* ✅ Clases adicionales que responden a temas */
+.theme-bg {
+  background-color: var(--bg-primary);
+  color: var(--text-primary);
+}
+
+.theme-bg-secondary {
+  background-color: var(--bg-secondary);
+  color: var(--text-primary);
+}
+
+.theme-text {
+  color: var(--text-primary);
+}
+
+.theme-text-secondary {
+  color: var(--text-secondary);
+}
+
+/* ✅ Aplicación directa a elementos comunes */
+[data-theme="light"] .text-white {
+  color: #1e293b !important;
+}
+
+[data-theme="light"] .bg-gray-900 {
+  background-color: #f1f5f9 !important;
+  color: #1e293b !important;
+}
+
+[data-theme="light"] .bg-gray-800 {
+  background-color: #e2e8f0 !important;
+  color: #1e293b !important;
 }
 
 /* index.css */
@@ -88,26 +135,40 @@ body {
   min-height: 100vh;
 }
 
-/*
-{
+/* * {
   outline: 1px solid red !important;
-}
-*/
+} */
 
 
 /* Temas personalizados */
 [data-theme="dark"] {
-  --bg-primary: #111827;
+  --bg-primary: #071016;
   --bg-secondary: #1f2937;
   --text-primary: #ffffff;
   --text-secondary: #9ca3af;
 }
 
 [data-theme="light"] {
-  --bg-primary: #f9fafb;
+  --bg-primary: #f8fafc;
   --bg-secondary: #ffffff;
-  --text-primary: #111827;
-  --text-secondary: #6b7280;
+  --text-primary: #1e293b;
+  --text-secondary: #64748b;
+}
+
+/* ✅ Aplicar tema al body también para asegurar que funcione */
+body {
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+/* ✅ Aplicación específica de temas al body */
+[data-theme="dark"] body {
+  background-color: #071016;
+  color: #ffffff;
+}
+
+[data-theme="light"] body {
+  background-color: #f8fafc;
+  color: #1e293b;
 }
 
 /* Transiciones personalizadas */
@@ -142,4 +203,65 @@ canvas {
 
 .pulse-slow {
   animation: pulse-slow 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+/* 🎯 Tournament ParticipantsGrid styles */
+.players-grid-container {
+  /* Container for participant cards with custom scrolling */
+}
+
+.players-grid-container::-webkit-scrollbar {
+  width: 6px;
+}
+
+.players-grid-container::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.players-grid-container::-webkit-scrollbar-thumb {
+  background: #374151;
+  border-radius: 3px;
+}
+
+.players-grid-container::-webkit-scrollbar-thumb:hover {
+  background: #4b5563;
+}
+
+/* Ensure consistent layout for participant cards */
+.participant-card {
+  min-height: 60px;
+  transition: all 0.2s ease;
+}
+
+.participant-card:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+/* Height matching for tournament grid container */
+#participantsGridContainer {
+  transition: height 0.3s ease;
+  display: flex;
+  flex-direction: column;
+}
+
+#rightColumnContainer {
+  display: flex;
+  flex-direction: column;
+}
+
+/* Ensure proper alignment between left and right columns */
+.lg\:w-3\/5 {
+  display: flex;
+}
+
+.lg\:w-2\/5 {
+  display: flex;
+  flex-direction: column;
+}
+
+/* Scroll styling for tournaments with more than 4 players */
+.players-grid-container.overflow-y-auto {
+  scrollbar-width: thin;
+  scrollbar-color: #374151 transparent;
 }

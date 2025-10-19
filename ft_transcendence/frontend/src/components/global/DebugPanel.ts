@@ -9,9 +9,9 @@ export function renderDebugPanel() {
       <button id="debug-toggle" class="text-cyan-400">Debug Info ▼</button>
       <div id="debug-content" class="hidden mt-2">
         <div><strong>CONFIG:</strong></div>
-        <div>HOST_IP: ${API_CONFIG.HOST_IP}</div>
+        <div>DOMAIN: ${API_CONFIG.DOMAIN}</div>
         <div>GOOGLE_URL: ${API_CONFIG.AUTH.GOOGLE}</div>
-        <div>API_URL: ${window.APP_CONFIG?.apiUrl || 'No disponible'}</div>
+        <div>API_URL: ${API_CONFIG.AUTH.PROFILE}</div>
         <div>WS_URL: ${API_CONFIG.GAME.WS}</div>
         <div class="mt-2"><strong>TECH:</strong></div>
         <div>User Agent: ${navigator.userAgent.substring(0, 50)}...</div>

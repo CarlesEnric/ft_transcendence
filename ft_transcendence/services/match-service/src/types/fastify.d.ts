@@ -12,4 +12,8 @@ declare module 'fastify'
   {
     db: Database<sqlite3.Database, sqlite3.Statement>;
   }
+  interface FastifyRequest
+  {
+    authUser?: { userId: number; username: string; email?: string };
+  }
 }

@@ -28,8 +28,6 @@
     "dotenv": "^17.2.1",
     "node-fetch": "^3.3.2",
     "jwt-decode": "^4.0.0",
-    "@fastify/swagger-ui": "^5.2.3",
-    "@fastify/swagger": "^9.5.1",
     "ws": "^8.14.2"
   },
   "devDependencies": {

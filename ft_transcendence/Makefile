@@ -2,13 +2,16 @@
 NAME = ft_transcendence
 COMPOSE = docker compose
 # use command shell to execute bash and doble $$ for use inside Makefile
-HOST_IP = $(shell hostname -I | awk '{print $$1}')
+#HOST_IP = $(shell hostname -I | awk '{print $$1}')
 
 .PHONY: all up build start down restart re clean fclean logs ps \
-		help build-no-cache exec-api exec-auth exec-backend exec-frontend exec-game \
-		host-ip clean-host-ip update-env
+		help build-no-cache exec-api exec-auth exec-backend exec-frontend exec-game update-dns
 
-all: host-ip update-env build
+all: update-dns build
+
+# Update dynamic DNS (DuckDNS)
+update-dns:
+	@bash ./update_dns.sh
 
 # Start services (without forcing rebuild)
 start:
@@ -17,8 +20,7 @@ start:
 up: start
 
 # Build and start (force rebuild)
-build: host-ip
-	@./setup_host_ip.sh
+build:
 	$(COMPOSE) up --build -d
 
 down:
@@ -35,9 +37,9 @@ build-no-cache:
 # Full rebuild (force rebuild)
 re: fclean build
 
-clean:
-	$(COMPOSE) down -v
-	docker system prune -f
+clean: update-dns
+	$(COMPOSE) down -v || true
+	docker system prune -f || true
 
 fclean: clean
 	$(COMPOSE) down -v --rmi all --remove-orphans
@@ -48,29 +50,6 @@ logs:
 
 ps:
 	$(COMPOSE) ps
-
-# Configure environment with host IP (Executes the script for advanced configuration)
-host-ip:
-	@echo "🔄 Configurant l'entorn amb HOST_IP: $(HOST_IP)"
-	@bash ./setup_host_ip.sh
-
-
-# Clean host IP environment files
-clean-host-ip:
-	@echo "🧹 Eliminant fitxers .env_host_ip..."
-	@rm -f frontend/.env
-	@rm -f frontend/.env_host_ip
-	@rm -f services/auth-service/.env_host_ip
-	@rm -f services/game-service/.env_host_ip
-	@rm -f services/match-service/.env_host_ip
-	@rm -f services/user-service/.env_host_ip
-	@rm -f services/api-gateway/.env_host_ip
-	@echo "✅ Fitxers .env_host_ip eliminats"
-
-# Update environment variables based on HOST_IP
-update-env:
-	@echo "🔄 Actualitzant variables d'entorn amb HOST_IP..."
-	@bash ./setup_host_ip.sh
 
 # Execute bash interactiu en cada contenidor
 exec-api:
@@ -110,4 +89,3 @@ help:
 	@echo "  make exec-backend   - Execute shell in backend"
 	@echo "  make exec-frontend  - Execute shell in frontend"
 	@echo "  make exec-game      - Execute shell in game-service"
-

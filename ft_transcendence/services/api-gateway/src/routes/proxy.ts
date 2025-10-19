@@ -1,12 +1,14 @@
+// Node.js global setTimeout declaration for TypeScript compatibility
+declare var setTimeout: (handler: (...args: any[]) => void, timeout: number) => number;
 /**
  * Proxy routes for microservices
  * Handles routing requests to appropriate services
  */
 
 import { AppConfig } from '../config/gateway.config.js';
-import { FastifyInstance } from 'fastify';
-import { FastifyRequest, FastifyReply } from 'fastify';
+import { FastifyRequest, FastifyReply, FastifyInstance } from 'fastify';
 import { ErrorResponse } from '../types/gateway.types.js';
+import globalSseRoute from './globalSse.js';
 
 /**
  * Setup proxy route for a specific service
@@ -15,35 +17,35 @@ export const setupProxyRoute = (server: FastifyInstance, prefix: string, target:
   server.register(async (fastify: any) => {
     await fastify.register(import('@fastify/http-proxy'), {
       upstream: target,
-      prefix: prefix,
-      rewritePrefix: '',
+      prefix: '/uploads/' === prefix ? '/uploads/' : prefix,
+      rewritePrefix: prefix === '/api/users' ? '/users' : (prefix === '/api/avatar' ? '/avatar' : (prefix === '/uploads/' ? '/uploads/' : '')),
       http2: false,
-      undici: {
-        rejectUnauthorized: false  // Accept self-signed certificates for internal services
+      undici: { rejectUnauthorized: false },
+
+      // >>> AQUI inyectamos SIEMPRE cabeceras de identidad verificadas
+      rewriteRequestHeaders: (req: FastifyRequest, headers: Record<string, string>) => {
+        const h: Record<string, string> = {
+          ...headers,
+          'x-forwarded-for': req.ip || '',
+          'x-forwarded-proto': 'https',
+          'x-forwarded-host': req.headers.host ?? 'localhost',
+        };
+
+        // Cookies / Authorization se mantienen si existen
+        if (req.headers.cookie) h['cookie'] = String(req.headers.cookie);
+        if (req.headers.authorization) h['authorization'] = String(req.headers.authorization);
+
+        // Identidad verificada por el gateway:
+        const u = (req as any).user as { userId?: number; username?: string; email?: string } | undefined;
+
+        // ⚠️ SIEMPRE sobreescribe lo que venga del cliente:
+        h['x-user-id'] = u?.userId ? String(u.userId) : '';
+        h['x-username'] = u?.username ?? '';
+        if (u?.email) h['x-email'] = u.email;
+
+        return h;
       },
-      preHandler: async (request: FastifyRequest, _reply: FastifyReply) => {
-        // Add forwarded headers
-        request.headers['x-forwarded-for'] = request.ip;
-        request.headers['x-forwarded-proto'] = 'https';
-        request.headers['x-forwarded-host'] = request.headers.host || 'localhost';
-        
-        // Forward JWT token from cookie to Authorization header if available
-        if (request.cookies && request.cookies.jwt) {
-          request.headers['authorization'] = `Bearer ${request.cookies.jwt}`;
-        }
-        
-        // Forward user identity if authenticated
-        if (
-          request.user &&
-          typeof request.user === 'object' &&
-          !Buffer.isBuffer(request.user)
-        ) {
-          const user = request.user as { userId?: string | number; username?: string; email?: string };
-          if (user.userId) request.headers['x-user-id'] = String(user.userId);
-          if (user.username) request.headers['x-username'] = String(user.username);
-          if (user.email) request.headers['x-email'] = String(user.email);
-        }
-      },
+
       replyOptions: {
         onError: (reply: FastifyReply, error: Error) => {
           server.log.error(`Proxy error for ${target}: ${error.message}`);
@@ -66,7 +68,9 @@ export const setupProxyRoute = (server: FastifyInstance, prefix: string, target:
  */
 export const setupAllProxyRoutes = (server: FastifyInstance, config: AppConfig): void => {
   setupProxyRoute(server, '/api/auth', config.services.auth);
+  setupProxyRoute(server, '/api/avatar', config.services.user); // direct avatar proxy
   setupProxyRoute(server, '/api/users', config.services.user);
   setupProxyRoute(server, '/api/game', config.services.game);
   setupProxyRoute(server, '/api/matches', config.services.match);
+  setupProxyRoute(server, '/uploads/', config.services.user); // proxy static avatar files
 };

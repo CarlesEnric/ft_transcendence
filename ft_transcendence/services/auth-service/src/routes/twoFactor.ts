@@ -6,9 +6,9 @@
 import { FastifyInstance, FastifyRequest, FastifyReply } from 'fastify';
 import sqlite3 from 'sqlite3';
 import { config } from '../config/auth.config.js';
-import { verifyJWTToken } from '../auth/auth.handlers.js';
-import { enable2FA, disable2FA, get2FASettings, useBackupCode, findUserByUsername } from '../database/database.connection.js';
-import { generate2FASetup, generateQRCode, verifyTOTP, isValidBackupCodeFormat, regenerateBackupCodes } from '../utils/twoFactor.js';
+import { verifyJWT } from '../auth/auth.handlers.js';
+import { enable2FA, disable2FA, get2FASettings, findUserByUsername } from '../database/database.connection.js';
+import { generate2FASetup, generateQRCode, verifyTOTP } from '../utils/twoFactor.js';
 
 interface Setup2FARequestBody {
   // No body needed - just needs authentication
@@ -21,12 +21,12 @@ interface Verify2FASetupRequestBody {
 
 interface Verify2FARequestBody {
   token: string;
-  isBackupCode?: boolean;
+  // ...existing code...
 }
 
 interface Disable2FARequestBody {
   password: string;
-  token?: string; // TOTP or backup code for verification
+  token?: string; // TOTP code for verification
 }
 
 /**
@@ -52,7 +52,7 @@ export function setup2FARoutes(server: FastifyInstance, db: sqlite3.Database): v
         });
       }
       
-      const decoded = verifyJWTToken(token, config.jwt.secret);
+      const decoded = verifyJWT(token, config.jwt.secret);
       (request as any).user = decoded;
     } catch (error) {
       return reply.code(401).send({
@@ -63,7 +63,7 @@ export function setup2FARoutes(server: FastifyInstance, db: sqlite3.Database): v
   };
 
   /**
-   * GET /2fa/setup - Generate 2FA setup data (secret, QR code, backup codes)
+   * GET /2fa/setup - Generate 2FA setup data (secret, QR code)
    */
   server.get('/2fa/setup', {
     preHandler: authenticate
@@ -92,7 +92,6 @@ export function setup2FARoutes(server: FastifyInstance, db: sqlite3.Database): v
           secret: setup.secret,
           qrCode: qrCodeDataUrl,
           manualEntryKey: setup.manualEntryKey,
-          backupCodes: setup.backupCodes
         }
       });
       
@@ -122,24 +121,20 @@ export function setup2FARoutes(server: FastifyInstance, db: sqlite3.Database): v
         });
       }
       
-      // Verify the TOTP token
-      if (!verifyTOTP(token, secret)) {
+  // Verify the TOTP token (only current code is valid)
+  if (!verifyTOTP(token, secret, 0)) {
         return reply.code(400).send({
           success: false,
           error: 'Invalid verification code'
         });
       }
       
-      // Generate fresh backup codes for final setup
-      const backupCodes = regenerateBackupCodes();
-      
       // Enable 2FA in database
-      await enable2FA(db, user.userId, secret, backupCodes);
+  await enable2FA(db, user.userId, secret);
       
       return reply.send({
         success: true,
-        message: '2FA has been successfully enabled',
-        backupCodes: backupCodes
+        message: '2FA has been successfully enabled'
       });
       
     } catch (error) {
@@ -156,7 +151,7 @@ export function setup2FARoutes(server: FastifyInstance, db: sqlite3.Database): v
    */
   server.post('/2fa/verify', async (request: FastifyRequest, reply: FastifyReply) => {
     try {
-      const { token, isBackupCode } = request.body as Verify2FARequestBody;
+      const { token } = request.body as Verify2FARequestBody;
       
       if (!token) {
         return reply.code(400).send({
@@ -166,7 +161,6 @@ export function setup2FARoutes(server: FastifyInstance, db: sqlite3.Database): v
       }
 
       let user;
-      
       // Check if this is a pending 2FA verification (OAuth flow)
       const pendingCookie = request.cookies.pending_2fa;
       const userIdCookie = request.cookies.pending_user_id;
@@ -203,7 +197,7 @@ export function setup2FARoutes(server: FastifyInstance, db: sqlite3.Database): v
             });
           }
           
-          const decoded = verifyJWTToken(authToken, config.jwt.secret);
+          const decoded = verifyJWT(authToken, config.jwt.secret);
           user = decoded;
         } catch (error) {
           return reply.code(401).send({
@@ -224,31 +218,14 @@ export function setup2FARoutes(server: FastifyInstance, db: sqlite3.Database): v
       
       let isValid = false;
       
-      if (isBackupCode) {
-        // Verify backup code
-        if (!isValidBackupCodeFormat(token.replace(/\\s/g, ''))) {
-          return reply.code(400).send({
-            success: false,
-            error: 'Invalid backup code format'
-          });
-        }
-        
-        isValid = await useBackupCode(db, user.userId, token.toUpperCase().replace(/\\s/g, ''));
-      } else {
-        // Verify TOTP
-        isValid = verifyTOTP(token, twoFASettings.two_factor_secret);
-      }
+      // Verify TOTP, value 0 for exact match no clock skew
+  isValid = verifyTOTP(token, twoFASettings.two_factor_secret, 0);
       
       if (!isValid) {
         return reply.code(400).send({
           success: false,
           error: 'Invalid verification code'
         });
-      }
-
-      // If this was a pending 2FA verification, complete the login process (OAuth)
-      if (pendingCookie === '1' && userIdCookie) {
-        // ...existing code...
       }
 
       // Normal login 2FA: generate JWT, set cookie, return user
@@ -316,9 +293,7 @@ export function setup2FARoutes(server: FastifyInstance, db: sqlite3.Database): v
       return reply.send({
         success: true,
         enabled: twoFASettings ? twoFASettings.two_factor_enabled : false,
-        backupCodesRemaining: twoFASettings && twoFASettings.backup_codes 
-          ? JSON.parse(twoFASettings.backup_codes).length 
-          : 0
+        // ...existing code...
       });
       
     } catch (error) {
@@ -357,10 +332,9 @@ export function setup2FARoutes(server: FastifyInstance, db: sqlite3.Database): v
         });
       }
       
-      // If token provided, verify it
+      // If token provided, verify it with exact match (0)
       if (token) {
-        const isValid = verifyTOTP(token, twoFASettings.two_factor_secret) ||
-                       await useBackupCode(db, user.userId, token.toUpperCase().replace(/\\s/g, ''));
+  const isValid = verifyTOTP(token, twoFASettings.two_factor_secret, 0);
         
         if (!isValid) {
           return reply.code(400).send({
@@ -380,45 +354,6 @@ export function setup2FARoutes(server: FastifyInstance, db: sqlite3.Database): v
       
     } catch (error) {
       server.log.error(`2FA disable error: ${error instanceof Error ? error.message : String(error)}`);
-      return reply.code(500).send({
-        success: false,
-        error: 'Internal server error'
-      });
-    }
-  });
-
-  /**
-   * POST /2fa/regenerate-backup-codes - Generate new backup codes
-   */
-  server.post('/2fa/regenerate-backup-codes', {
-    preHandler: authenticate
-  }, async (request: FastifyRequest, reply: FastifyReply) => {
-    try {
-      const user = (request as any).user;
-      
-      // Get user's 2FA settings
-      const twoFASettings = await get2FASettings(db, user.userId);
-      if (!twoFASettings || !twoFASettings.two_factor_enabled) {
-        return reply.code(400).send({
-          success: false,
-          error: '2FA is not enabled for this account'
-        });
-      }
-      
-      // Generate new backup codes
-      const newBackupCodes = regenerateBackupCodes();
-      
-      // Update database
-      await enable2FA(db, user.userId, twoFASettings.two_factor_secret, newBackupCodes);
-      
-      return reply.send({
-        success: true,
-        message: 'New backup codes generated',
-        backupCodes: newBackupCodes
-      });
-      
-    } catch (error) {
-      server.log.error(`2FA regenerate backup codes error: ${error instanceof Error ? error.message : String(error)}`);
       return reply.code(500).send({
         success: false,
         error: 'Internal server error'

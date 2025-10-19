@@ -1,33 +1,25 @@
-FROM node:24-alpine
-# FROM nexus.42barcelona.com:5000/node:24-alpine
-
-# Set working directory
+# Stage 1: build
+FROM node:24-alpine AS builder
 WORKDIR /app
 
-# Install system dependencies
 RUN apk add --no-cache openssl
-
-# Copy package files
 COPY package*.json ./
-
-# Install dependencies (including dev dependencies for build)
 RUN npm install
-# Install dependencies only for production, not iclude like typescript dependency
-#RUN npm install --production
-
-# Copy SSL script and make executable
+COPY . .
 COPY ssl/ssl.sh ./ssl/ssl.sh
 RUN chmod +x ssl/ssl.sh
-
-# Copy source code
-COPY . .
-
-# Build TypeScript
 RUN npm run build
 
-# Expose port (only service that should be externally accessible)
-EXPOSE 3001
+# Stage 2: final image
+FROM node:24-alpine
+WORKDIR /app
+RUN apk add --no-cache openssl
 
-# Use SSL script as entrypoint
+COPY --from=builder /app/package*.json ./
+COPY --from=builder /app/node_modules ./node_modules
+COPY --from=builder /app/dist ./dist
+COPY --from=builder /app/ssl ./ssl
+
 ENTRYPOINT ["./ssl/ssl.sh"]
 CMD ["node", "dist/index.js"]
+EXPOSE 3000

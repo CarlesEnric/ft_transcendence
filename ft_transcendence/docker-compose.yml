@@ -19,6 +19,7 @@ services:
     container_name: api-gateway
     restart: unless-stopped
     ports:
+#      - "80:80"      # HTTP redirect to HTTPS
       - "3000:3000"  # HTTPS on port 3000
     networks:
       - transcendence-net
@@ -26,8 +27,8 @@ services:
       - ./services/api-gateway/src:/app/src:ro        # Read-only: prevents container from modifying source code
       - frontend-static:/app/frontend:ro              # Read-only: static files from frontend build
     env_file:
+      - ./.env_duckdns                                  # Load dynamic domain from DuckDNS update script
       - ./services/api-gateway/.env
-      - ./services/api-gateway/.env_host_ip
     depends_on:
       - auth-service
       - user-service
@@ -44,8 +45,7 @@ services:
     restart: unless-stopped
     networks:
       - transcendence-net
-    env_file:
-      - ./frontend/.env_host_ip
+
     volumes:
       - frontend-static:/app/dist                     # Share built static files with API Gateway
 
@@ -62,8 +62,8 @@ services:
       - ./services/auth-service/src:/app/src:ro       # Read-only: prevents container from modifying source code
       - auth-db:/app/database                         # Read-write: database needs to be writable
     env_file:
+      - ./.env_duckdns                                  # Load dynamic domain from DuckDNS update script
       - ./services/auth-service/.env
-      - ./services/auth-service/.env_host_ip
 
   # User Service - Profile management
   user-service:
@@ -77,10 +77,11 @@ services:
     volumes:
       - ./services/user-service/src:/app/src:ro       # Read-only: prevents container from modifying source code
       - auth-db:/app/database                         # Shared DB with auth-service
-      - user-uploads:/app/uploads                     # Read-write: file uploads need to be writable
+      # - user-uploads:/app/uploads                     # Read-write: file uploads need to be writable
+      - ./services/user-service/uploads:/app/uploads   # Debug: bind mount to host for uploads
     env_file:
+      - ./.env_duckdns                                  # Load dynamic domain from DuckDNS update script
       - ./services/user-service/.env
-      - ./services/user-service/.env_host_ip
     depends_on:
       - auth-service
 
@@ -91,14 +92,17 @@ services:
       dockerfile: Dockerfile
     container_name: game
     restart: unless-stopped
+    ports:
+      - "3003:3003"  # HTTP for internal Docker communication
+      - "3005:3005"  # HTTPS for external access
     networks:
       - transcendence-net
     volumes:
       - ./services/game-service/src:/app/src:ro       # Read-only: prevents container from modifying source code
       - game-db:/app/database                         # Read-write: database needs to be writable
     env_file:
+      - ./.env_duckdns                                  # Load dynamic domain from DuckDNS update script
       - ./services/game-service/.env
-      - ./services/game-service/.env_host_ip
     depends_on:
       - auth-service
       - user-service
@@ -116,8 +120,8 @@ services:
       - ./services/match-service/src:/app/src:ro      # Read-only: prevents container from modifying source code
       - match-db:/app/database                        # Read-write: database needs to be writable
     env_file:
+      - ./.env_duckdns                                  # Load dynamic domain from DuckDNS update script
       - ./services/match-service/.env
-      - ./services/match-service/.env_host_ip
     depends_on:
       - auth-service
       - user-service

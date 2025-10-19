@@ -16,6 +16,7 @@ import { setupWebSocketRoutes } from './routes/websocket.js';
 import { setupHealthRoutes } from './routes/health.js';
 import { setupErrorHandlers, setupGracefulShutdown, startServer, startRedirectServer } from './utils/gateway.utils.js';
 import { FastifyInstance } from 'fastify';
+import authPlugin from './routes/auth.js';
 
 /**
  * Main application setup
@@ -26,11 +27,15 @@ const main = async (): Promise<void> => {
 
   // Register middleware
   await registerAllMiddleware(server, config);
+  await server.register(authPlugin, config); // Register auth routes
 
   // Setup routes
   setupHealthRoutes(server, config);
   setupAllProxyRoutes(server, config);
   setupWebSocketRoutes(server);
+  // Register SSE global route
+  const { setupGlobalSseRoute } = await import('./routes/globalSseSetup.js');
+  setupGlobalSseRoute(server);
 
 
   // Setup error handlers
@@ -45,7 +50,6 @@ const main = async (): Promise<void> => {
     const interval = setInterval(() => {
       const routes = (server as any).printRoutes();
       const output = 'REGISTERED ROUTES (stdout):\n' + routes + '\n';
-      console.log(output);
       try {
         fs.appendFileSync('/tmp/routes.txt', output);
       } catch (e) {

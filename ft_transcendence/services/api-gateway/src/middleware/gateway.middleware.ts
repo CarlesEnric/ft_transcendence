@@ -26,7 +26,13 @@ export const registerSecurity = async (server: FastifyInstance): Promise<void> =
         scriptSrc: ["'self'", "'unsafe-inline'"],
         styleSrc: ["'self'", "'unsafe-inline'"],
         imgSrc: ["'self'", "data:", "https:"],
-        connectSrc: ["'self'", "https://*", "wss://*"],
+         //connectSrc: ["'self'", "https://bcn-transcendence.duckdns.org:3000"],
+         //connectSrc: ["'self'", "https://bcn42.duckdns.org:3000"],
+        // connectSrc: ["'self'", "https://bcn-project.duckdns.org:3000"],
+         connectSrc: ["'self'", "https://corb-project.duckdns.org:3000"],
+        // connectSrc: ["'self'", "https://domain42.duckdns.org:3000"],
+        // connectSrc: ["'self'", "https://localhost:3000"],
+        // connectSrc: ["'self'", "https://*", "wss://*"], // Permet qualsevol domini per a WebSocket (només per a desenvolupament)
         fontSrc: ["'self'"],
         objectSrc: ["'none'"],
         mediaSrc: ["'self'"],
@@ -51,32 +57,26 @@ export const registerCORS = async (server: FastifyInstance, config: AppConfig): 
         return callback(null, true);
       }
       
-      // Allow specific origins and IP addresses on the network
-      const HOST_IP = process.env.HOST_IP || 'localhost';
+      // In production, only allow specific origins
+      // const DOMAIN = 'bcn42.duckdns.org:3000';
+      // const DOMAIN = 'bcn-project.duckdns.org:3000';
+      // const DOMAIN = 'domain42.duckdns.org:3000';
+      const DOMAIN = 'corb-project.duckdns.org:3000';
+      // const DOMAIN = 'localhost:3000';
+      // const DOMAIN = 'bcn-transcendence.duckdns.org:3000';
+      // const DOMAIN = 'bcn-transcendence.duckdns.org:3000';
       const allowedOrigins = [
-        `https://${HOST_IP}`,
-        `https://${HOST_IP}:443`,
-        `https://${HOST_IP}:3000`,
-        'https://localhost',
-        'https://localhost:443',
-        'https://localhost:3000',
+        `https://${DOMAIN}`,
+        `https://${DOMAIN}:443`,
+        `https://${DOMAIN}:3000`,
+        config.frontend.url,
         'https://127.0.0.1',
-        'https://127.0.0.1:443',
-        'https://127.0.0.1:3000',
-        config.frontend.url
+        'https://127.0.0.1:443'
       ];
-      
-      // Parse additional allowed origins from config
-      if (config.cors && config.cors.origin && typeof config.cors.origin === 'string' && config.cors.origin !== '*') {
-        const corsOrigins = config.cors.origin.split(',');
-        corsOrigins.forEach(origin => {
-          if (origin.trim() && !allowedOrigins.includes(origin.trim())) {
-            allowedOrigins.push(origin.trim());
-          }
-        });
-      }
-      
-      if (allowedOrigins.indexOf(origin) !== -1) {
+
+      // Permet també subdominis i qualsevol port del domini principal
+      const domainRegex = new RegExp(`^https://(.*\.)?${DOMAIN}(:\d+)?$`);
+      if (allowedOrigins.includes(origin) || domainRegex.test(origin || '')) {
         callback(null, true);
       } else {
         callback(new Error('Not allowed by CORS'), false);

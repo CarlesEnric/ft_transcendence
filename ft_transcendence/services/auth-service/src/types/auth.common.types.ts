@@ -8,10 +8,12 @@ export interface User {
   id: number;
   username: string;
   email: string;
+  firstName?: string | null;
+  lastName?: string | null;
+  display_name?: string | null;
   password_hash?: string | null;
   google_id?: string | null;
   profile_picture?: string | null;
-  is_verified?: boolean;
   created_at: string;
 }
 
@@ -19,6 +21,9 @@ export interface UserResponse {
   id: number;
   username: string;
   email: string;
+  firstName?: string | null;
+  lastName?: string | null;
+  display_name?: string | null;
   profile_picture?: string | null;
   created_at?: string;
 }
@@ -65,6 +70,9 @@ export interface RegistrationRequest {
   username: string;
   email: string;
   password: string;
+  firstName?: string;
+  lastName?: string;
+  display_name?: string;
 }
 
 export interface LoginRequest {
@@ -83,10 +91,12 @@ export interface AuthResponse {
 export interface CreateUserData {
   username: string;
   email: string;
+  firstName?: string;
+  lastName?: string;
+  display_name?: string;
   password_hash?: string | null;
   google_id?: string | null;
   profile_picture?: string | null;
-  is_verified?: boolean;
 }
 
 // 2FA related types

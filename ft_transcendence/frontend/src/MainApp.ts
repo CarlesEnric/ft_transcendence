@@ -1,53 +1,65 @@
 /**
  * Main entry point - SPA Vanilla TypeScript
+ *  MIGRAT: Arquitectura modular amb core centralitzat
  */
-// Primer importem la configuració de l'aplicació
-import './config/init';
 
+// Importem els estils globals
 import '../public/styles/index.css';
-import { initRouter } from './core/router';
-import { initState } from './core/state';
-import './core/i18n'; // Importar configuració de i18n
-import { API_CONFIG } from './config/api';
 
-import { App } from './GameEngine';
+// Importem els mòduls core migrats
+import { initState, initGlobalSSE } from './core/state.js';
+import { initRouter } from './core/router.js';
+import './core/i18n.js'; // Configuració d'internacionalització
 
-console.log('🚀 MainApp.ts loading...');
-console.log('🌐 API Config:', {
-  hostIp: API_CONFIG.HOST_IP,
-  googleAuthUrl: API_CONFIG.AUTH.GOOGLE,
-  wsUrl: API_CONFIG.GAME.WS
-});
+// Importem configuració de l'API
+import { API_CONFIG } from './config/api.js';
 
-const rootElement = document.getElementById('root');
-console.log('📍 Root element:', rootElement);
+// Importem la classe App principal (simplificada després de migració)
+import { App } from './GameEngine.js';
 
-if (rootElement) {
-  console.log('⚡ Initializing SPA...');
-  const app = new App();
-  app.mount(rootElement);
-  
-  // Exponer la app globalmente para acceso desde otros componentes
-  (window as any).app = app;
-  
-  console.log('✅ App initialized successfully');
-} else {
-  console.error('❌ Root element not found!');
+/**
+ * Inicialitzar aplicació
+ */
+async function initializeApp(): Promise<void> {
+    // Inicialització global del gameMode
+    window.app = window.app || {};
+    window.app._gameMode = 'online'; // valor per defecte
+    window.app.setGameMode = function(mode: 'ai' | 'inline' | 'online' | 'tournament') {
+      window.app._gameMode = mode;
+    };
+    window.app.getGameMode = function() {
+      return window.app._gameMode;
+    };
+  try {
+    
+  // 0.  PRIMER: Inicialitzar estat (inclou tema) abans que res
+  initState();
+  initGlobalSSE();
+    
+    // 1.  SEGON: Check OAuth redirect
+    const { handleOAuthRedirect } = await import('./core/auth-frontend.js');
+    if (await handleOAuthRedirect()) {
+      return; // OAuth redirect handled, no need to continue init
+    }
+    
+    // 1.5.  VERIFICAR AUTENTICACIÓ REAL: Comprovar sessió al servidor
+    const { checkAuth } = await import('./core/state.js');
+    await checkAuth();
+    
+    // 2. Inicialitzar router amb navegació centralitzada
+    initRouter();
+    
+    // 3. Inicialitzar aplicació principal
+    const app = new App();
+    await app.init();
+    
+    
+  } catch (error) {
+    console.error(' Failed to initialize application:', error);
+  }
 }
 
-/*
-
-FRONTEND ARCHLY
-
-// Inicialitzar estado global
-initState();
-
-// Inicialitzar la aplicación
+// Inicialitzar quan el DOM estigui carregat
 document.addEventListener('DOMContentLoaded', () => {
-    console.log('🌍 i18n initialized');
-    console.log('🚀 FT Transcendence initialized');
-    // Inicialitzar el router
-    initRouter();
-  });
-
-*/
+  initializeApp();
+});

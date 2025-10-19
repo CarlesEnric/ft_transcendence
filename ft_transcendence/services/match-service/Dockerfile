@@ -1,40 +1,25 @@
-FROM node:24-alpine
-# FROM nexus.42barcelona.com:5000/node:24-alpine
-
-# Set working directory
+# Stage 1: build
+FROM node:24-alpine AS builder
 WORKDIR /app
 
-# Install system dependencies including build tools for native modules
-RUN apk add --no-cache \
-    sqlite \
-    openssl \
-    python3 \
-    py3-pip \
-    make \
-    g++ \
-    dotenv \
-    sqlite-dev
-
-# Copy package files
+RUN apk add --no-cache python3 py3-pip make g++ sqlite sqlite-dev openssl dotenv
 COPY package*.json ./
-
-# Install all dependencies (including devDependencies for build)
 RUN npm install
-
-# Copy source code
 COPY . .
-
-# Copy SSL script and make it executable
 COPY ssl/ssl.sh ./ssl/ssl.sh
 RUN chmod +x ssl/ssl.sh
-
-# Build TypeScript
 RUN npm run build
 
-# Remove dev dependencies and build tools to reduce image size
-RUN npm prune --production && \
-    apk del python3 py3-pip make g++ sqlite-dev
+# Stage 2: final image
+FROM node:24-alpine
+WORKDIR /app
+RUN apk add --no-cache sqlite openssl
 
-# Use SSL script as entrypoint
+COPY --from=builder /app/package*.json ./
+COPY --from=builder /app/node_modules ./node_modules
+COPY --from=builder /app/dist ./dist
+COPY --from=builder /app/ssl ./ssl
+
 ENTRYPOINT ["./ssl/ssl.sh"]
 CMD ["node", "dist/index.js"]
+

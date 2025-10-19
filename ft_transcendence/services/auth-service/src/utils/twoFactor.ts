@@ -11,7 +11,6 @@ export interface TwoFactorSetup {
   secret: string;
   qrCodeUrl: string;
   manualEntryKey: string;
-  backupCodes: string[];
 }
 
 /**
@@ -25,14 +24,10 @@ export function generate2FASetup(username: string, serviceName: string = 'ft_tra
     length: 32
   });
 
-  // Generate backup codes
-  const backupCodes = generateBackupCodes();
-
   return {
     secret: secret.base32,
     qrCodeUrl: secret.otpauth_url || '',
-    manualEntryKey: secret.base32,
-    backupCodes
+    manualEntryKey: secret.base32
   };
 }
 
@@ -62,28 +57,4 @@ export function verifyTOTP(token: string, secret: string, window: number = 2): b
 /**
  * Generate backup codes for 2FA
  */
-export function generateBackupCodes(count: number = 10): string[] {
-  const codes: string[] = [];
-  
-  for (let i = 0; i < count; i++) {
-    // Generate 8-character alphanumeric codes
-    const code = crypto.randomBytes(4).toString('hex').toUpperCase();
-    codes.push(code);
-  }
-  
-  return codes;
-}
-
-/**
- * Verify a backup code format (8 characters, alphanumeric)
- */
-export function isValidBackupCodeFormat(code: string): boolean {
-  return /^[A-Fa-f0-9]{8}$/.test(code);
-}
-
-/**
- * Generate a new set of backup codes (for regeneration)
- */
-export function regenerateBackupCodes(): string[] {
-  return generateBackupCodes();
-}
+// Backup code functions removed

@@ -16,8 +16,9 @@ export interface GameState {
   }
   
   export interface GameMessage {
-    type: 'move' | 'start' | 'pause' | 'reset';
+    type: 'move' | 'start' | 'pause' | 'reset' | 'sync' | 'ready';
     player?: 'left' | 'right';
     direction?: 'up' | 'down';
     data?: any;
+    state?: any; // Afegit per permetre enviar l'estat del joc
   }

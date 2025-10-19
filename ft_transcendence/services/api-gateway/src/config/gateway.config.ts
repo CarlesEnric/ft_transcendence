@@ -61,13 +61,13 @@ export const loadConfig = (): AppConfig => {
     },
     
     frontend: {
-      url: process.env.FRONTEND_URL || `https://${process.env.HOST_IP || 'localhost'}:3000`,
+      url: process.env.FRONTEND_URL || '',
       staticPath: '/app/frontend',
     },
     
     rateLimit: {
-      max: parseInt(process.env.RATE_LIMIT_MAX || '100', 10),
-      timeWindow: parseInt(process.env.RATE_LIMIT_WINDOW || '60000', 10),
+      max: parseInt(process.env.RATE_LIMIT_MAX || '1000', 10), // requests per timeWindow (default 100) - decimal base 10 value
+      timeWindow: parseInt(process.env.RATE_LIMIT_WINDOW || '60000', 10), // in milliseconds (1 minute default) - decimal base 10 value
     },
     
     cors: {

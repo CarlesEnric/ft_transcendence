@@ -1,18 +1,21 @@
 <!DOCTYPE html>
 <html lang="en">
   <head>
-<meta name="host-ip" content="192.168.1.56" />
     <meta charset="UTF-8" />
     <link rel="icon" type="image/x-icon" href="/assets/favicon.ico" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <!-- CSP configuration for cross-origin access - Generated dynamically -->
-    <meta http-equiv="Content-Security-Policy" content="default-src 'self' https://${HOST_IP}:3000 https://localhost:3000; connect-src 'self' https://${HOST_IP}:3000 https://localhost:3000 wss://${HOST_IP}:3000 wss://localhost:3000; script-src 'self' 'unsafe-inline' 'unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self' data:;">
     <title>FT Transcendence</title>
+    
+    <!--  Aplicar tema immediatament per evitar flash -->
+    <script>
+      (function() {
+        const savedTheme = localStorage.getItem('theme') || 'dark';
+        document.documentElement.setAttribute('data-theme', savedTheme);
+      })();
+    </script>
   </head>
   <body>
-    <div id="root"></div>
-    <!-- Carrega la configuració dinàmica primer -->
-    <script src="/config.js"></script>
+    <div id="app"></div>
     <script type="module" src="/src/MainApp.ts"></script>
   </body>
 </html>
