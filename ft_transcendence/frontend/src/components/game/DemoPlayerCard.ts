@@ -5,33 +5,18 @@ interface DemoPlayerCardProps {
   type: 'player1' | 'player2';
 }
 
-// Helper to normalize avatar path (extract filename if it's a full URL)
+// Helper to normalize avatar path; preserve remote http(s) URLs
 const normalizeAvatarForDisplay = (avatar: string): string => {
   if (!avatar) return '/images/avatar1.png';
-  
-  // If it's already a proper path, return as is
-  if (avatar.startsWith('/uploads/')) return avatar;
-  if (avatar.startsWith('/images/')) return avatar;
-  
-  // If it's a full URL or complex path
-  if (avatar.includes('/')) {
-    const parts = avatar.split('/');
-    const filename = parts[parts.length - 1];
-    // Check if it looks like an avatar file (avatar1-4.png) or just return /uploads/
-    if (filename.includes('avatar')) {
-      return `/images/${filename}`;
-    }
-    // Otherwise treat as upload
-    return `/uploads/${filename}`;
-  }
-  
-  // If it's just a filename, check if it's default avatar or user upload
-  if (avatar.includes('avatar')) {
-    return `/images/${avatar}`;
-  }
-  
-  // Default to uploads
-  return `/uploads/${avatar}`;
+  const s = avatar.trim();
+  if (!s) return '/images/avatar1.png';
+  // Preserve full remote URLs
+  if (s.startsWith('http://') || s.startsWith('https://')) return s;
+  // If it's already a proper absolute path, return as is
+  if (s.startsWith('/uploads/') || s.startsWith('/images/')) return s;
+  // If it's just a filename, decide bucket
+  if (s.includes('avatar')) return `/images/${s}`;
+  return `/uploads/${s}`;
 };
 
 export const renderDemoPlayerCard = ({ name, avatar, compact = false, type }: DemoPlayerCardProps): string => {

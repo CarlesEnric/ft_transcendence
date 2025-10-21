@@ -6,6 +6,7 @@ import {
   getInlineRegistered,
   saveInlineRegistered,
   activateNextMatchIfNeeded,
+  normalizeAvatar,
 } from './RegisteredTournamentStore';
 
 type BracketPlayer = { id: number; name: string; avatar?: string };
@@ -30,42 +31,44 @@ export function renderRegisteredBracketPage(): string {
 
   return `
     <div class="min-h-screen global-bg p-2 sm:p-4 relative flex flex-col">
-      <div class="w-full max-w-7xl mx-auto mb-4 sm:mb-6">
-        <div class="flex items-center justify-between">
-          <div class="flex items-center gap-2 text-sm">
-            <button id="backLobby" class="text-cyan-400 hover:text-cyan-300 transition-colors">
-              ← ${i18n.t('general.back') || 'Volver'}
-            </button>
-            <span class="text-gray-400">•</span>
-            <span class="text-gray-300">${i18n.t('tournament.tournament') || 'Torneo'}</span>
-            <span class="text-gray-400">•</span>
-            <span class="text-white font-medium">${name}</span>
+      <div class="flex-1 flex flex-col">
+        <div class="w-full max-w-7xl mx-auto mb-4 sm:mb-6">
+          <div class="flex items-center justify-between">
+            <div class="flex items-center gap-2 text-sm">
+              <button id="backLobby" class="text-cyan-400 hover:text-cyan-300 transition-colors">
+                ← ${i18n.t('general.back') || 'Volver'}
+              </button>
+              <span class="text-gray-400">•</span>
+              <span class="text-gray-300">${i18n.t('tournament.tournament') || 'Torneo'}</span>
+              <span class="text-gray-400">•</span>
+              <span class="text-white font-medium">${name}</span>
+            </div>
+            ${finished ? `
+              <button id="exitAfterFinal" class="h-10 px-4 rounded-lg bg-cyan-200 hover:bg-cyan-300 text-teal-800 font-bold">
+                ${i18n.t('game.exit') || 'EXIT'}
+              </button>
+            ` : ''}
           </div>
-          ${finished ? `
-            <button id="exitAfterFinal" class="h-10 px-4 rounded-lg bg-cyan-200 hover:bg-cyan-300 text-teal-800 font-bold">
-              ${i18n.t('game.exit') || 'EXIT'}
-            </button>
+        </div>
+
+        <div class="max-w-7xl mx-auto w-full">
+          <div id="registeredBracketRoot"></div>
+        </div>
+
+        <div class="max-w-7xl mx-auto w-full mt-4 sm:mt-6">
+          ${!finished ? `
+            <div class="flex justify-center">
+              <button id="playActiveMatch"
+                      class="h-12 px-6 rounded-lg bg-cyan-700 hover:bg-cyan-800 text-white font-bold disabled:opacity-50"
+                      disabled>
+                ${(i18n.t('bracket.waiting') || 'Esperando siguiente partido')}
+              </button>
+            </div>
           ` : ''}
         </div>
       </div>
 
-      <div class="max-w-7xl mx-auto w-full">
-        <div id="registeredBracketRoot"></div>
-      </div>
-
-      <div class="max-w-7xl mx-auto w-full mt-4 sm:mt-6">
-        ${!finished ? `
-          <div class="flex justify-center">
-            <button id="playActiveMatch"
-                    class="h-12 px-6 rounded-lg bg-cyan-700 hover:bg-cyan-800 text-white font-bold disabled:opacity-50"
-                    disabled>
-              ${(i18n.t('bracket.waiting') || 'Esperando siguiente partido')}
-            </button>
-          </div>
-        ` : ''}
-      </div>
-
-      <div class="mt-4 sm:mt-6 max-w-7xl mx-auto w-full">
+      <div class="w-full flex justify-center">
         ${renderFooter()}
       </div>
     </div>
@@ -85,6 +88,23 @@ export async function initRegisteredBracketPage(): Promise<void> {
   saveInlineRegistered(st);
 
   // Mapea datos al formato del widget
+  // Winner info: use st.winner if present, else derive from final match
+  const winnerInfo = (st as any).winner
+    ? {
+        userId: (st as any).winner.id,
+        username: (st as any).winner.name,
+        avatar: (st as any).winner.avatar || ''
+      }
+    : (() => {
+        if (!Array.isArray(st.matches) || st.matches.length === 0) return null;
+        const lastRound = Math.max(...st.matches.map((m: any) => Number(m.round) || 0));
+        const finalMatch = st.matches
+          .filter((m: any) => m.round === lastRound)
+          .find((m: any) => !!m.winner);
+        const w = finalMatch?.winner;
+        return w ? { userId: w.id, username: w.name, avatar: w.avatar || '' } : null;
+      })();
+
   const bracketData = {
     matches: st.matches.map(m => ({
       id: m.id,
@@ -94,24 +114,29 @@ export async function initRegisteredBracketPage(): Promise<void> {
       player1: m.player1 ? {
         userId: m.player1.id,
         username: m.player1.name,
-        avatar: m.player1.avatar || ''
+        avatar: normalizeAvatar(m.player1.avatar) || '',
+        avatar_url: normalizeAvatar(m.player1.avatar) || ''
       } : null,
       player2: m.player2 ? {
         userId: m.player2.id,
         username: m.player2.name,
-        avatar: m.player2.avatar || ''
+        avatar: normalizeAvatar(m.player2.avatar) || '',
+        avatar_url: normalizeAvatar(m.player2.avatar) || ''
       } : null,
       winner: m.winner ? {
         userId: m.winner.id,
         username: m.winner.name,
-        avatar: m.winner.avatar || ''
+        avatar: normalizeAvatar(m.winner.avatar) || '',
+        avatar_url: normalizeAvatar(m.winner.avatar) || ''
       } : null,
       score1: m.score1 ?? null,
       score2: m.score2 ?? null,
       room_code: 'REGISTERED_INLINE'
     })),
     tournamentSize: st.config.size,
-    currentRound: st.currentRound
+    currentRound: st.currentRound,
+    winner: winnerInfo,
+    showActions: false
   };
 
   // Pinta el bracket con el mismo componente visual que el local

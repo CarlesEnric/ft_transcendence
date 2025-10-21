@@ -33,6 +33,16 @@ export const renderPlayerCard = ({ type, compact = false }: PlayerCardProps): st
   const isLocalUser = hasPlayer && me && data?.id === me.id;
   const ready = !!data?.ready;
   const waitingOpponent = type === 'player2' && !hasPlayer;
+
+  // Resolve avatar url from data.avatar_url or data.avatar
+  const resolveAvatarURL = (src?: string): string => {
+    if (!src) return '';
+    const s = String(src).trim();
+    if (!s) return '';
+    if (s.startsWith('http://') || s.startsWith('https://') || s.startsWith('/')) return s;
+    return `/images/${s}`; // treat as image filename by default
+  };
+  const avatarSrc = resolveAvatarURL(data?.avatar_url || data?.avatar);
   
   const spinnerHTML = `
     <div class="${compact ? 'mt-1' : 'mt-2'} flex items-center justify-center gap-2 ${compact ? 'text-[10px] sm:text-xs' : 'text-xs xl:text-sm'} text-white/70">
@@ -62,8 +72,10 @@ export const renderPlayerCard = ({ type, compact = false }: PlayerCardProps): st
           <div class="flex flex-col items-center">
             <div class="w-16 h-16 sm:w-20 sm:h-20 md:w-24 md:h-24 rounded-full shadow-[0px_2px_8px_rgba(0,240,255,0.20)]
                         ${isPlayer1 ? 'bg-gradient-to-br from-cyan-400 to-blue-600' : 'bg-gradient-to-br from-yellow-400 to-orange-600'}
-                        flex items-center justify-center select-none">
-              <div class="text-white text-xl sm:text-2xl md:text-3xl font-bold">${initial}</div>
+                        flex items-center justify-center select-none overflow-hidden relative">
+              ${avatarSrc
+                ? `<img src="${avatarSrc}" alt="${username}" class="w-full h-full object-cover object-center rounded-full" onerror="this.src='/images/avatar1.png'" />`
+                : `<div class="text-white text-xl sm:text-2xl md:text-3xl font-bold">${initial}</div>`}
             </div>
             <div class="mt-2 flex flex-col gap-1 w-full">
               <div class="px-2 py-1 ${isPlayer1 ? 'bg-teal-600 text-white' : 'bg-teal-600 text-white'} rounded-md text-xs sm:text-sm font-semibold text-center truncate" title="${username}">
@@ -85,8 +97,10 @@ export const renderPlayerCard = ({ type, compact = false }: PlayerCardProps): st
       <div class="flex flex-col ${isPlayer1 ? 'items-start' : 'items-end'}">
         <div class="w-32 h-32 xl:w-36 xl:h-36 rounded-full shadow-[0px_2px_8px_rgba(0,240,255,0.20)]
                     ${isPlayer1 ? 'bg-gradient-to-br from-cyan-400 to-blue-600' : 'bg-gradient-to-br from-yellow-400 to-orange-600'}
-                    flex items-center justify-center select-none">
-          <div class="text-white text-5xl xl:text-6xl font-bold">${initial}</div>
+                    flex items-center justify-center select-none overflow-hidden relative">
+          ${avatarSrc
+            ? `<img src="${avatarSrc}" alt="${username}" class="w-full h-full object-cover object-center rounded-full" onerror="this.src='/images/avatar1.png'" />`
+            : `<div class="text-white text-5xl xl:text-6xl font-bold">${initial}</div>`}
         </div>
 
         <div class="mt-2 flex flex-col gap-2 ${isPlayer1 ? 'items-start' : 'items-end'}">

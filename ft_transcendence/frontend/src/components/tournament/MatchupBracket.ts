@@ -3,6 +3,7 @@ export interface Player {
   userId: number;
   username: string;
   avatar?: string;
+  avatar_url?: string; // support external or normalized avatar urls
   seat?: number;
 }
 export interface Match {
@@ -22,6 +23,7 @@ export interface BracketData {
   tournamentSize: 4 | 8;
   currentRound: number;
   winner?: Player | null;
+  showActions?: boolean; // when false, hide play/join/create buttons
 }
 
 export function renderMatchupBracket(data: BracketData): string {
@@ -75,7 +77,7 @@ function renderBracketStructure(data: BracketData): string {
   
   return `
     <div class="grid gap-6 ${getGridCols(data.tournamentSize)}">
-      ${rounds.map(round => renderRound(parseInt(round), matchesByRound[round])).join('')}
+      ${rounds.map(round => renderRound(data, parseInt(round), matchesByRound[round])).join('')}
     </div>
   `;
 }
@@ -89,7 +91,7 @@ function groupMatchesByRound(matches: Match[]): Record<string, Match[]> {
   }, {} as Record<string, Match[]>);
 }
 
-function renderRound(round: number, matches: Match[]): string {
+function renderRound(data: BracketData, round: number, matches: Match[]): string {
   if (round === 1) {
     return `
       <div class="space-y-4">
@@ -97,7 +99,7 @@ function renderRound(round: number, matches: Match[]): string {
           ${getRoundName(round)}
         </h4>
         <div class="space-y-3 max-h-[48vh] overflow-y-auto pr-2">
-          ${matches.map(match => renderMatch(match)).join('')}
+          ${matches.map(match => renderMatch(data, match)).join('')}
         </div>
       </div>
     `;
@@ -108,17 +110,18 @@ function renderRound(round: number, matches: Match[]): string {
         ${getRoundName(round)}
       </h4>
       <div class="space-y-3 flex flex-col justify-center">
-        ${matches.map(match => renderMatch(match)).join('')}
+        ${matches.map(match => renderMatch(data, match)).join('')}
       </div>
     </div>
   `;
 }
 
-function renderMatch(match: Match): string {
+function renderMatch(data: BracketData, match: Match): string {
   const statusClass = getMatchStatusClass(match.status);
   const canPlay = match.status === 'pending' && !!match.player1 && !!match.player2;
   const hasRoom = !!match.room_code;
   const highlight = match.status === 'finished';
+  const allowActions = data.showActions !== false; // default true
 
   return `
     <div class="bg-gray-800 rounded-lg p-3 ${statusClass} border border-gray-600/50">
@@ -133,19 +136,17 @@ function renderMatch(match: Match): string {
           ${getMatchStatusText(match.status)}
         </span>
 
-        ${
-          (canPlay || hasRoom)
-            ? `
-              <button
-                data-action="match-btn"
-                data-match-id="${match.id}"
-                data-room="${match.room_code || ''}"
-                class="px-3 py-1 ${hasRoom ? 'bg-blue-600 hover:bg-blue-700' : 'bg-purple-600 hover:bg-purple-700'} text-white rounded text-xs font-medium transition-colors">
-                ${hasRoom ? (i18n.t('bracket.join') || 'Entrar') : (i18n.t('bracket.createRoom') || 'Crear sala')}
-              </button>
-            `
-            : ''
-        }
+        ${allowActions && (canPlay || hasRoom)
+          ? `
+            <button
+              data-action="match-btn"
+              data-match-id="${match.id}"
+              data-room="${match.room_code || ''}"
+              class="px-3 py-1 ${hasRoom ? 'bg-blue-600 hover:bg-blue-700' : 'bg-purple-600 hover:bg-purple-700'} text-white rounded text-xs font-medium transition-colors">
+              ${hasRoom ? (i18n.t('bracket.join') || 'Entrar') : (i18n.t('bracket.createRoom') || 'Crear sala')}
+            </button>
+          `
+          : ''}
         ${match.status === 'finished' ? `
           <span class="text-green-400 font-medium">
             ${i18n.t('bracket.finished') || 'Finalizado'}
@@ -188,11 +189,21 @@ function renderMatchPlayer(
     ? (isWinner ? 'border-green-400' : 'border-red-400')
     : 'border-gray-400';
 
+  const resolveAvatar = (src?: string): string => {
+    if (!src || src.trim() === '') return '';
+    const s = src.trim();
+    if (s.startsWith('http://') || s.startsWith('https://') || s.startsWith('/')) return s;
+    // treat as local image filename
+    return `/images/${s}`;
+  };
+
+  const avatarSrc = resolveAvatar(player.avatar) || resolveAvatar(player.avatar_url) || `/images/avatar${(player.userId % 4) + 1}.png`;
+
   return `
     <div class="flex items-center justify-between p-2 bg-gray-700/50 rounded border-l-4 ${winnerClass}">
       <div class="flex items-center gap-2">
         <img
-          src="${player.avatar || `/images/avatar${(player.userId % 4) + 1}.png`}"
+          src="${avatarSrc}"
           alt="${player.username}"
           class="w-8 h-8 rounded-full border-2 ${avatarBorderClass}" />
         <span class="text-sm font-medium ${textClass}">${player.username}</span>

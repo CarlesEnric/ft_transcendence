@@ -63,7 +63,7 @@ const routes: Route[] = [
   { path: '/game', handler: () => { renderGameRoom(); }, protected: true },
   { path: '/pong2dinline', handler: () => import('../components/game/Pong2dInline').then(mod => mod.renderPong2dInline()), protected: true },
   { path: '/pong2dia', handler: () => import('../components/game/Pong2dIA').then(mod => mod.renderPong2dIA()), protected: true },
-  { path: '/pong2donline', handler: () => import('../components/game/GameRoom').then(mod => mod.renderGameRoom('online')), protected: true },
+//  { path: '/pong2donline', handler: () => import('../components/game/GameRoom').then(mod => mod.renderGameRoom('online')), protected: true },
   { path: '/demo-inline', handler: () => renderDemoGameInline(), protected: false },
   { path: '/login', handler: () => renderLoginPage(), view: 'login', protected: false },
   { path: '/dashboard', handler: () => handleDashboardView(), view: 'dashboard', protected: true },

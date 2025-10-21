@@ -28,8 +28,8 @@ export const registerSecurity = async (server: FastifyInstance): Promise<void> =
         imgSrc: ["'self'", "data:", "https:"],
          //connectSrc: ["'self'", "https://bcn-transcendence.duckdns.org:3000"],
          //connectSrc: ["'self'", "https://bcn42.duckdns.org:3000"],
-        // connectSrc: ["'self'", "https://bcn-project.duckdns.org:3000"],
-         connectSrc: ["'self'", "https://corb-project.duckdns.org:3000"],
+         connectSrc: ["'self'", "https://bcn-project.duckdns.org:3000"],
+         //connectSrc: ["'self'", "https://corb-project.duckdns.org:3000"],
         // connectSrc: ["'self'", "https://domain42.duckdns.org:3000"],
         // connectSrc: ["'self'", "https://localhost:3000"],
         // connectSrc: ["'self'", "https://*", "wss://*"], // Permet qualsevol domini per a WebSocket (només per a desenvolupament)
@@ -59,9 +59,9 @@ export const registerCORS = async (server: FastifyInstance, config: AppConfig): 
       
       // In production, only allow specific origins
       // const DOMAIN = 'bcn42.duckdns.org:3000';
-      // const DOMAIN = 'bcn-project.duckdns.org:3000';
+      const DOMAIN = 'bcn-project.duckdns.org:3000';
       // const DOMAIN = 'domain42.duckdns.org:3000';
-      const DOMAIN = 'corb-project.duckdns.org:3000';
+      // const DOMAIN = 'corb-project.duckdns.org:3000';
       // const DOMAIN = 'localhost:3000';
       // const DOMAIN = 'bcn-transcendence.duckdns.org:3000';
       // const DOMAIN = 'bcn-transcendence.duckdns.org:3000';

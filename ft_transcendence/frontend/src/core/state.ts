@@ -106,6 +106,8 @@ export interface PlayerPublic {
   username: string;
   email: string;
   ready?: boolean;
+  avatar_url?: string;
+  avatar?: string;
 }
 
 export interface PlayersState {
@@ -198,6 +200,7 @@ function syncPlayersWithUser(user: User | null) {
         ...p,
         username: user.username,
         email: user.email ?? p.email,
+        avatar_url: user.avatar_url ?? p.avatar_url,
       };
     }
   });

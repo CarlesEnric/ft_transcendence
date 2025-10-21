@@ -49,16 +49,17 @@ export function renderLocalBracketPage(): void {
       round: m.round,
       slot: m.slot,
       status: m.status,
-      player1: m.player1 ? { userId: m.player1.id, username: m.player1.name, avatar: `/images/${m.player1.avatar}` } : null,
-      player2: m.player2 ? { userId: m.player2.id, username: m.player2.name, avatar: `/images/${m.player2.avatar}` } : null,
-      winner: m.winner ? { userId: m.winner.id, username: m.winner.name, avatar: `/images/${m.winner.avatar}` } : null,
+      player1: m.player1 ? { userId: m.player1.id, username: m.player1.name, avatar: `/images/${m.player1.avatar}`, avatar_url: `/images/${m.player1.avatar}` } : null,
+      player2: m.player2 ? { userId: m.player2.id, username: m.player2.name, avatar: `/images/${m.player2.avatar}`, avatar_url: `/images/${m.player2.avatar}` } : null,
+      winner: m.winner ? { userId: m.winner.id, username: m.winner.name, avatar: `/images/${m.winner.avatar}`, avatar_url: `/images/${m.winner.avatar}` } : null,
       score1: m.score1 ?? null,
       score2: m.score2 ?? null,
       room_code: 'LOCAL'
     })),
     tournamentSize: state.config.size,
     currentRound: state.currentRound,
-    winner: state.winner ? { userId: state.winner.id, username: state.winner.name, avatar: `/images/${state.winner.avatar}` } : null
+    winner: state.winner ? { userId: state.winner.id, username: state.winner.name, avatar: `/images/${state.winner.avatar}`, avatar_url: `/images/${state.winner.avatar}` } : null,
+    showActions: false
   };
   app.innerHTML = `
     <div class="min-h-screen global-bg p-2 sm:p-4 relative flex flex-col">

@@ -28,7 +28,16 @@ const getAvatarFromUsername = (username: string): string => {
     hash = hash & hash; // Convert to 32bit integer
   }
   const avatarNum = (Math.abs(hash) % 4) + 1; // Returns 1-4
-  return `avatar${avatarNum}.png`;
+  return `/images/avatar${avatarNum}.png`;
+};
+
+// Normalize avatar URL (supports google URLs, absolute paths, or local filenames)
+const resolveAvatarURL = (src?: string): string => {
+  if (!src) return '';
+  const s = String(src).trim();
+  if (!s) return '';
+  if (s.startsWith('http://') || s.startsWith('https://') || s.startsWith('/')) return s;
+  return `/images/${s}`;
 };
 
 // Helper functions for layout rendering (reusable components)
@@ -40,7 +49,9 @@ interface IAPlayer {
 
 // Wrappers locals per Pong2dIA
 const renderIAGameLayout = (player: IAPlayer, aiName: string): string => {
-  return renderGameLayout(player, { username: aiName, avatar: getAvatarFromUsername(aiName) }, true);
+  const p1 = { ...player, avatar_url: resolveAvatarURL(player.avatar_url || player.avatar) };
+  const p2 = { username: aiName, avatar: getAvatarFromUsername(aiName), avatar_url: getAvatarFromUsername(aiName) } as IAPlayer;
+  return renderGameLayout(p1, p2, true);
 };
 
 let engine: PongPhysics | null = null;
@@ -134,10 +145,8 @@ export const renderPong2dIA = async (): Promise<void> => {
             </button>
           </div>
         </div>
-        <div class="mt-2 sm:mt-4">${renderFooter()}</div>
       </div>
     `;
-    initFooter();
     setTimeout(() => {
       const pongContainer = document.getElementById('pongContainer');
       if (pongContainer) {

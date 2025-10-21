@@ -208,8 +208,13 @@ function paintDashboard(stats: DashboardStats | null) {
     winsEl.textContent   = '—';
     lossEl.textContent   = '—';
     wrEl.textContent     = '—';
-    // Reset rings
-    if (ringWr)  { ringWr.style.strokeDasharray = '0 999'; ringWr.style.transition = 'stroke-dasharray 600ms'; }
+    // Rings: outer ring should always be 100%
+    if (ringWr)  {
+      const r = Number(ringWr.getAttribute('r') || '0');
+      const c = 2 * Math.PI * r;
+      ringWr.style.transition = 'stroke-dasharray 600ms';
+      ringWr.setAttribute('stroke-dasharray', `${c} 0`);
+    }
     if (ringWins){ ringWins.style.strokeDasharray = '0 999'; ringWins.style.transition = 'stroke-dasharray 600ms'; }
     if (ringLoss){ ringLoss.style.strokeDasharray = '0 999'; ringLoss.style.transition = 'stroke-dasharray 600ms'; }
     return;
@@ -236,7 +241,8 @@ function paintDashboard(stats: DashboardStats | null) {
   };
 
   const total = Math.max(played, 1);
-  setRing(ringWr, (stats.win_rate ?? 0));
+  // Outer ring should always appear at 100%
+  setRing(ringWr, 1);
   setRing(ringWins, wins / total);
   setRing(ringLoss, losses / total);
 }

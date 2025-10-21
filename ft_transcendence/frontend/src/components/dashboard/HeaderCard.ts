@@ -50,7 +50,7 @@ export const renderHeaderCard = (): string => {
     class="self-stretch p-6 bg-gray-900 rounded-[20px]
            shadow-[2px_2px_10px_0px_rgba(0,240,255,0.20)]
            outline outline-2 outline-offset-[-2px] outline-cyan-500
-           flex flex-col lg:flex-row justify-start items-end gap-8">
+           flex flex-col lg:flex-row justify-start items-stretch gap-8">
 
     <!-- Col: Avatar + Info -->
     <div class="flex items-center gap-6">
@@ -73,10 +73,18 @@ export const renderHeaderCard = (): string => {
         ${new HowToPlay().render()}
       </div>
 
+    </div>
+
 
     <!-- Col: Actions -->
-    <div class="w-full lg:flex-1 flex flex-col justify-between items-end gap-6">
-      <div class="w-full inline-flex justify-end items-start gap-4">
+    <div class="w-full lg:flex-1 flex flex-col gap-4">
+      <div class="text-2xl">
+        <span class="text-blue-300 font-bold tracking-widest">${i18n.t('header.selectMode')}</span>
+        <span class="text-cyan-200 font-black tracking-widest">${i18n.t('header.play')} </span>
+      </div>
+
+      <!-- Row 1: Settings and Exit aligned right -->
+      <div class="w-full flex items-center justify-end gap-3">
         <button id="settingsBtn"
           class="w-14 h-14 sm:w-16 sm:h-16 bg-cyan-100 rounded-full grid place-items-center
                  hover:bg-cyan-200 transition-colors duration-200 hover:scale-105 transform"> 
@@ -90,31 +98,23 @@ export const renderHeaderCard = (): string => {
         </button>
       </div>
 
-      <div class="flex flex-col items-start gap-3">
-        <div class="text-2xl">
-          <span class="text-blue-300 font-bold tracking-widest">${i18n.t('header.selectMode')}</span>
-          <span class="text-cyan-200 font-black tracking-widest">${i18n.t('header.play')} </span>
+      <!-- Row 2: Select mode and Play below, aligned to the far right -->
+      <div class="w-full flex flex-wrap items-center gap-3 justify-end">
+        <div class="relative w-44 sm:w-56">
+          <select id="modeSelect"
+            class="h-11 w-full px-3 py-2 bg-gray-800 text-white rounded-md outline outline-1 outline-gray-600
+                   focus:outline-cyan-400 focus:bg-gray-700 transition-colors duration-200">
+            <option value="ai">1 vs AI</option>
+            <option value="inline">1 vs 1</option>
+            <option value="tournament-inline-registered">tournament</option>
+          </select>
         </div>
 
-        <div class="w-full sm:w-[26rem] inline-flex justify-center items-start gap-3">
-          <div class="w-40 relative inline-flex flex-col gap-1">
-            <select id="modeSelect"
-              class="h-11 px-3 py-2 bg-gray-800 text-white rounded-md outline outline-1 outline-gray-600
-                     focus:outline-cyan-400 focus:bg-gray-700 transition-colors duration-200">
-              <option value="ai">1 vs AI</option>
-              <option value="inline">1 vs 1 (inline)</option>
-              <option value="online">1 vs 1 (online)</option>
-              <option value="tournament-inline-registered">tournament (inline)</option>
-              <option value="tournament">tournament (online)</option>
-            </select>
-          </div>
-
-          <button id="playNowBtn"
-            class="flex-1 px-6 py-3 bg-cyan-200 rounded-lg font-bold text-gray-700
-                   hover:bg-cyan-400 transition-colors duration-200 hover:scale-105 transform">
-            ${i18n.t('header.playNow')}
-          </button>
-        </div>
+        <button id="playNowBtn"
+          class="px-6 py-3 bg-cyan-200 rounded-lg font-bold text-gray-700
+                 hover:bg-cyan-400 transition-colors duration-200 hover:scale-105 transform">
+          ${i18n.t('header.playNow')}
+        </button>
       </div>
     </div>
   </section>`;

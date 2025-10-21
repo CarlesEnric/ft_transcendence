@@ -61,9 +61,9 @@ export const renderHomePage = async (): Promise<void> => {
         <!-- Header Card -->
         ${renderHeaderCard()}
         <!-- Segunda fila: Ranking (izq) + Match History (der) -->
-        <div class="w-full flex flex-col lg:flex-row gap-10">
+        <div class="w-full flex flex-col lg:flex-row items-stretch gap-10">
           ${renderRankingCard()}
-          <div id="match-history"></div>
+          <div id="match-history" class="flex-1 min-w-0"></div>
         </div>
         <div class="w-full flex justify-center">
           ${renderFooter()}
@@ -71,8 +71,6 @@ export const renderHomePage = async (): Promise<void> => {
         <!-- Sidebar -->
         ${renderSidebar()}
       </div>
-      <!-- Debug Panel - per ajuda en el desenvolupament -->
-      ${renderDebugPanel()}
     </div>
   `;
   try {

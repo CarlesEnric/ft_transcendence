@@ -25,7 +25,16 @@ interface InlinePlayer {
 
 //  Wrappers locals per Pong2dInline
 const renderInlineGameLayout = (player1: InlinePlayer, player2: InlinePlayer): string => {
-  return renderGameLayout(player1, player2, true);
+  const resolve = (src?: string) => {
+    if (!src) return '';
+    const s = String(src).trim();
+    if (!s) return '';
+    if (s.startsWith('http://') || s.startsWith('https://') || s.startsWith('/')) return s;
+    return `/images/${s}`;
+  };
+  const p1 = { ...player1, avatar_url: resolve(player1.avatar_url || player1.avatar) };
+  const p2 = { ...player2, avatar_url: resolve(player2.avatar_url || player2.avatar) };
+  return renderGameLayout(p1, p2, true);
 };
 
 export interface RegisteredUser {
@@ -185,7 +194,6 @@ export const renderPong2dInline = async (): Promise<void> => {
             </button>
           </div>
         </div>
-        <div class="mt-2 sm:mt-4">${renderFooter()}</div>
       </div>
     `;
     initFooter();
@@ -196,12 +204,19 @@ export const renderPong2dInline = async (): Promise<void> => {
         const canvas = createResponsivePongCanvas(pongContainer);
         // Pass real user info to Pong2dPvP
         _inlineOpponent = player2;
+        const resolve = (src?: string) => {
+          if (!src) return '';
+          const s = String(src).trim();
+          if (!s) return '';
+          if (s.startsWith('http://') || s.startsWith('https://') || s.startsWith('/')) return s;
+          return `/images/${s}`;
+        };
         initPong2dPvP(canvas, updateScore, {
           name: currentUser.username,
-          avatar: currentUser.avatar_url || ''
+          avatar: resolve(currentUser.avatar_url)
         }, {
           name: player2?.username || '',
-          avatar: player2?.avatar_url || player2?.avatar || ''
+          avatar: resolve(player2?.avatar_url || player2?.avatar)
         });
       }
     }, 0);

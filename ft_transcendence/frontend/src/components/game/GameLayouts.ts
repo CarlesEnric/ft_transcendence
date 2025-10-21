@@ -24,28 +24,14 @@ const getDefaultAvatar = (username: string): string => {
   return `avatar${avatarNum}.png`;
 };
 
-// Helper function to normalize avatar URL/path to just the filename
+// Helper: keep absolute URLs and known absolute paths; otherwise return the raw string (filename)
 const normalizeAvatar = (avatarUrl: string | undefined): string => {
   if (!avatarUrl) return '';
-  
-  // If it's already /uploads/ or /images/, return as is
-  if (avatarUrl.startsWith('/uploads/') || avatarUrl.startsWith('/images/')) {
-    return avatarUrl;
-  }
-  
-  // If it's a full URL or path, extract just the filename
-  if (avatarUrl.includes('/')) {
-    const parts = avatarUrl.split('/');
-    const filename = parts[parts.length - 1];
-    // Check if it looks like a default avatar
-    if (filename.includes('avatar')) {
-      return filename; // Will be converted to /images/avatar1.png in DemoPlayerCard
-    }
-    return filename; // User upload filename
-  }
-  
-  // If it's just a filename, return as is
-  return avatarUrl;
+  const s = avatarUrl.trim();
+  if (!s) return '';
+  if (s.startsWith('http://') || s.startsWith('https://')) return s; // preserve google or remote
+  if (s.startsWith('/uploads/') || s.startsWith('/images/')) return s; // already absolute path
+  return s; // likely a filename; downstream decides images/uploads
 };
 
 /**

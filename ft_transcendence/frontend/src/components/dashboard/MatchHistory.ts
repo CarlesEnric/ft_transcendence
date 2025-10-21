@@ -72,6 +72,8 @@ export const renderMatchHistoryCard = (rows: MatchRow[] = []): string => {
       </div>
     </section>`;
   }
+  // Enable internal scroll only when there are more than 9 matches
+  const scrollMaxClass = rows.length > 9 ? 'max-h-[520px]' : '';
   const playersCol = rows.map((r, i) =>
     `<div class="${rowBg(i)}">${renderPlayerCell(r)}</div>`
   ).join('');
@@ -93,7 +95,7 @@ export const renderMatchHistoryCard = (rows: MatchRow[] = []): string => {
       <div class="px-5 py-5 text-white font-semibold sm:text-left">${i18n.t('history.results') || 'Results'}</div>
       <div class="px-5 py-5 text-white font-semibold sm:text-left">${i18n.t('history.status') || 'Status'}</div>
     </div>
-    <div class="flex-1 overflow-y-auto w-full min-w-0">
+    <div class="flex-1 overflow-y-auto w-full min-w-0 ${scrollMaxClass}">
       <div class="grid grid-cols-1 sm:grid-cols-4 w-full">
         <div class="flex flex-col">${playersCol}</div>
         <div class="flex flex-col">${dateCol}</div>

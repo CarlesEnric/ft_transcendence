@@ -4,8 +4,8 @@
 
 // Vite injecta automàticament les variables VITE_* dels fitxers .env en temps de construcció
 // const DOMAIN = 'bcn42.duckdns.org:3000';
-// const DOMAIN = 'bcn-project.duckdns.org:3000';
-const DOMAIN = 'corb-project.duckdns.org:3000';
+const DOMAIN = 'bcn-project.duckdns.org:3000';
+// const DOMAIN = 'corb-project.duckdns.org:3000';
 // const DOMAIN = 'domain42.duckdns.org:3000';
 // const DOMAIN = 'localhost:3000';
 // const DOMAIN = 'bcn-transcendence.duckdns.org:3000';
